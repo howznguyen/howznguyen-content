@@ -1,0 +1,129 @@
+---
+title: "Your post title here"
+description: "A one-sentence summary shown on cards and meta tags. Keep it under 160 characters."
+date: 2026-05-06
+# updatedAt: 2026-05-10      # uncomment when you revise a published post
+
+tags:
+  - Tag One
+  - Tag Two
+
+# Author is a GitHub username (no "@"). Use `authors:` array for co-authored posts.
+author: your-github-username
+# authors:
+#   - your-github-username
+#   - co-author-username
+
+featured: false
+# image: "https://cdn.example.com/your-cover.png"
+---
+
+{/* 
+  Delete this comment block once you start writing.
+
+  Tips:
+  - Filename = URL slug. Keep it kebab-case and ASCII (this file's name becomes /blog/<slug>).
+  - Body starts at `##` headings. Don't use `#` — it's reserved for the rendered title.
+  - Prefer fenced code blocks over the <Code> component.
+  - Preview your post at https://howznguyen.dev/preview before opening a PR.
+*/}
+
+Opening paragraph. Write 1–2 sentences that set up what the post is about and why the reader should care.
+
+## First section
+
+Body content with **bold**, *italic*, and `inline code`. Use standard markdown for the bulk of your writing.
+
+Lists work as expected:
+
+- First point
+- Second point
+- Third point
+
+Ordered lists too:
+
+1. Step one
+2. Step two
+3. Step three
+
+## Code examples
+
+Fenced code blocks with a language tag get syntax highlighting:
+
+```typescript
+export function greet(name: string) {
+  return `Hello, ${name}`;
+}
+```
+
+```bash
+curl -fsSL https://example.com/install.sh | sh
+```
+
+## Using custom components
+
+### Callouts
+
+<Callout type="info" title="Heads up">
+  Callouts are great for surfacing key information or warnings.
+</Callout>
+
+<Callout type="tip">
+  Types: `info`, `warning`, `error`, `success`, `note`, `tip`.
+</Callout>
+
+### Images
+
+<Image
+  src="https://placehold.co/1200x675/3b82f6/ffffff?text=Replace+me"
+  alt="Descriptive alt text"
+  caption="Optional caption shown under the image"
+/>
+
+### Bookmarks
+
+For referencing external articles or repos:
+
+<Bookmark
+  url="https://nextjs.org"
+  title="Next.js"
+  description="The React framework for the web."
+/>
+
+### Quotes
+
+<Quote color="blue">
+  Add memorable quotes with a colored accent.
+</Quote>
+
+### Todo lists
+
+<TodoList>
+  <Todo checked>Write a great title</Todo>
+  <Todo checked>Add a cover image</Todo>
+  <Todo>Preview before submitting PR</Todo>
+</TodoList>
+
+### Videos (YouTube URLs auto-detected)
+
+{/* <Video src="https://www.youtube.com/watch?v=dQw4w9WgXcQ" /> */}
+
+## Links
+
+Inline links work the same as markdown: [Next.js docs](https://nextjs.org/docs). Internal links to other posts: [another post](/blog/other-post-slug).
+
+## Tables
+
+| Feature        | Supported |
+|----------------|-----------|
+| Markdown       | Yes       |
+| MDX components | Yes       |
+| Imports        | No        |
+
+## Conclusion
+
+Wrap up with a takeaway or a call to action. Link to related posts or the content repo if helpful.
+
+---
+
+*Once you're done: save the file, preview at [howznguyen.dev/preview](https://howznguyen.dev/preview), then open a PR.*

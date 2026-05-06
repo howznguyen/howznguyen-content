@@ -1,0 +1,210 @@
+---
+title: "Caddy Server - Web server mã nguồn mở, tiện dụng"
+description: "Caddy Server – web server mã nguồn mở hiện đại, linh hoạt, đang nổi lên như đối thủ đáng gờm của Nginx."
+date: 2026-05-06
+tags:
+  - Caddy
+  - Web Server
+author: howznguyen
+featured: true
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1758728688/dc8d5491-b83a-4765-82d7-722d5c20a587.png"
+---
+
+Đối với các bạn lập trình viên lâu năm, Apache hay Nginx luôn là một trong những Web server được lựa chọn hàng đầu. Nhất là Nginx, một web server được đánh giá tốt về tốc độ, tính linh hoạt và sự mạnh mẽ của nó. Tuy nhiên, với sự ra đời của một Open Source Web Server - Caddy Server, trở thành đối trọng của Nginx. Trong bài viết này, chúng ta sẽ đi sâu vào các tính năng, ưu điểm và cả nhược điểm của Caddy.
+
+## Caddy là gì?
+
+Caddy Server là một Open Source Web Server được xây dựng từ 2015. Với mã nguồn được phát triển từ Golang (Go), Caddy cung cấp những tính năng mạnh mẽ cho nhà phát triển web. Tính năng nổi bật nhất mà Open Source này có là tự động xác thực chứng chỉ HTTPS (Let's Encrypt SSL), giúp loại bỏ sự phức tạp của việc quản lý chứng chỉ SSL/TLS theo cách thủ công. Cùng với đó là một thiết kế để chạy chỉ trong một lệnh (work out of the box), làm nó trở thành một lựa chọn hấp dẫn dành cho các nhà phát triển cần một hệ thống quản lý dễ triển khai.
+
+Các tính năng của Caddy:
+
+- Tự động xác thực HTTPS
+- Cấu hình từ file **Caddyfile**
+- Hỗ trợ **HTTP/1.1, HTTP/2,** và **HTTP/3**
+- Đa tính năng: web server, reverse proxy, load balancer
+- Mở rộng nhanh chóng nhờ thiết kế theo dạng mô-đun (modular architecture)
+- Và nhiều tính năng khác...
+
+## Cài đặt Caddy Server
+
+Caddy Server có thể cài đặt thông qua nhiều cách theo [hướng dẫn ở đây](https://caddyserver.com/docs/install). Tuy nhiên mình thường sử dụng cài đặt trên **Debian** cho server và **Docker** cho môi trường phát triển.
+
+### Cài đặt trên Debian (Ubuntu)
+
+Để cài đặt trên server, chúng ta sẽ chạy câu lệnh này trên shell hoặc bash của máy chủ:
+
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+chmod o+r /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
+
+Và đây là kết quả sau khi cài đặt:
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729241/f616dd53-7e13-4188-a8d3-68439b878d9d.png"
+  alt="Kết quả sau khi cài đặt Caddy trên Debian"
+/>
+
+### Cài đặt bằng Docker
+
+Chúng ta cũng có thể cài đặt bằng Docker (hoặc Docker Compose) để triển khai một hệ thống web bằng Caddy.
+
+Đầu tiên chúng ta sẽ tạo một thư mục với cấu trúc file như sau:
+
+```text
+.
+├── Caddyfile
+└── docker-compose.yml
+
+1 directory, 2 files
+```
+
+Với file `Caddyfile` - hay còn gọi là file cấu hình của Caddy, chúng ta có thể tạo mẫu một response.
+
+```caddyfile
+:80 {
+  respond "Hello world"
+}
+```
+
+Còn với file `docker-compose.yml`, chúng ta sẽ cấu hình cho container này như sau:
+
+```yaml
+services:
+  caddy:
+    image: caddy:alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./html:/var/www/html
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+```
+
+Sau khi hoàn tất, chúng ta sẽ dùng lệnh để chạy docker-compose:
+
+```bash
+docker-compose up -d
+```
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729437/74fb1da0-58c9-4896-92c6-fba578c0348c.png"
+  alt="Kết quả chạy docker-compose up -d cho Caddy"
+/>
+
+Đến khi hoàn tất việc cài đặt hệ thống, chúng ta có thể truy cập vào **localhost** để kiểm tra xem hệ thống đã khởi tạo ok chưa.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729513/dadcd164-58ed-45a9-95eb-2223cc9f4e78.png"
+  alt="Truy cập localhost hiển thị Hello world từ Caddy"
+/>
+
+## So sánh giữa Caddy & Nginx
+
+### Cú pháp cấu hình
+
+**Nginx:** Cấu hình của Nginx cần người dùng hiểu sâu về cấu trúc của nó. Kể cả một cấu hình reverse proxy đơn giản.
+
+**Example** (Nginx reverse proxy):
+
+```nginx
+server {
+  listen 80;
+  server_name example.com;
+
+  location / {
+    proxy_pass http://localhost:8080;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+}
+```
+
+**Caddy:** Với tệp cấu hình trực quan (Caddyfile), việc thiết lập reverse proxy hoặc một trang web tĩnh trở nên vô cùng đơn giản.
+
+**Example** (Caddy reverse proxy):
+
+```caddyfile
+example.com {
+  reverse_proxy localhost:8080
+}
+```
+
+### Automatic HTTPS
+
+**Nginx:** Cần phải yêu cầu certificate được tạo hoặc gia hạn thủ công hoặc tích hợp một tool như **Certbot**.
+
+**Example** (Nginx HTTPS):
+
+```nginx
+server {
+  listen 443 ssl;
+  server_name example.com;
+
+  ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+
+  location / {
+    proxy_pass http://localhost:8080;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+}
+```
+
+**Caddy:** Tự động xử lý HTTPS ngay khi cài đặt, bao gồm tạo và gia hạn chứng chỉ thông qua Let's Encrypt.
+
+**Example** (Caddy HTTPS):
+
+```caddyfile
+example.com {
+  reverse_proxy localhost:8080
+}
+```
+
+**Custom TLS Example:**
+
+```caddyfile
+example.com {
+  tls /path/to/cert.pem /path/to/key.pem
+  reverse_proxy localhost:8080
+}
+```
+
+## Hiệu năng
+
+Dù cả hai đều có hiệu suất cao, nhưng kiến trúc hiện đại của Caddy mang lại cho nó một lợi thế trong các hệ sinh thái dựa trên Golang.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729785/5910dde4-8f88-479f-8afb-4d3ddba50ba4.png"
+  alt="Biểu đồ benchmark Caddy vs Nginx"
+  caption="Hình ảnh được trích dẫn từ bài viết 35 Million Hot Dogs: Benchmarking Caddy vs. Nginx"
+/>
+
+Dưới đây là một vài benchmark của một số tác giả đã thực hiện:
+
+<Bookmark
+  url="https://github.com/patrickdappollonio/nginx-vs-caddy-benchmark"
+  title="nginx-vs-caddy-benchmark"
+  description="Comparing Caddy vs Nginx in what could be closest to an apples-to-apples comparison."
+/>
+
+<Bookmark
+  url="https://blog.tjll.net/reverse-proxy-hot-dog-eating-contest-caddy-vs-nginx/"
+  title="35 Million Hot Dogs: Benchmarking Caddy vs. Nginx"
+  description="A thorough benchmark comparing Caddy and Nginx as reverse proxies under heavy load."
+/>
+
+## Kết luận
+
+Caddy đại diện cho một bước tiến vượt bậc trong công nghệ máy chủ web. Sự đơn giản, thiết kế hiện đại và các tính năng tích hợp sẵn khiến nó trở thành một ứng cử viên sáng giá để thay thế Nginx trong nhiều trường hợp. Cho dù bạn đang lưu trữ một trang web tĩnh, chạy proxy ngược hay xây dựng kiến trúc microservice, Caddy đều đáng để cân nhắc. Việc tập trung vào việc giảm thiểu sự phức tạp cho nhà phát triển và tự động hóa các tác vụ tẻ nhạt khiến nó trở thành một bước ngoặt trong lĩnh vực máy chủ web.

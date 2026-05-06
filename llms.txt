@@ -1,0 +1,221 @@
+# howznguyen-content
+
+> Content repository for howznguyen.dev. Blog posts and project showcases as MDX files, fetched at runtime by the main Next.js site.
+
+This file follows the [llms.txt](https://llmstxt.org/) convention. Instructions for AI agents (Cursor, Copilot, Claude) helping to author MDX content.
+
+## Key facts
+
+- Content-only repo. No application code.
+- Consumed by howznguyen.dev via GitHub Contents API.
+- Preview tool: https://howznguyen.dev/preview
+- Push to `main` triggers a webhook that revalidates the site within seconds.
+
+## Repository layout
+
+```
+posts/                       Blog posts (.mdx)
+projects/                    Project showcases (.mdx)
+assets/                      Optional committed images
+README.md
+AGENTS.md
+llms.txt
+```
+
+Rules:
+- Only `.mdx` files in `posts/` and `projects/` are published.
+- Files starting with `_` are ignored (for drafts and templates).
+- No subdirectories inside `posts/` or `projects/`.
+
+## Filename → URL
+
+- `posts/my-post.mdx` → `/blog/my-post` (neutral, no language tag)
+- `posts/my-post.en.mdx` → `/blog/my-post/en`
+- `posts/my-post.vi.mdx` → `/blog/my-post/vi`
+- `projects/my-project.mdx` → `/projects/my-project`
+
+## Translations
+
+Posts and projects can be translated by adding a locale suffix before `.mdx`.
+
+- A file **without a suffix** is "neutral" — not tagged with any language. Good for code-heavy or reference content.
+- A file **with a suffix** is a specific translation (e.g. `.en`, `.vi`, `.ja`).
+- A post may have only neutral, only localized, or both.
+- If there is no neutral file, the base URL serves the first available translation (prefers `en`).
+- The language switcher appears automatically when more than one variant exists.
+
+Supported locale codes (ISO 639-1): `en`, `vi`, `ja`, `zh`, `ko`, `fr`, `es`, `de`, `pt`, `ru`.
+
+## Frontmatter
+
+### Posts (`posts/*.mdx`)
+
+```yaml
+---
+title: string                  # required
+description: string            # required, shown on cards + meta tags
+date: YYYY-MM-DD               # required
+updatedAt: YYYY-MM-DD          # optional
+tags: [string]                 # required, first tag is primary category
+author: string                 # optional, single GitHub username (no @)
+authors: [string]              # optional, multiple GitHub usernames
+featured: boolean              # optional
+image: url                     # optional, cover image URL
+---
+```
+
+### Projects (`projects/*.mdx`)
+
+```yaml
+---
+title: string                  # required
+description: string            # required
+date: YYYY-MM-DD               # required
+tags: [string]                 # required
+
+# Classification (affects badge + gradient + icon)
+type: "open-source" | "side-project" | "work" | "experiment" | "product" | "writing"
+status: "active" | "wip" | "shipped" | "archived" | "sunset"
+
+# Work-specific
+role: string                   # e.g. "Founding Engineer"
+company: string                # e.g. "Knowns Dev"
+year: number | string
+
+featured: boolean
+image: url                     # optional
+images: [url]                  # optional gallery (3824×2474 recommended)
+github: url                    # optional
+demo: url                      # optional
+authors: [string]              # optional GitHub usernames
+---
+```
+
+### Project type and status
+
+| type           | icon | for                                                  |
+|----------------|------|------------------------------------------------------|
+| `open-source`  | ⭐   | OSS libraries, CLIs, tools                           |
+| `side-project` | 🎨   | Personal hobby projects (default)                    |
+| `work`         | 💼   | Client or company work                               |
+| `experiment`   | 🧪   | Prototypes, experiments                              |
+| `product`      | 🚀   | Launched SaaS or commercial products                 |
+| `writing`      | 📝   | Docs, guides, manuscripts                            |
+
+Status options: `active` (pulsing green), `wip` (pulsing blue), `shipped` (green), `archived` (gray), `sunset` (orange).
+
+### Authors
+
+- `author: "<github-username>"` for a single author.
+- `authors: ["user1", "user2"]` for multiple.
+- Both fields can coexist; the site dedupes preserving order.
+- Leading `@` is stripped. Usernames must match `[A-Za-z0-9-]{1,39}`.
+- Display names (with spaces) in `author` are treated as invalid and fall back to the site owner.
+
+## Markdown features
+
+Standard markdown: `#`–`####` headings, `**bold**`, `*italic*`, `inline code`, `~~strikethrough~~`, ordered/unordered/task lists, tables, blockquotes, links, images, horizontal rules.
+
+GFM extensions enabled: tables, task lists, strikethrough, autolinks.
+
+## Code blocks
+
+```typescript
+const greeting = "Hello"
+```
+
+Languages: `typescript`, `ts`, `javascript`, `js`, `tsx`, `jsx`, `python`, `py`, `go`, `rust`, `rs`, `bash`, `sh`, `shell`, `zsh`, `json`, `yaml`, `yml`, `html`, `css`, `scss`, `sql`, `graphql`, `dockerfile`, `nginx`, `caddyfile`, `toml`, `md`, `mdx`, `text`.
+
+## Custom components
+
+Auto-injected in every MDX file. Do NOT `import` them.
+
+### `<Callout>`
+```mdx
+<Callout type="info" title="Heads up">
+  Content supports **markdown**.
+</Callout>
+```
+- `type`: `info` (default) | `warning` | `error` | `success` | `note` | `tip`
+- `title`: optional, defaults to the type name
+- `emoji`: optional override (default per type: 💡 ⚠️ 🚨 ✅ 📝 ✨)
+
+### `<Image>`
+```mdx
+<Image src="https://..." alt="..." caption="..." />
+```
+Click-to-zoom enabled. `alt` is required for accessibility.
+
+### `<Bookmark>`
+```mdx
+<Bookmark url="https://..." title="..." description="..." />
+```
+Props: `url` (required), `title`, `description`, `icon`, `cover`.
+
+### `<Video>`
+```mdx
+<Video src="https://www.youtube.com/watch?v=ID" />
+```
+YouTube URLs auto-detected. Other URLs use native `<video controls>`.
+
+### `<TodoList>` + `<Todo>`
+```mdx
+<TodoList>
+  <Todo checked>Done item</Todo>
+  <Todo>Pending item</Todo>
+</TodoList>
+```
+GFM task lists (`- [x] item`) also work.
+
+### `<Quote>`
+```mdx
+<Quote color="blue">Memorable quote.</Quote>
+```
+`color`: `gray` (default) | `red` | `blue` | `green` | `yellow` | `orange` | `purple`.
+
+### `<Code>`
+```mdx
+<Code language="typescript" title="src/utils.ts">
+{`export const hello = "world";`}
+</Code>
+```
+Prefer fenced code blocks; use `<Code>` when you need a custom title.
+
+## Images
+
+1. **External CDN (preferred):** Cloudinary, Imgur, S3 — paste URL.
+2. **Commit to `assets/`** and reference via jsDelivr:
+   ```
+   https://cdn.jsdelivr.net/gh/howznguyen/howznguyen-content@main/assets/posts/file.png
+   ```
+
+## Publishing workflow
+
+1. Fork the repo.
+2. Copy `posts/_template.mdx` to `posts/your-slug.mdx` (add `.en` / `.vi` etc. for translations).
+3. Write the post following the frontmatter and component contract above.
+4. Preview at https://howznguyen.dev/preview.
+5. Open a pull request against `main`.
+
+## Style guide
+
+- `description`: ≤ 160 characters for best social previews.
+- `date`: always `YYYY-MM-DD`.
+- `tags`: 2–5 tags per post. First becomes the category label.
+- Body headings start at `##` (H1 reserved for the rendered title).
+- Code blocks: always specify a language tag.
+- Self-close MDX components with no children: `<Video src="..." />`.
+
+## Things to avoid
+
+- Do not add imports in MDX.
+- Do not use components other than the ones listed above.
+- Do not put `.mdx` files in subdirectories.
+- Do not commit assets > 1MB; use a CDN.
+- Do not use display names in the `author` field — use GitHub usernames.
+
+## Related
+
+- Main site: https://howznguyen.dev
+- Preview tool: https://howznguyen.dev/preview
+- This repo: https://github.com/howznguyen/howznguyen-content

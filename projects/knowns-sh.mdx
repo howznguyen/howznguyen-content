@@ -1,0 +1,77 @@
+---
+title: "Knowns"
+description: "Project memory for AI coding assistants. Structured tasks, docs, specs, templates, and memory exposed via MCP."
+date: 2025-12-25
+tags:
+  - AI
+  - MCP
+  - Developer Tools
+  - Open Source
+type: open-source
+status: active
+featured: true
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058995/cover_lkg1dl.png"
+images:
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058995/cover_lkg1dl.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-01-hero_rvfbo6.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-02-problem_xowzcw.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-03-how_o1cryx.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-04-features_ykvml1.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-05-audience_kmyoxv.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058847/ph-06-before-after_vcz1qc.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058847/ph-07-different_fe6ovm.png"
+github: "https://github.com/knowns-dev/knowns"
+demo: "https://knowns.sh"
+authors:
+  - howznguyen
+---
+
+**Knowns** is the memory layer for AI-native development — giving AI coding assistants (Claude, Cursor, Kiro, Copilot…) structured, persistent project context across sessions.
+
+Instead of pasting files and re-explaining your project every time you open a new chat, your assistant works from **project state** — tasks, docs, specs, templates, and memory are all linked together and accessible through MCP.
+
+## Why Knowns?
+
+Your AI forgets. Every new session starts from scratch. `CLAUDE.md` and `AGENTS.md` are static instruction files — no tasks, no acceptance criteria, no links between spec and code.
+
+Knowns fills that gap:
+
+- **Structured tasks:** every task has acceptance criteria and links to specs, templates, and memory
+- **Semantic doc search:** find docs by meaning, not grep
+- **Specs as graph nodes:** acceptance criteria stay in sync with tasks automatically
+- **Layered memory:** project-level and global, tagged and searchable
+- **Code intelligence:** symbol graph and dependency tracking
+
+## Key features
+
+- **Context flows through your project:** when a task, spec, or template changes, Knowns traces the impact downstream. Your AI always works with fresh, connected context.
+- **Incremental delta updates:** only the changes are synced — no full reindex.
+- **Browser UI:** Kanban board, docs editor, AI chat, and semantic search — all running locally via `knowns browser`.
+- **MCP server:** exposes tasks, docs, specs, memory, templates, and code intelligence through a single MCP server.
+- **Workflow skills for Claude Code:** `/kn-research`, `/kn-plan`, `/kn-implement`, `/kn-extract` — a standardized working loop.
+
+## How it compares
+
+- **CLAUDE.md / AGENTS.md** are static instructions. Knowns tells the AI *what to build* and what "done" looks like.
+- **Task managers** are built for humans. Knowns structures tasks so the AI can read them, verify acceptance criteria, and extract knowledge when done.
+- **Memory tools** only store facts. Knowns links memory to specs, tasks, templates, and code intelligence.
+- **Spec tools** help you write specs. Knowns connects specs to everything else — ACs sync, templates generate code from specs, and verification checks coverage.
+- **MCP** is the transport layer. Knowns is the structured context that travels through it.
+
+## Get started
+
+Install via Homebrew, a shell script, PowerShell, npm, or `npx`. Node.js 20+ is required for npm-based installs.
+
+```bash
+# Quick install with npx
+npx knowns@latest init
+
+# Open the browser UI
+knowns browser
+```
+
+Full install instructions and platform-specific guides are on [knowns.sh](https://knowns.sh) and the [GitHub repo](https://github.com/knowns-dev/knowns).
+
+## Open source
+
+Knowns is open source (MIT), local-first, self-hosted, and free. Bug reports, pull requests, and doc improvements are welcome at [github.com/knowns-dev/knowns](https://github.com/knowns-dev/knowns).

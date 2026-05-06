@@ -1,0 +1,286 @@
+---
+title: "Component showcase"
+description: "Every MDX component available on howznguyen.dev, with live examples. Copy, paste, adapt."
+date: 2026-05-06
+tags:
+  - Demo
+  - Reference
+author: howznguyen
+featured: false
+---
+
+{/* 
+  This is a reference file that demonstrates every available MDX component.
+  The filename starts with _ so it's ignored by the publisher and won't appear on the site.
+  Rename (remove the leading underscore) if you want to publish it.
+*/}
+
+This file is a living reference of every component, syntax, and styling available when writing posts on howznguyen.dev. Use it to check how things render, or copy snippets into your own posts.
+
+## Text formatting
+
+Standard markdown works as expected. **Bold text**, *italic text*, and `inline code` all render with custom styling. You can also use ~~strikethrough~~ and combine [styled links](https://example.com) with regular text.
+
+Here's a paragraph with multiple sentences to demonstrate line height and reading rhythm. The prose styling on the site gives body text a 1.85 line-height for comfortable reading. Paragraphs are separated by blank lines in the source, and render with generous spacing.
+
+---
+
+## Lists
+
+Unordered list:
+
+- First item
+- Second item with some longer content to show wrapping
+- Third item
+  - Nested item
+  - Another nested item
+- Fourth item
+
+Ordered list:
+
+1. Do this first
+2. Then do this
+3. Finally, do this
+
+Task list (GitHub-flavored):
+
+- [x] Write the template
+- [x] Add sample components
+- [ ] Publish to content repo
+- [ ] Announce on Twitter
+
+## Blockquotes
+
+Regular markdown blockquote:
+
+> The best way to predict the future is to invent it.
+> — Alan Kay
+
+## Tables
+
+| Language   | Year | Creator            |
+|------------|------|--------------------|
+| TypeScript | 2012 | Microsoft          |
+| Go         | 2009 | Google             |
+| Rust       | 2010 | Mozilla            |
+| Swift      | 2014 | Apple              |
+
+## Code blocks
+
+Fenced code blocks with a language tag get Shiki syntax highlighting, line numbers, and a copy button:
+
+```typescript
+// A simple function
+export function greet(name: string): string {
+  if (!name) throw new Error("Name is required");
+  return `Hello, ${name}!`;
+}
+
+// Usage
+greet("Howz"); // "Hello, Howz!"
+```
+
+```bash
+# Install dependencies
+bun install
+
+# Run dev server
+bun run dev
+
+# Build for production
+bun run build
+```
+
+```yaml
+# Frontmatter example
+title: "My post"
+tags:
+  - Writing
+  - Meta
+date: 2026-05-06
+```
+
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build"
+  }
+}
+```
+
+Unknown languages fall back to plain text:
+
+```other
+This renders with no syntax highlighting.
+```
+
+## Callouts
+
+Callouts highlight important info. Six types are available:
+
+<Callout type="info" title="Info">
+  Use **info** for neutral asides and extra context.
+</Callout>
+
+<Callout type="tip">
+  Use **tip** for helpful suggestions and best practices. Uses the default title.
+</Callout>
+
+<Callout type="warning" title="Heads up">
+  Use **warning** when something might trip the reader up.
+</Callout>
+
+<Callout type="success">
+  Use **success** to confirm the reader has done the right thing.
+</Callout>
+
+<Callout type="error" title="Don't do this">
+  Use **error** to flag pitfalls or security issues.
+</Callout>
+
+<Callout type="note" emoji="🧩">
+  Use **note** for neutral asides. Emoji can be overridden with the `emoji` prop.
+</Callout>
+
+## Images
+
+Images use the `<Image>` component which adds optional captions and click-to-zoom:
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729241/f616dd53-7e13-4188-a8d3-68439b878d9d.png"
+  alt="A descriptive alt text for accessibility"
+  caption="Optional italic caption shown below the image"
+/>
+
+Regular markdown image syntax also works but without the caption and zoom:
+
+![Alt text](https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729437/74fb1da0-58c9-4896-92c6-fba578c0348c.png)
+
+## Bookmarks
+
+Link preview cards are great for referencing external articles, repos, or docs:
+
+<Bookmark
+  url="https://nextjs.org"
+  title="Next.js"
+  description="The React framework for the web — used to build howznguyen.dev."
+/>
+
+<Bookmark
+  url="https://github.com/howznguyen"
+  title="@howznguyen on GitHub"
+  description="My GitHub profile. Mostly TypeScript and Python work."
+/>
+
+## Quotes with accents
+
+The `<Quote>` component takes an optional `color` prop:
+
+<Quote color="blue">
+  Blue quote: Simplicity is the ultimate sophistication.
+</Quote>
+
+<Quote color="purple">
+  Purple quote: The only way to do great work is to love what you do.
+</Quote>
+
+<Quote color="green">
+  Green quote: Premature optimization is the root of all evil.
+</Quote>
+
+<Quote color="red">
+  Red quote: Perfection is achieved when there is nothing left to take away.
+</Quote>
+
+## Todo lists
+
+Interactive-looking checklist (read-only):
+
+<TodoList>
+  <Todo checked>Research the problem space</Todo>
+  <Todo checked>Draft an outline</Todo>
+  <Todo checked>Write the first section</Todo>
+  <Todo>Add code examples</Todo>
+  <Todo>Peer review</Todo>
+  <Todo>Publish</Todo>
+</TodoList>
+
+## Videos
+
+YouTube URLs are auto-detected and embedded:
+
+<Video
+  src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  title="Example embedded video"
+/>
+
+Direct video URLs use the native HTML5 player:
+
+{/* <Video src="https://example.com/clip.mp4" /> */}
+
+## Explicit code block component
+
+Most of the time you'll use fenced code blocks. But `<Code>` is available when you need a custom title:
+
+<Code language="typescript" title="src/lib/utils.ts">
+{`export function formatDate(date: Date): string {
+  return date.toISOString().split("T")[0];
+}`}
+</Code>
+
+## Headings
+
+The site supports headings from `##` down to `####`. `#` is reserved for the post title — do not use it in body content.
+
+## Section heading (h2)
+
+### Subsection (h3)
+
+Body text under h3.
+
+#### Minor heading (h4)
+
+Body text under h4.
+
+---
+
+## Inline links
+
+Internal links to other posts on the site: [another post example](/blog/hello-world). External links: [MDX docs](https://mdxjs.com).
+
+## Horizontal rule
+
+Use `---` on its own line to insert a horizontal rule:
+
+---
+
+This section is after the rule.
+
+## Putting it all together
+
+A typical post mixes several of these. Here's a realistic paragraph:
+
+When building the post editor we hit a tricky issue with hydration. The server was rendering [one state](https://react.dev/reference/react-dom/client/hydrateRoot) while the client rendered another, which caused a mismatch.
+
+<Callout type="tip" title="Debugging hydration">
+  Add `suppressHydrationWarning` sparingly. Most of the time the right fix is to make the server and client render identical output.
+</Callout>
+
+```typescript
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+See the [Next.js docs](https://nextjs.org/docs) for more.
+
+---
+
+*End of showcase. Happy writing.*
