@@ -1,0 +1,223 @@
+---
+title: "Agent Coding - có phải chúng ta đang quay lại thời mò mẫm?"
+description: "Dùng AI để code giống hệt cách mình học lập trình 10 năm trước. Nhưng lần này đứng ở một tầng khác. Không phải thụt lùi, mà là vòng xoáy đi lên."
+date: 2026-05-13
+tags:
+  - AI
+  - Suy ngẫm
+  - Lập trình
+authors: [howznguyen]
+featured: false
+image: "https://images.unsplash.com/photo-1544256718-3bcf237f3974"
+---
+
+Mấy tháng gần đây mình dùng Agent Coding khá nhiều. Claude Code, Cursor, Copilot — đủ cả. Và mình nhận ra một điều khá thú vị mà không biết có ai cùng cảm giác không.
+
+Cái cảm giác khi ngồi với AI agent để làm một tính năng, nó giống hệt cách mình học lập trình hồi mới bắt đầu. Cách đây khoảng 10 năm.
+
+Giống đến mức hơi bất ngờ.
+
+## Hồi đó mình code kiểu gì
+
+Mình bắt đầu học lập trình bằng PHP. Trên [freetuts.net](https://freetuts.net/hoc-php). Học if else, học echo, học `$_GET`, `$_POST`. Không có ai dạy. Không có lộ trình. Không có người hướng dẫn. Chỉ có mấy bài hướng dẫn trên mạng và một cái hosting free.
+
+Mỗi trang là một file `.php`. Trang chủ thì `index.php`. Trang liên hệ thì `lienhe.php`. Trang đăng nhập thì `dangnhap.php`. Không biết MVC là gì. Không biết router là gì. Mỗi file tự query database, tự render HTML, tự xử lý logic. Tất cả trong một.
+
+OOP? Chưa nghe bao giờ. Class? Interface? Namespace? Không biết. Chỉ biết viết function rồi gọi. Mà nhiều khi còn không viết function, cứ code thẳng từ trên xuống dưới.
+
+Và fix bug thì fix thẳng trên production. Không có staging. Không có git. Sửa xong save, refresh browser, chạy được là xong. Chạy không được thì sửa tiếp. Có hôm sửa sai làm cả trang trắng xóa, phải ngồi nhớ lại code cũ viết gì.
+
+Mỗi lần muốn làm gì mới, quy trình luôn giống nhau: **muốn → lên freetuts search → copy code → sửa sửa → sai → sửa tiếp → chạy được → muốn thêm cái khác → lặp lại**.
+
+Nhưng mà vui. Vui kiểu khám phá. Mỗi ngày đều học được một thứ mới. Mỗi bug fix được đều thấy mình giỏi hơn hôm qua một chút. Không ai đánh giá. Không ai review. Chỉ có mình và cái máy tính.
+
+Đó là giai đoạn mò mẫm. Thử sai ở dạng nguyên thủy nhất. Vừa làm vừa học mà không biết mình đang vừa làm vừa học.
+
+## Rồi Đại học và đi làm thay đổi mọi thứ
+
+Lên Đại học, mình được học "cách đúng".
+
+OOP. SOLID. Design patterns. MVC. Clean Architecture. TDD. Code review. Git flow.
+
+Mình bắt đầu hiểu tại sao phải tách class. Tại sao phải viết interface. Tại sao phải test. Tại sao đặt tên biến quan trọng. Tại sao một function không nên dài quá 20 dòng.
+
+Rồi đi làm, mình lại học thêm một tầng nữa: quy trình. Sprint. Scrum. Agile. Waterfall. Daily standup. Sprint planning. Retrospective. Jira board. Story points. Definition of Done.
+
+Hồi đó mình thấy mấy thứ này hơi nhiều nghi lễ. Nhưng dần dần hiểu tại sao nó tồn tại. Vì khi làm với team, code không chỉ cần chạy được. Nó cần được lên kế hoạch, được ước lượng, được theo dõi, được giao đúng hạn. Một mình thì loạn không sao. Nhưng 5-10 người cùng đụng một codebase mà không có quy trình thì tan hoang.
+
+Giai đoạn này không vui bằng hồi mò mẫm. Nhưng nó cần thiết. Nó biến mình từ "người biết code" thành "người biết xây phần mềm". Từ "viết code chạy được" thành "viết code người khác đọc được, bảo trì được, mở rộng được". Từ "làm một mình" thành "làm với team mà không đạp lên chân nhau".
+
+Mình không còn mò mẫm nữa. Mình có khung tư duy. Có quy trình để đi theo. Có những cách làm đã được chứng minh để tham khảo. Mọi thứ có trật tự hơn.
+
+Và mình nghĩ đó là con đường mà hầu hết developer đều đi qua. Từ loạn đến có cấu trúc. Từ mò mẫm đến có phương pháp.
+
+## Nhưng giờ ngồi với Agent Coding...
+
+Giờ mình ngồi với Claude Code, cách làm việc trông như thế này:
+
+Mình mô tả thứ mình muốn. Agent viết code. Chạy thử. Sai. Mình giải thích lại rõ hơn. Agent sửa. Gần đúng hơn nhưng chưa hẳn. Mình chỉnh lại lời dặn, thêm ngữ cảnh, nói rõ ràng buộc. Agent thử lại. Lần này ổn hơn. Nhưng có trường hợp biên. Mình chỉ ra. Agent fix. Chạy được.
+
+Có thấy quen không?
+
+**Muốn → Thử → Sai → Sửa → Học → Lặp lại.**
+
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style={{width: '100%', maxWidth: '720px', margin: '2rem auto', display: 'block'}}>
+  <defs>
+    <marker id="arrow1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#6366f1" />
+    </marker>
+    <marker id="arrow2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#10b981" />
+    </marker>
+  </defs>
+  <text x="360" y="20" textAnchor="middle" fill="#94a3b8" fontSize="11" fontFamily="monospace">CÙNG MỘT VÒNG LẶP — KHÁC MỘT TẦNG</text>
+  <rect x="20" y="40" width="330" height="140" rx="12" fill="none" stroke="#334155" strokeWidth="1.5" strokeDasharray="4 3" />
+  <rect x="370" y="40" width="330" height="140" rx="12" fill="none" stroke="#334155" strokeWidth="1.5" strokeDasharray="4 3" />
+  <text x="185" y="62" textAnchor="middle" fill="#6366f1" fontSize="12" fontWeight="bold" fontFamily="monospace">10 năm trước</text>
+  <text x="535" y="62" textAnchor="middle" fill="#10b981" fontSize="12" fontWeight="bold" fontFamily="monospace">Bây giờ</text>
+  <g transform="translate(185, 125)">
+    <ellipse cx="0" cy="0" rx="70" ry="35" fill="none" stroke="#6366f1" strokeWidth="1.5" />
+    <text x="0" y="-50" textAnchor="middle" fill="#e2e8f0" fontSize="10" fontFamily="monospace">Muốn làm web</text>
+    <text x="-85" y="5" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Search</text>
+    <text x="85" y="5" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Fix bug</text>
+    <text x="0" y="55" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Chạy được!</text>
+    <path d="M50,-28 A70,35 0 1,1 45,-30" fill="none" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#arrow1)" />
+  </g>
+  <g transform="translate(535, 125)">
+    <ellipse cx="0" cy="0" rx="70" ry="35" fill="none" stroke="#10b981" strokeWidth="1.5" />
+    <text x="0" y="-50" textAnchor="middle" fill="#e2e8f0" fontSize="10" fontFamily="monospace">Mô tả ý định</text>
+    <text x="-85" y="5" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Prompt</text>
+    <text x="85" y="5" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Chỉnh sửa</text>
+    <text x="0" y="55" textAnchor="middle" fill="#e2e8f0" fontSize="9" fontFamily="monospace">Chạy được!</text>
+    <path d="M50,-28 A70,35 0 1,1 45,-30" fill="none" stroke="#10b981" strokeWidth="1.5" markerEnd="url(#arrow2)" />
+  </g>
+</svg>
+
+Đây là cái vòng lặp y hệt hồi mới học code. Cùng một kiểu. Cùng một cảm giác mò mẫm. Cùng cái sướng khi nó chạy được sau mấy lần chỉnh tới chỉnh lui.
+
+Mình không có một quy trình chuẩn nào cho việc dùng Agent Coding. Không có "SOLID cho prompting". Không có "Clean Architecture cho cách làm việc với AI". Mình đang mò. Thử cách này, không ổn thì thử cách khác. Prompt dài quá thì rút ngắn. Ngắn quá thì thêm ngữ cảnh. Chia nhỏ task thì agent làm tốt hơn. Gom lại thì nó mất mạch.
+
+Nghe quen chưa? Đây là giai đoạn mò mẫm. Lại là mò mẫm.
+
+<Quote color="blue">
+  Chúng ta đã đi từ mò mẫm, qua quy trình, rồi lại quay về mò mẫm. Nhưng lần
+  này ở một tầng khác.
+</Quote>
+
+## Khác ở chỗ nào
+
+Nếu chỉ nhìn bề ngoài, hai giai đoạn giống nhau đến kỳ lạ. Nhưng nhìn kỹ thì khác.
+
+Hồi đó mình debug từng dấu chấm phẩy. Từng biến sai tên. Từng vòng lặp lệch một. Từng cái `undefined is not a function`. Mình đang vật lộn với **cú pháp** và **logic cơ bản**.
+
+Giờ mình không debug cú pháp nữa. Mình debug **ý định**. Mình đang học cách diễn đạt sao cho agent hiểu đúng mình muốn gì. Cách chia nhỏ vấn đề sao cho agent xử lý được từng phần. Cách đặt ngữ cảnh sao cho agent không bịa ra thứ mình không cần. Cách đọc lại kết quả sao cho không bỏ sót lỗi logic mà nhìn qua thì rất trôi chảy.
+
+Hồi đó mình search "how to center a div". Giờ mình đang tìm cách nói cho AI hiểu "cái layout này cần responsive nhưng không phải kiểu grid thông thường, mà là kiểu masonry nhưng item đầu tiên phải chiếm 2 cột trên desktop".
+
+Hồi đó mình đọc docs để hiểu API. Giờ mình đọc kết quả agent trả về để kiểm tra nó có đang dùng đúng phiên bản API không, có đang bịa ra một method không tồn tại không.
+
+Hồi đó mình copy paste từ Stack Overflow rồi sửa cho hợp. Giờ mình đọc lại code agent viết rồi sửa cho đúng ý.
+
+Cái vòng lặp cốt lõi không đổi. Nhưng mọi thứ đã dịch lên một tầng trừu tượng hơn.
+
+## Vòng xoáy, không phải vòng tròn
+
+Mình nghĩ hình ảnh đúng nhất để mô tả chuyện này là một **vòng xoáy đi lên** (spiral).
+
+<svg viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" style={{width: '100%', maxWidth: '500px', margin: '2rem auto', display: 'block'}}>
+  <defs>
+    <marker id="arrowUp" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#94a3b8" />
+    </marker>
+  </defs>
+  <line x1="250" y1="360" x2="250" y2="20" stroke="#334155" strokeWidth="1" strokeDasharray="4 3" markerEnd="url(#arrowUp)" />
+  <text x="265" y="30" fill="#94a3b8" fontSize="10" fontFamily="monospace">trừu tượng hơn</text>
+  <ellipse cx="250" cy="300" rx="120" ry="30" fill="none" stroke="#6366f1" strokeWidth="2" opacity="0.4" />
+  <text x="250" y="305" textAnchor="middle" fill="#6366f1" fontSize="11" fontFamily="monospace">Mò mẫm PHP</text>
+  <text x="250" y="340" textAnchor="middle" fill="#475569" fontSize="9" fontFamily="monospace">cú pháp · logic · thử sai</text>
+  <ellipse cx="250" cy="200" rx="120" ry="30" fill="none" stroke="#f59e0b" strokeWidth="2" opacity="0.6" />
+  <text x="250" y="205" textAnchor="middle" fill="#f59e0b" fontSize="11" fontFamily="monospace">Đại học · Đi làm</text>
+  <text x="250" y="240" textAnchor="middle" fill="#475569" fontSize="9" fontFamily="monospace">OOP · patterns · Sprint · Scrum</text>
+  <ellipse cx="250" cy="100" rx="120" ry="30" fill="none" stroke="#10b981" strokeWidth="2" />
+  <text x="250" y="105" textAnchor="middle" fill="#10b981" fontSize="11" fontFamily="monospace">Agent Coding</text>
+  <text x="250" y="140" textAnchor="middle" fill="#475569" fontSize="9" fontFamily="monospace">ý định · prompting · kiểm chứng</text>
+  <path d="M130,300 C100,250 130,230 130,200 C130,170 100,150 130,100" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 3" />
+  <path d="M370,300 C400,250 370,230 370,200 C370,170 400,150 370,100" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 3" />
+  <text x="250" y="375" textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="monospace">cùng kiểu "thử → sai → học" nhưng mỗi vòng cao hơn</text>
+</svg>
+
+Nếu nhìn từ trên xuống, chúng ta đang đứng ở cùng một vị trí. Vẫn là mò mẫm. Vẫn là thử sai. Vẫn là "thử rồi sai rồi sửa rồi học".
+
+Nhưng nếu nhìn từ bên cạnh, chúng ta đang ở một độ cao khác hoàn toàn.
+
+Kiến thức về OOP, kiến trúc phần mềm, design patterns, testing, chất lượng code — tất cả vẫn ở đó. Nó không biến mất khi mình chuyển sang dùng AI. Ngược lại, nó trở thành **nền tảng** để mình đánh giá kết quả agent trả về.
+
+Mình biết khi nào agent đang viết code tệ. Biết khi nào nó đang làm quá. Biết khi nào nó đang bỏ qua trường hợp biên. Biết khi nào cái lớp trừu tượng nó tạo ra không hợp lý. Biết khi nào nó đang bịa ra một thứ không tồn tại.
+
+Một người mới học code dùng Agent Coding sẽ khác hoàn toàn một người có 5-10 năm kinh nghiệm. Không phải vì người có kinh nghiệm viết prompt giỏi hơn. Mà vì họ có **con mắt**. Họ biết code tốt trông như thế nào. Họ có đủ nền để kiểm chứng.
+
+Những năm học "cách đúng" không phải vô nghĩa. Nó cho mình khả năng phân biệt đúng sai, dù mình không phải là người trực tiếp gõ từng dòng nữa.
+
+<Callout type="note">
+  Vòng xoáy không phải thụt lùi. Nó là tiến hóa. Mỗi lần quay lại cùng một
+  kiểu, chúng ta đứng cao hơn một bậc. Cái "mò mẫm" lần này khác về chất so
+  với lần trước.
+</Callout>
+
+## Kỹ năng mới: nói cho AI hiểu mình muốn gì
+
+Nếu nghĩ kỹ, mỗi giai đoạn đều có một "ngôn ngữ" cần học.
+
+Giai đoạn đầu: học ngôn ngữ lập trình. Cú pháp, từ khóa, kiểu dữ liệu, luồng điều khiển. Mình phải nói cho máy tính hiểu từng bước một.
+
+Giai đoạn giữa: học ngôn ngữ thiết kế. Patterns, nguyên tắc, kiến trúc. Mình phải nói cho đồng nghiệp hiểu tại sao code được viết như vậy.
+
+Giai đoạn hiện tại: học cách truyền đạt ý định. Mình phải nói cho AI hiểu mình muốn gì, trong bối cảnh nào, với ràng buộc nào, và kết quả mong đợi trông như thế nào.
+
+Nghe thì đơn giản. Nhưng ai đã dùng Agent Coding đều biết: nói cho AI hiểu đúng ý mình khó hơn tưởng rất nhiều. Đặc biệt khi vấn đề phức tạp, khi có nhiều ngữ cảnh ngầm mà mình quên không nói, khi mình tưởng mình rõ ràng nhưng thực ra rất mơ hồ.
+
+Mình từng mất cả tiếng đồng hồ chỉ để chỉnh tới chỉnh lui với agent về một tính năng mà nếu tự code thì có khi 30 phút xong. Không phải vì agent ngu. Mà vì mình chưa biết cách diễn đạt đủ rõ.
+
+Và đó chính là quá trình học. Giống hệt hồi đầu mình mất cả ngày để căn giữa một cái div vậy.
+
+## Quy trình sẽ lại xuất hiện
+
+Mình tin là giai đoạn mò mẫm này sẽ không kéo dài mãi.
+
+Giống như từ hỗn loạn hồi mới học code, dần dần cộng đồng hình thành những cách làm tốt, những quy ước chung. Từ "ai thích viết sao thì viết" thành "có Agile, có code review, có CI/CD, có testing pyramid".
+
+Agent Coding cũng sẽ đi qua con đường tương tự. Dần dần sẽ có những khuôn mẫu rõ ràng hơn. Khi nào nên chia nhỏ task. Khi nào nên cho agent toàn bộ ngữ cảnh. Cách viết prompt cho tính năng phức tạp. Cách đọc lại code AI viết sao cho hiệu quả. Cách phối hợp nhiều agent cho một luồng công việc lớn.
+
+Thực ra một số khuôn mẫu đã bắt đầu hình thành rồi. Agentic coding, spec-driven development, AI-assisted code review. Nhưng tất cả vẫn đang ở giai đoạn rất sớm. Chưa có "SOLID cho cách dùng AI". Chưa có "Clean Architecture cho prompting".
+
+Và mình thấy điều đó khá thú vị. Vì nó có nghĩa là chúng ta đang ở đầu một vòng xoáy mới. Đang ở giai đoạn mà mọi thứ còn mở, còn nhiều thứ để khám phá, còn nhiều cách tiếp cận chưa ai thử.
+
+Giống hệt cảm giác hồi mới học code vậy. Mỗi ngày đều có thể học được một thứ mới.
+
+## Vậy có đáng lo không?
+
+Mình thấy nhiều người lo lắng khi dùng Agent Coding. Lo rằng mình đang "quên cách code". Lo rằng phụ thuộc AI quá nhiều. Lo rằng tay nghề đang bị mai một.
+
+Mình hiểu nỗi lo đó. Nhưng mình nghĩ nó hơi lệch hướng.
+
+Chúng ta không quên cách code. Chúng ta đang học cách code ở một tầng khác. Giống như khi chuyển từ Assembly lên C, từ C lên Python, mỗi lần lên một tầng trừu tượng, chúng ta "mất" khả năng kiểm soát ở tầng dưới. Nhưng đổi lại, chúng ta giải quyết được vấn đề lớn hơn, nhanh hơn.
+
+Người viết Assembly không sai khi lo rằng thế hệ sau không hiểu quản lý bộ nhớ. Nhưng thế hệ sau lại xây được những thứ mà thế hệ Assembly không tưởng tượng nổi.
+
+Tất nhiên, nền tảng vẫn quan trọng. Một người không hiểu gì về lập trình mà dùng Agent Coding thì rất dễ rơi vào bẫy: code chạy được nhưng không hiểu tại sao, không biết khi nào nó sẽ vỡ, không biết cách xử lý khi agent bó tay.
+
+Nhưng với người đã có nền, Agent Coding không phải là sự thay thế. Nó là một lớp mới để học.
+
+## Kết
+
+Lập trình luôn là một quá trình lặp. Chúng ta không bao giờ thực sự "xong". Chỉ là mỗi lần quay lại, mình đứng cao hơn một chút.
+
+10 năm trước: mò mẫm để hiểu máy tính nói gì.
+
+5 năm trước: học quy trình để làm việc với con người.
+
+Bây giờ: mò mẫm để giao tiếp với AI.
+
+Cùng một vòng lặp. Khác một tầng. Và mình thấy điều đó không đáng lo. Nó đáng để tò mò.
+
+See yah.
