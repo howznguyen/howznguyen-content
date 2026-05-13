@@ -1,0 +1,523 @@
+---
+title: "Agent Coding - are we back to fumbling around?"
+description: "Using AI to code feels exactly like learning to program 10 years ago. But this time we're standing at a different level. Not regression — a spiral upward."
+date: 2026-05-13
+tags:
+  - AI
+  - Reflection
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://images.unsplash.com/photo-1544256718-3bcf237f3974"
+---
+
+I've been using Agent Coding quite a lot these past few months. Claude Code, Cursor, Copilot — the whole lot. And I noticed something interesting that I'm not sure others feel too.
+
+The feeling of sitting with an AI agent to build a feature — it's identical to how I learned programming when I first started. About 10 years ago.
+
+Eerily identical.
+
+## How I used to code
+
+I started learning to program with PHP. On [freetuts.net](https://freetuts.net/hoc-php). Learned if else, echo, `$_GET`, `$_POST`. Nobody taught me. No roadmap. No mentor. Just some tutorials online and a free hosting account.
+
+Each page was a `.php` file. Homepage was `index.php`. Contact page was `lienhe.php`. Login page was `dangnhap.php`. Didn't know what MVC was. Didn't know what a router was. Each file queried the database, rendered HTML, and handled logic all by itself. Everything in one place.
+
+OOP? Never heard of it. Class? Interface? Namespace? No clue. Just wrote functions and called them. Sometimes didn't even bother with functions — just coded straight from top to bottom.
+
+And fixing bugs? Fixed them straight on production. No staging. No git. Save, refresh browser, if it works then done. If it doesn't, fix again. Some days I'd break the whole page white, had to sit there trying to remember what the old code looked like.
+
+Every time I wanted to do something new, the process was always the same: **want → search freetuts → copy code → tweak → broken → tweak more → works → want something else → repeat**.
+
+But it was fun. The fun of discovery. Every day I learned something new. Every bug fixed made me feel slightly better than yesterday. Nobody judging. Nobody reviewing. Just me and the computer.
+
+That was the fumbling phase. Trial and error in its most primitive form. Learning by doing without knowing I was learning by doing.
+
+## Then university and work changed everything
+
+In university, I learned "the right way."
+
+OOP. SOLID. Design patterns. MVC. Clean Architecture. TDD. Code review. Git flow.
+
+I started understanding why you separate classes. Why you write interfaces. Why you test. Why naming conventions matter. Why a function shouldn't be longer than 20 lines.
+
+Then at work, I learned yet another layer: process. Sprint. Scrum. Agile. Waterfall. Daily standup. Sprint planning. Retrospective. Jira board. Story points. Definition of Done.
+
+At first I thought all this was too much ceremony. But gradually I understood why it exists. When working with a team, code doesn't just need to run. It needs to be planned, estimated, tracked, delivered on time. Solo chaos is fine. But 5-10 people touching the same codebase without process? Disaster.
+
+This phase wasn't as fun as fumbling. But it was necessary. It turned me from "someone who can code" into "someone who can build software." From "writing code that runs" to "writing code others can read, maintain, and scale." From "working alone" to "working with a team without stepping on each other's toes."
+
+I wasn't fumbling anymore. I had frameworks to think with. Processes to follow. Proven practices to reference. Everything was more orderly.
+
+And I think that's the path most developers walk. From chaos to structure. From fumbling to methodology.
+
+## But now, sitting with Agent Coding...
+
+Now I sit with Claude Code, and the workflow looks like this:
+
+I describe what I want. Agent writes code. Run it. Wrong. I explain more clearly. Agent fixes. Closer but not quite. I adjust the prompt, add context, clarify constraints. Agent tries again. Better this time. But there's an edge case. I point it out. Agent fixes. Works.
+
+Sound familiar?
+
+**Want → Try → Fail → Fix → Learn → Repeat.**
+
+<svg
+  viewBox="0 0 720 200"
+  xmlns="http://www.w3.org/2000/svg"
+  style={{
+    width: "100%",
+    maxWidth: "720px",
+    margin: "2rem auto",
+    display: "block",
+  }}
+>
+  <defs>
+    <marker
+      id="arrow1"
+      markerWidth="8"
+      markerHeight="6"
+      refX="8"
+      refY="3"
+      orient="auto"
+    >
+      <path d="M0,0 L8,3 L0,6" fill="#6366f1" />
+    </marker>
+    <marker
+      id="arrow2"
+      markerWidth="8"
+      markerHeight="6"
+      refX="8"
+      refY="3"
+      orient="auto"
+    >
+      <path d="M0,0 L8,3 L0,6" fill="#10b981" />
+    </marker>
+  </defs>
+  <text
+    x="360"
+    y="20"
+    textAnchor="middle"
+    fill="#94a3b8"
+    fontSize="11"
+    fontFamily="monospace"
+  >
+    SAME LOOP — DIFFERENT LEVEL
+  </text>
+  <rect
+    x="20"
+    y="40"
+    width="330"
+    height="140"
+    rx="12"
+    fill="none"
+    stroke="#334155"
+    strokeWidth="1.5"
+    strokeDasharray="4 3"
+  />
+  <rect
+    x="370"
+    y="40"
+    width="330"
+    height="140"
+    rx="12"
+    fill="none"
+    stroke="#334155"
+    strokeWidth="1.5"
+    strokeDasharray="4 3"
+  />
+  <text
+    x="185"
+    y="62"
+    textAnchor="middle"
+    fill="#6366f1"
+    fontSize="12"
+    fontWeight="bold"
+    fontFamily="monospace"
+  >
+    10 years ago
+  </text>
+  <text
+    x="535"
+    y="62"
+    textAnchor="middle"
+    fill="#10b981"
+    fontSize="12"
+    fontWeight="bold"
+    fontFamily="monospace"
+  >
+    Now
+  </text>
+  <g transform="translate(185, 125)">
+    <ellipse
+      cx="0"
+      cy="0"
+      rx="70"
+      ry="35"
+      fill="none"
+      stroke="#6366f1"
+      strokeWidth="1.5"
+    />
+    <text
+      x="0"
+      y="-50"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="10"
+      fontFamily="monospace"
+    >
+      Want to build
+    </text>
+    <text
+      x="-85"
+      y="5"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      Search
+    </text>
+    <text
+      x="85"
+      y="5"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      Fix bug
+    </text>
+    <text
+      x="0"
+      y="55"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      It works!
+    </text>
+    <path
+      d="M50,-28 A70,35 0 1,1 45,-30"
+      fill="none"
+      stroke="#6366f1"
+      strokeWidth="1.5"
+      markerEnd="url(#arrow1)"
+    />
+  </g>
+  <g transform="translate(535, 125)">
+    <ellipse
+      cx="0"
+      cy="0"
+      rx="70"
+      ry="35"
+      fill="none"
+      stroke="#10b981"
+      strokeWidth="1.5"
+    />
+    <text
+      x="0"
+      y="-50"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="10"
+      fontFamily="monospace"
+    >
+      Describe intent
+    </text>
+    <text
+      x="-85"
+      y="5"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      Prompt
+    </text>
+    <text
+      x="85"
+      y="5"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      Iterate
+    </text>
+    <text
+      x="0"
+      y="55"
+      textAnchor="middle"
+      fill="#e2e8f0"
+      fontSize="9"
+      fontFamily="monospace"
+    >
+      It works!
+    </text>
+    <path
+      d="M50,-28 A70,35 0 1,1 45,-30"
+      fill="none"
+      stroke="#10b981"
+      strokeWidth="1.5"
+      markerEnd="url(#arrow2)"
+    />
+  </g>
+</svg>
+
+This is the exact same loop from when I first learned to code. Same pattern. Same feeling of fumbling. Same satisfaction when it finally works after several rounds of back-and-forth.
+
+I don't have a standard process for using Agent Coding. No "SOLID for prompting." No "Clean Architecture for AI workflows." I'm fumbling. Try this approach, doesn't work, try another. Prompt too long, shorten it. Too short, add context. Break tasks down and the agent does better. Combine them and it loses the thread.
+
+Sound familiar yet? This is the fumbling phase. Again.
+
+<Quote color="blue">
+  We went from fumbling, through process, and back to fumbling. But this time at
+  a different level.
+</Quote>
+
+## What's different
+
+On the surface, the two phases look eerily similar. But look closer and they're different.
+
+Back then I debugged semicolons. Misspelled variables. Off-by-one loops. `undefined is not a function`. I was wrestling with **syntax** and **basic logic**.
+
+Now I don't debug syntax. I debug **intent**. I'm learning how to express what I want so the agent understands correctly. How to decompose problems so the agent can handle each piece. How to set context so the agent doesn't hallucinate things I don't need. How to review output so I don't miss logic errors hidden behind fluent-looking code.
+
+Back then I searched "how to center a div." Now I'm trying to tell AI "this layout needs to be responsive but not regular grid — more like masonry, but the first item should span 2 columns on desktop."
+
+Back then I read docs to understand an API. Now I read agent output to verify it's using the right API version and not hallucinating a method that doesn't exist.
+
+Back then I copy-pasted from Stack Overflow and tweaked it. Now I review agent-generated code and tweak it to match my intent.
+
+The core loop hasn't changed. But everything has shifted up one level of abstraction.
+
+## A spiral, not a circle
+
+I think the right image for this is an **upward spiral**.
+
+<svg
+  viewBox="0 0 500 380"
+  xmlns="http://www.w3.org/2000/svg"
+  style={{
+    width: "100%",
+    maxWidth: "500px",
+    margin: "2rem auto",
+    display: "block",
+  }}
+>
+  <defs>
+    <marker
+      id="arrowUp"
+      markerWidth="8"
+      markerHeight="6"
+      refX="8"
+      refY="3"
+      orient="auto"
+    >
+      <path d="M0,0 L8,3 L0,6" fill="#94a3b8" />
+    </marker>
+  </defs>
+  <line
+    x1="250"
+    y1="360"
+    x2="250"
+    y2="20"
+    stroke="#334155"
+    strokeWidth="1"
+    strokeDasharray="4 3"
+    markerEnd="url(#arrowUp)"
+  />
+  <text x="265" y="30" fill="#94a3b8" fontSize="10" fontFamily="monospace">
+    abstraction
+  </text>
+  <ellipse
+    cx="250"
+    cy="300"
+    rx="120"
+    ry="30"
+    fill="none"
+    stroke="#6366f1"
+    strokeWidth="2"
+    opacity="0.4"
+  />
+  <text
+    x="250"
+    y="305"
+    textAnchor="middle"
+    fill="#6366f1"
+    fontSize="11"
+    fontFamily="monospace"
+  >
+    Fumbling with PHP
+  </text>
+  <text
+    x="250"
+    y="340"
+    textAnchor="middle"
+    fill="#475569"
+    fontSize="9"
+    fontFamily="monospace"
+  >
+    syntax · logic · trial & error
+  </text>
+  <ellipse
+    cx="250"
+    cy="200"
+    rx="120"
+    ry="30"
+    fill="none"
+    stroke="#f59e0b"
+    strokeWidth="2"
+    opacity="0.6"
+  />
+  <text
+    x="250"
+    y="205"
+    textAnchor="middle"
+    fill="#f59e0b"
+    fontSize="11"
+    fontFamily="monospace"
+  >
+    University · Work
+  </text>
+  <text
+    x="250"
+    y="240"
+    textAnchor="middle"
+    fill="#475569"
+    fontSize="9"
+    fontFamily="monospace"
+  >
+    OOP · patterns · Sprint · Scrum
+  </text>
+  <ellipse
+    cx="250"
+    cy="100"
+    rx="120"
+    ry="30"
+    fill="none"
+    stroke="#10b981"
+    strokeWidth="2"
+  />
+  <text
+    x="250"
+    y="105"
+    textAnchor="middle"
+    fill="#10b981"
+    fontSize="11"
+    fontFamily="monospace"
+  >
+    Agent Coding
+  </text>
+  <text
+    x="250"
+    y="140"
+    textAnchor="middle"
+    fill="#475569"
+    fontSize="9"
+    fontFamily="monospace"
+  >
+    intent · prompting · verification
+  </text>
+  <path
+    d="M130,300 C100,250 130,230 130,200 C130,170 100,150 130,100"
+    fill="none"
+    stroke="#94a3b8"
+    strokeWidth="1.5"
+    strokeDasharray="3 3"
+  />
+  <path
+    d="M370,300 C400,250 370,230 370,200 C370,170 400,150 370,100"
+    fill="none"
+    stroke="#94a3b8"
+    strokeWidth="1.5"
+    strokeDasharray="3 3"
+  />
+  <text
+    x="250"
+    y="375"
+    textAnchor="middle"
+    fill="#64748b"
+    fontSize="9"
+    fontFamily="monospace"
+  >
+    same "try → fail → learn" pattern, each loop higher
+  </text>
+</svg>
+
+Viewed from above, we're standing at the same position. Still fumbling. Still trial and error. Still "try, fail, fix, learn."
+
+But viewed from the side, we're at a completely different altitude.
+
+Knowledge of OOP, software architecture, design patterns, testing, code quality — it's all still there. It doesn't vanish when you switch to AI. Instead, it becomes the **foundation** for evaluating agent output.
+
+I know when the agent is writing bad code. When it's over-engineering. When it's skipping edge cases. When the abstraction it creates doesn't make sense. When it's hallucinating something that doesn't exist.
+
+A beginner using Agent Coding is completely different from someone with 5-10 years of experience. Not because the experienced person writes better prompts. But because they have **taste**. They know what good code looks like. They have enough context to verify.
+
+Those years of learning "the right way" weren't wasted. They gave me the ability to tell right from wrong, even when I'm not the one typing every line anymore.
+
+<Callout type="note">
+  A spiral isn't regression. It's evolution. Each time we return to the same
+  pattern, we're standing one level higher. This round of "fumbling" is
+  qualitatively different from the last.
+</Callout>
+
+## New skill: communicating intent
+
+If you think about it, each phase has a "language" to learn.
+
+First phase: learning a programming language. Syntax, keywords, data types, control flow. You had to tell the computer every single step.
+
+Middle phase: learning the language of design. Patterns, principles, architecture. You had to tell colleagues why the code was written that way.
+
+Current phase: learning to communicate intent. You have to tell AI what you want, in what context, with what constraints, and what the expected result looks like.
+
+Sounds simple. But anyone who's used Agent Coding knows: getting AI to understand exactly what you mean is much harder than you'd think. Especially when the problem is complex, when there's implicit context you forgot to mention, when you think you're being clear but you're actually vague.
+
+I've spent entire hours going back and forth with an agent on a feature that I could've coded myself in 30 minutes. Not because the agent is dumb. But because I didn't know how to express myself clearly enough.
+
+And that's the learning process. Exactly like spending an entire day trying to center a div back in the beginning.
+
+## Process will emerge again
+
+I believe this fumbling phase won't last forever.
+
+Just like the chaos of early coding gradually gave way to best practices, conventions, and methodology. From "write however you want" to "there's Agile, code review, CI/CD, testing pyramid."
+
+Agent Coding will walk the same path. Gradually there'll be clearer patterns. When to break tasks down. When to give the agent full context. How to write prompts for complex features. How to review AI-generated code effectively. How to orchestrate multiple agents for large workflows.
+
+Some patterns are already forming. Agentic coding, spec-driven development, AI-assisted code review. But it's all still very early. No "SOLID for AI workflows" yet. No "Clean Architecture for prompting."
+
+And I find that quite exciting. Because it means we're at the beginning of a new spiral. At a phase where everything is still open, still plenty to discover, still many approaches nobody has tried.
+
+Exactly like the feeling of first learning to code. Every day you can learn something new.
+
+## Should we worry?
+
+I see many people anxious about Agent Coding. Worried they're "forgetting how to code." Worried about depending on AI too much. Worried their skills are atrophying.
+
+I understand that worry. But I think it's slightly misdirected.
+
+We're not forgetting how to code. We're learning to code at a different level. Just like moving from Assembly to C, from C to Python — each time you go up a level of abstraction, you "lose" control at the layer below. But in return, you solve bigger problems, faster.
+
+Assembly programmers weren't wrong to worry that the next generation wouldn't understand memory management. But the next generation built things the Assembly generation couldn't have imagined.
+
+Of course, fundamentals still matter. Someone who knows nothing about programming using Agent Coding easily falls into a trap: code that works but they don't understand why, don't know when it'll break, don't know how to debug when the agent gives up.
+
+But for those with a foundation, Agent Coding isn't a replacement. It's a new layer to learn.
+
+## Closing
+
+Programming has always been an iterative process. We never truly "finish." We just stand a little higher each time we come back around.
+
+10 years ago: fumbling to understand what the computer is saying.
+
+5 years ago: learning process to work with humans.
+
+Now: fumbling to communicate with AI.
+
+Same loop. Different level. And I don't find that worrying. I find it worth being curious about.
+
+See yah.
