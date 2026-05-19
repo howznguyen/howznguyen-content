@@ -1,0 +1,95 @@
+---
+title: "Routing & Navigation"
+description: "Understanding the App Router, dynamic routes, and navigation patterns"
+---
+
+## File-Based Routing
+
+In Next.js App Router, the file system defines your routes. Create a file at `app/about/page.tsx` and it becomes accessible at `/about`.
+
+## Dynamic Routes
+
+Use square brackets for dynamic segments:
+
+```tsx
+// app/blog/[slug]/page.tsx
+export default async function BlogPost({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return <h1>Post: {slug}</h1>;
+}
+```
+
+## Route Groups
+
+Organize routes without affecting the URL using parentheses:
+
+```
+app/
+├── (marketing)/
+│   ├── about/page.tsx     → /about
+│   └── contact/page.tsx   → /contact
+├── (app)/
+│   ├── dashboard/page.tsx → /dashboard
+│   └── settings/page.tsx  → /settings
+└── layout.tsx
+```
+
+## Navigation
+
+### Link Component
+
+Use the `Link` component for client-side navigation:
+
+```tsx
+import Link from "next/link";
+
+export default function Nav() {
+  return (
+    <nav>
+      <Link href="/">Home</Link>
+      <Link href="/blog">Blog</Link>
+      <Link href="/about">About</Link>
+    </nav>
+  );
+}
+```
+
+### Programmatic Navigation
+
+Use the `useRouter` hook for programmatic navigation:
+
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function LoginButton() {
+  const router = useRouter();
+
+  function handleLogin() {
+    // ... login logic
+    router.push("/dashboard");
+  }
+
+  return <button onClick={handleLogin}>Log in</button>;
+}
+```
+
+## Loading & Error States
+
+Next.js provides special files for loading and error UI:
+
+- `loading.tsx` — Shown while the page is loading
+- `error.tsx` — Shown when an error occurs
+- `not-found.tsx` — Shown for 404 pages
+
+```tsx
+// app/blog/loading.tsx
+export default function Loading() {
+  return <div className="animate-pulse">Loading posts...</div>;
+}
+```

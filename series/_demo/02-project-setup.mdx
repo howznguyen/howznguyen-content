@@ -1,0 +1,80 @@
+---
+title: "Project Setup"
+description: "Creating your first Next.js project and understanding the file structure"
+---
+
+## Creating a New Project
+
+The easiest way to get started with Next.js is using `create-next-app`:
+
+```bash
+npx create-next-app@latest my-blog --typescript --tailwind --app
+cd my-blog
+npm run dev
+```
+
+Open `http://localhost:3000` to see your app running.
+
+## Project Structure
+
+After creation, your project looks like this:
+
+```
+my-blog/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx    # Root layout
+│   │   ├── page.tsx      # Home page
+│   │   └── globals.css   # Global styles
+│   └── components/       # Shared components
+├── public/               # Static assets
+├── package.json
+├── next.config.ts
+└── tsconfig.json
+```
+
+## The App Directory
+
+The `app` directory is where all your routes live. Each folder represents a URL segment:
+
+- `app/page.tsx` → `/`
+- `app/blog/page.tsx` → `/blog`
+- `app/blog/[slug]/page.tsx` → `/blog/:slug`
+
+## Key Files
+
+### `layout.tsx`
+
+Layouts wrap pages and persist across navigations. The root layout is required and wraps your entire app:
+
+```tsx
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+### `page.tsx`
+
+Pages are the UI unique to a route. They are server components by default:
+
+```tsx
+export default function Home() {
+  return <h1>Welcome to my blog</h1>;
+}
+```
+
+## Running in Development
+
+```bash
+npm run dev
+```
+
+Next.js provides Fast Refresh — edits to your components are reflected instantly without losing state.
