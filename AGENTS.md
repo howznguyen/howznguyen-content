@@ -11,6 +11,7 @@ If asked to write code (components, utilities, config), **stop and confirm** —
 ## Acceptable changes
 
 - Creating `.mdx` files in `posts/` or `projects/`
+- Creating series folders in `series/` with `_meta.mdx` + chapter files
 - Editing frontmatter or body of existing `.mdx` files
 - Adding images to `assets/`
 - Updating `README.md` / `AGENTS.md` / `llms.txt`
@@ -27,12 +28,16 @@ posts/my-new-post.mdx          → /blog/my-new-post         (neutral)
 posts/my-new-post.en.mdx       → /blog/my-new-post/en      (English)
 posts/my-new-post.vi.mdx       → /blog/my-new-post/vi      (Vietnamese)
 projects/my-project.mdx        → /projects/my-project
+series/my-series/_meta.mdx     → /series/my-series          (series metadata)
+series/my-series/01-chapter.mdx → rendered on /series/my-series
 _template.mdx                  → ignored
 ```
 
 - Base filename (minus any locale suffix, minus `.mdx`) = URL slug. Keep kebab-case, ASCII only.
-- Files starting with `_` are skipped by the publisher. Use for drafts and templates.
+- Files starting with `_` are skipped by the publisher (except `_meta.mdx` inside series folders). Use for drafts and templates.
+- Folders starting with `_` inside `series/` are ignored (use for demos/drafts).
 - No nested folders — everything lives flat in `posts/` or `projects/`.
+- `series/` uses subdirectories: one folder per series.
 - Locale suffix comes directly before `.mdx`: `.en.mdx`, `.vi.mdx`, `.ja.mdx`, etc.
 - A file **without** a locale suffix is "neutral" — no language attached.
 - Supported locale codes: `en`, `vi`, `ja`, `zh`, `ko`, `fr`, `es`, `de`, `pt`, `ru`.
@@ -130,6 +135,39 @@ The site supports one or multiple GitHub users as authors:
 - `tags` must be an array, not comma-separated.
 - URLs in `image`, `github`, `demo` must be absolute HTTPS.
 
+### Series (`series/<slug>/_meta.mdx`)
+
+```yaml
+---
+title: "Series Title"
+description: "What this series covers"
+date: 2026-05-19
+updatedAt: 2026-05-19           # optional
+tags:
+  - nextjs
+  - react
+featured: false                  # optional
+image: "https://cdn.example.com/cover.png"  # optional
+status: active                   # active | complete | paused | archived
+---
+```
+
+### Series chapters (`series/<slug>/NN-chapter-slug.mdx`)
+
+```yaml
+---
+title: "Chapter Title"
+description: "Brief chapter summary"  # optional
+---
+```
+
+Chapter rules:
+- Filename must start with a numeric prefix for ordering: `01-`, `02-`, etc.
+- Body headings start at `##` (chapter title is rendered from frontmatter, not from body).
+- All custom components (Callout, Image, Video, etc.) are available.
+- Each series folder must have exactly one `_meta.mdx`.
+- Folders starting with `_` inside `series/` are ignored.
+
 ## Available MDX components
 
 Globally available inside any MDX file. **Do not add import statements.**
@@ -158,6 +196,14 @@ Globally available inside any MDX file. **Do not add import statements.**
 ### `<Code>`
 - Props: `language`, `title`, `showLineNumbers`. Children as template literal.
 - Prefer fenced code blocks; use `<Code>` only when you need a custom title.
+
+### `<TutorialSteps>` + `<Step>` + `<Highlight>`
+- Interactive image-based tutorial walkthrough with pixel-precise animated highlights
+- `TutorialSteps`: `autoAdvance` (optional, ms between steps, pauses on hover)
+- `Step`: `image` (URL), `width` (original px), `height` (original px)
+- `Highlight`: `x`, `y` (pixel in original image), optional `w`, `h` (rectangle), `label` (tooltip on hover)
+- Without `w`/`h` → pulsing circle. With `w`/`h` → highlighted rectangle region.
+- Supports keyboard navigation (arrow keys) and clickable step dots
 
 ## Code blocks
 
@@ -211,6 +257,23 @@ Supported: `typescript`, `javascript`, `tsx`, `jsx`, `python`, `go`, `rust`, `ba
 5. Include `github` and `demo` URLs if provided.
 6. If multiple screenshots, use the `images` array. First image is listing cover.
 
+### Creating a series
+
+1. Confirm the series slug (folder name, kebab-case).
+2. Create `series/<slug>/` directory.
+3. Create `series/<slug>/_meta.mdx` with frontmatter (title, description, date, tags, status).
+4. Create chapter files with numeric prefix: `01-chapter-slug.mdx`, `02-chapter-slug.mdx`, etc.
+5. Each chapter has minimal frontmatter: `title` (required), `description` (optional).
+6. Chapter body starts at `##` — do not use `#` (the title comes from frontmatter).
+7. All chapters are rendered on a single page at `/series/<slug>`.
+8. Do not commit or push — leave that to the user.
+
+### Adding a chapter to an existing series
+
+1. Read existing chapters to determine the next numeric prefix.
+2. Create `series/<slug>/NN-chapter-slug.mdx`.
+3. Follow the same frontmatter and heading rules as above.
+
 ## Preview
 
 Authors can preview without pushing at https://howznguyen.dev/preview:
@@ -241,3 +304,40 @@ If information is missing:
 - Cover image URL?
 - `updatedAt` on edits?
 - For projects: type, status, and work-specific fields if applicable?
+
+<!-- KNOWNS GUIDELINES START -->
+
+**CRITICAL: You MUST read and follow `KNOWNS.md` in the repository root before doing any work. It is the canonical source of truth for all agent behavior in this project.**
+
+## Canonical Guidance
+
+- Knowns is the repository memory layer for humans and the AI-friendly working layer for agents.
+- The source of truth for repo-level agent guidance is `KNOWNS.md`.
+- Read `KNOWNS.md` first whenever the runtime supports reading repository files.
+- Load behavior, memory policy, and workflow rules from `KNOWNS.md`; treat this file only as a compatibility entrypoint.
+- If this file and `KNOWNS.md` differ, follow `KNOWNS.md`.
+
+## Minimum Rules
+
+- Use Knowns as the canonical system for tasks, docs, templates, and workflow state.
+- Never manually edit Knowns-managed task or doc markdown.
+- Search first, then read only relevant docs and code.
+- Use `search` for discovery; use MCP `retrieve` tool when a workflow needs structured context with citations. Fall back to CLI `knowns retrieve` if MCP is unavailable.
+- For code context retrieval, prefer MCP tools over CLI: use `code({ action: "search" })` first, then `code({ action: "symbols" })`, then `code({ action: "deps" })`. Treat CLI `knowns code ...` as fallback for manual inspection or debugging.
+- Plan before implementation unless the user explicitly overrides that workflow.
+- Validate before considering work complete.
+- Use memory tools: `memory({ action: "list" })` at session start, `memory({ action: "add" })` after tasks for reusable knowledge.
+- Proactively capture durable memory based on `KNOWNS.md` memory rules; do not wait for an explicit user instruction to save memory when scope and durability are clear.
+
+## Quick Reference
+
+```bash
+knowns doc list --plain               # List docs
+knowns task list --plain              # List tasks
+knowns task <id> --plain              # View task
+knowns doc "<path>" --plain --smart  # View doc
+knowns search "query" --plain        # Search docs/tasks
+knowns retrieve "query" --json      # Retrieve structured context pack (CLI fallback)
+```
+
+<!-- KNOWNS GUIDELINES END -->

@@ -16,6 +16,7 @@ This file follows the [llms.txt](https://llmstxt.org/) convention. Instructions 
 ```
 posts/                       Blog posts (.mdx)
 projects/                    Project showcases (.mdx)
+series/                      Series (subdirectories with _meta.mdx + chapters)
 assets/                      Optional committed images
 README.md
 AGENTS.md
@@ -26,6 +27,7 @@ Rules:
 - Only `.mdx` files in `posts/` and `projects/` are published.
 - Files starting with `_` are ignored (for drafts and templates).
 - No subdirectories inside `posts/` or `projects/`.
+- `series/` uses subdirectories: each series is a folder containing `_meta.mdx` + numbered chapter files.
 
 ## Filename → URL
 
@@ -33,6 +35,8 @@ Rules:
 - `posts/my-post.en.mdx` → `/blog/my-post/en`
 - `posts/my-post.vi.mdx` → `/blog/my-post/vi`
 - `projects/my-project.mdx` → `/projects/my-project`
+- `series/my-series/_meta.mdx` → `/series/my-series` (series metadata)
+- `series/my-series/01-chapter.mdx` → rendered as chapter on `/series/my-series`
 
 ## Translations
 
@@ -104,6 +108,47 @@ authors: [string]              # optional GitHub usernames
 
 Status options: `active` (pulsing green), `wip` (pulsing blue), `shipped` (green), `archived` (gray), `sunset` (orange).
 
+### Series (`series/<slug>/_meta.mdx`)
+
+```yaml
+---
+title: string                  # required
+description: string            # required
+date: YYYY-MM-DD               # required
+updatedAt: YYYY-MM-DD          # optional
+tags: [string]                 # required
+featured: boolean              # optional
+image: url                     # optional, cover image
+status: "active" | "complete" | "paused" | "archived"  # optional
+---
+```
+
+### Series chapters (`series/<slug>/NN-chapter-slug.mdx`)
+
+```yaml
+---
+title: string                  # required, chapter title
+description: string            # optional
+---
+```
+
+Chapter rules:
+- Filename must start with a numeric prefix for ordering: `01-`, `02-`, etc.
+- Body headings start at `##` (chapter title is rendered from frontmatter).
+- All custom components (Callout, Image, etc.) are available.
+- Each series folder must have exactly one `_meta.mdx`.
+
+### Series structure example
+
+```
+series/
+  getting-started-with-nextjs/
+    _meta.mdx                  # series metadata
+    01-introduction.mdx        # chapter 1
+    02-project-setup.mdx       # chapter 2
+    03-routing-and-navigation.mdx  # chapter 3
+```
+
 ### Authors
 
 - `author: "<github-username>"` for a single author.
@@ -167,6 +212,25 @@ YouTube URLs auto-detected. Other URLs use native `<video controls>`.
 ```
 GFM task lists (`- [x] item`) also work.
 
+### `<TutorialSteps>` + `<Step>` + `<Highlight>`
+```mdx
+<TutorialSteps autoAdvance={5000}>
+  <Step image="https://..." width={1920} height={1080}>
+    <Highlight x={450} y={320} label="Click here" />
+    <Highlight x={800} y={600} w={200} h={100} label="This area" />
+  </Step>
+  <Step image="https://..." width={1920} height={1080}>
+    <Highlight x={960} y={540} label="Next button" />
+  </Step>
+</TutorialSteps>
+```
+Interactive image-based tutorial walkthrough. Shows one screenshot at a time with animated highlights at pixel-precise positions. Tooltips appear on hover. Supports navigation (arrows, dots, keyboard) and optional auto-advance.
+
+- `TutorialSteps`: `autoAdvance` (optional, ms between steps, pauses on hover)
+- `Step`: `image` (URL), `width` (original image width px), `height` (original image height px)
+- `Highlight`: `x`, `y` (pixel position in original image), optional `w`, `h` (rectangle region), `label` (tooltip on hover)
+- Without `w`/`h` → pulsing circle point. With `w`/`h` → highlighted rectangle region.
+
 ### `<Quote>`
 ```mdx
 <Quote color="blue">Memorable quote.</Quote>
@@ -210,7 +274,7 @@ Prefer fenced code blocks; use `<Code>` when you need a custom title.
 
 - Do not add imports in MDX.
 - Do not use components other than the ones listed above.
-- Do not put `.mdx` files in subdirectories.
+- Do not put `.mdx` files in subdirectories inside `posts/` or `projects/` (series uses subdirectories under `series/`).
 - Do not commit assets > 1MB; use a CDN.
 - Do not use display names in the `author` field — use GitHub usernames.
 
