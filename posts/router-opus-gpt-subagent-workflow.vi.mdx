@@ -1,6 +1,6 @@
 ---
 title: "Kết hợp Opus + GPT trong Claude Code bằng Router và Sub-agent"
-description: "Cách mình dùng Router để Opus giám sát tổng, GPT chạy việc nhỏ — tiết kiệm chi phí, giữ mạch tốt hơn, và xử lý feature lớn mượt hơn."
+description: "Cách mình dùng Router để Opus giám sát tổng, GPT chạy việc nhỏ - tiết kiệm chi phí, giữ mạch tốt hơn, và xử lý feature lớn mượt hơn."
 date: 2026-05-19
 tags:
   - AI
@@ -23,8 +23,9 @@ Câu hỏi lặp lại nhiều nhất là:
 Bài này mình viết lại chi tiết hơn. Vừa là cách mình setup, vừa là cách mình nghĩ về workflow **supervisor / sub-agent** khi làm project thật.
 
 <Callout type="note">
-  Đây không phải "cách đúng duy nhất". Đây là workflow mình đang dùng và thấy hợp với
-  kiểu làm feature lớn, nhiều bước, cần giữ context và kiểm soát chi phí.
+  Đây không phải "cách đúng duy nhất". Đây là workflow mình đang dùng và thấy
+  hợp với kiểu làm feature lớn, nhiều bước, cần giữ context và kiểm soát chi
+  phí.
 </Callout>
 
 ## Vấn đề: để một model làm hết thì hơi phí
@@ -55,8 +56,8 @@ Vậy nên mình bắt đầu tách vai trò:
 - **GPT sub-agent**: executor cho các task nhỏ, rõ scope, có input/output cụ thể.
 
 <Quote color="blue">
-  Không phải model nào cũng nên làm mọi việc. Model mạnh nhất nên giữ vai trò cần
-  suy luận mạnh nhất.
+  Không phải model nào cũng nên làm mọi việc. Model mạnh nhất nên giữ vai trò
+  cần suy luận mạnh nhất.
 </Quote>
 
 ## Router là gì? Tại sao cần?
@@ -67,7 +68,7 @@ Trong workflow này, router giúp mình gom nhiều model vào một chỗ để
 
 Mình đang dùng 9Router, nhưng bạn hoàn toàn có thể dùng tool khác:
 
-- [9Router](https://9router.com) — cái mình đang dùng
+- [9Router](https://9router.com) - cái mình đang dùng
 - [OmniRouter](https://omnirouter.com)
 - CLI API Proxy
 - Hoặc bất kỳ proxy nào expose được endpoint tương thích Anthropic/OpenAI
@@ -190,7 +191,13 @@ Nếu bạn dùng 9Router, flow setup trong giao diện sẽ như sau:
     width={1800}
     height={1169}
   >
-    <Highlight x={470} y={470} w={560} h={240} label="Khu vực cấu hình env (BASE_URL, AUTH_TOKEN, model routes)" />
+    <Highlight
+      x={470}
+      y={470}
+      w={560}
+      h={240}
+      label="Khu vực cấu hình env (BASE_URL, AUTH_TOKEN, model routes)"
+    />
   </Step>
   <Step
     image="https://res.cloudinary.com/dkxhoyenc/image/upload/v1779196339/SCR-20260519-rnzv_ryekyo.png"
@@ -198,7 +205,11 @@ Nếu bạn dùng 9Router, flow setup trong giao diện sẽ như sau:
     height={1169}
   >
     <Highlight x={510} y={750} label="Chọn Apply nếu chạy local" />
-    <Highlight x={810} y={770} label="Hoặc Manual Config nếu chạy trên server" />
+    <Highlight
+      x={810}
+      y={770}
+      label="Hoặc Manual Config nếu chạy trên server"
+    />
   </Step>
 </TutorialSteps>
 
@@ -208,13 +219,13 @@ Nếu bạn dùng 9Router, flow setup trong giao diện sẽ như sau:
 </Callout>
 
 <Callout type="warning">
-  Đừng paste API key vào blog, repo, issue, hay prompt public. Config local nên để
-  trong env var hoặc file local đã được gitignore.
+  Đừng paste API key vào blog, repo, issue, hay prompt public. Config local nên
+  để trong env var hoặc file local đã được gitignore.
 </Callout>
 
 ### Bước 2: Trỏ Claude Code về router
 
-Claude Code cho phép config model và endpoint qua file `~/.claude/settings.json`. Đây là config mình đang dùng (với 9Router local — nếu bạn cũng dùng 9Router local thì copy thẳng, chỉ cần thay API key):
+Claude Code cho phép config model và endpoint qua file `~/.claude/settings.json`. Đây là config mình đang dùng (với 9Router local - nếu bạn cũng dùng 9Router local thì copy thẳng, chỉ cần thay API key):
 
 ```json
 {
@@ -232,8 +243,8 @@ Giải thích:
 
 - `ANTHROPIC_BASE_URL`: endpoint local của router (chạy trên máy, port 20128)
 - `ANTHROPIC_AUTH_TOKEN`: API key của router
-- `ANTHROPIC_DEFAULT_OPUS_MODEL`: route `kr/claude-opus-4.6` — Opus chạy qua Kiro, đây là model chính (supervisor)
-- `ANTHROPIC_DEFAULT_SONNET_MODEL`: route `cx/gpt-5.5` — GPT-5.5 chạy qua Codex, đây là model cho sub-agent
+- `ANTHROPIC_DEFAULT_OPUS_MODEL`: route `kr/claude-opus-4.6` - Opus chạy qua Kiro, đây là model chính (supervisor)
+- `ANTHROPIC_DEFAULT_SONNET_MODEL`: route `cx/gpt-5.5` - GPT-5.5 chạy qua Codex, đây là model cho sub-agent
 - `ANTHROPIC_DEFAULT_HAIKU_MODEL`: cũng trỏ về GPT-5.5 cho các task nhẹ
 
 Prefix `kr/` và `cx/` là cách 9Router phân biệt provider (mỗi router có cách đặt tên riêng). `kr` = Kiro, `cx` = Codex/OpenAI.
@@ -246,15 +257,16 @@ Prefix `kr/` và `cx/` là cách 9Router phân biệt provider (mỗi router có
 
 Bạn map 3 slot này sang bất kỳ model nào qua router. Trong trường hợp của mình: opus → Kiro Opus 4.6, sonnet và haiku → GPT-5.5.
 
-Với config này, khi mình dùng Claude Code bình thường, Opus sẽ là model chính. Khi spawn sub-agent bằng `spawn agent sonnet`, Claude Code sẽ tự dùng model sonnet đã config — tức GPT-5.5.
+Với config này, khi mình dùng Claude Code bình thường, Opus sẽ là model chính. Khi spawn sub-agent bằng `spawn agent sonnet`, Claude Code sẽ tự dùng model sonnet đã config - tức GPT-5.5.
 
 <Callout type="info">
-  Đây là điểm hay: Claude Code có sẵn tính năng sub-agent (Agent tool). Bạn không
-  cần cài thêm gì. Chỉ cần config đúng model routing, rồi khi gõ "spawn agent sonnet"
-  hoặc để Opus tự spawn, nó sẽ dùng model sonnet đã map trong settings.
+  Đây là điểm hay: Claude Code có sẵn tính năng sub-agent (Agent tool). Bạn
+  không cần cài thêm gì. Chỉ cần config đúng model routing, rồi khi gõ "spawn
+  agent sonnet" hoặc để Opus tự spawn, nó sẽ dùng model sonnet đã map trong
+  settings.
 </Callout>
 
-### Bước 3: Spawn sub-agent — tính năng built-in của Claude Code
+### Bước 3: Spawn sub-agent - tính năng built-in của Claude Code
 
 Đây là phần nhiều người không biết: **sub-agent là tính năng có sẵn trong Claude Code**. Bạn không cần cài plugin, không cần MCP server riêng, không cần script wrapper.
 
@@ -271,7 +283,7 @@ Với config ở bước 2, `sonnet` sẽ map sang `cx/gpt-5.5`. Tức là GPT-5
 - Sub-agent chạy trong môi trường riêng, không làm loãng context của supervisor
 - Opus vẫn giữ nguyên conversation và có thể review output khi sub-agent xong
 - Có thể spawn nhiều sub-agent song song cho các task độc lập
-- Sub-agent có quyền đọc/sửa file, chạy command — giống một dev thật đang làm cùng
+- Sub-agent có quyền đọc/sửa file, chạy command - giống một dev thật đang làm cùng
 
 Cách dùng trong thực tế:
 
@@ -301,7 +313,7 @@ Rồi Opus sẽ tự truyền instruction phù hợp dựa trên plan đã có.
 
 Setup xong mà chia task tệ thì vẫn loạn. Model mạnh + model nhanh không tự động tạo workflow tốt. Cần biết việc nào nên giao cho ai.
 
-### Không chỉ implement — sub-agent cũng có thể research
+### Không chỉ implement - sub-agent cũng có thể research
 
 Một điều mình muốn nói sớm: sub-agent không chỉ để code. Bạn hoàn toàn có thể spawn sub-agent để **tìm hiểu, đọc code, research** trước khi implement.
 
@@ -325,9 +337,9 @@ Hai agent này chạy song song, mỗi agent đọc một phần codebase. Opus 
 
 Cách này giúp:
 
-- Opus không phải đọc hết mọi file — tiết kiệm context window
-- Mỗi sub-agent tập trung vào phần riêng — output rõ hơn
-- Research song song — nhanh hơn đáng kể so với đọc tuần tự
+- Opus không phải đọc hết mọi file - tiết kiệm context window
+- Mỗi sub-agent tập trung vào phần riêng - output rõ hơn
+- Research song song - nhanh hơn đáng kể so với đọc tuần tự
 
 Sau khi có research, mình lại tách implementation theo domain tương tự:
 
@@ -365,16 +377,19 @@ File `.agent/notes/billing-research.md` sau khi agent xong có thể trông như
 ## Billing Research Summary
 
 ### Patterns found
+
 - All billing queries go through BillingService class
 - Permission check uses workspace.canAccessBilling()
 - Response shape: { used, limit, percentage }
 
 ### Relevant files
+
 - src/billing/BillingService.ts
 - src/billing/types.ts
 - src/workspaces/permissions.ts
 
 ### Constraints
+
 - Do not query billing DB directly, use BillingService
 - Response must include workspace_id
 ```
@@ -394,15 +409,16 @@ Mình hay dùng folder `.agent/notes/` hoặc `.agent/handoff/` cho mấy file k
 
 Nhưng không nhất thiết phải tự tạo file thủ công. Bạn có thể dùng:
 
-- **Backlog.md** — tạo task có phần notes/output, agent sau đọc task đó để lấy context
-- **Knowns** — dùng `appendNotes` để ghi kết quả vào task, hoặc tạo doc riêng cho mỗi giai đoạn
-- **Markdown tự cấu trúc** — folder `docs/handoff/` hoặc bất kỳ convention nào team bạn quen
+- **Backlog.md** - tạo task có phần notes/output, agent sau đọc task đó để lấy context
+- **Knowns** - dùng `appendNotes` để ghi kết quả vào task, hoặc tạo doc riêng cho mỗi giai đoạn
+- **Markdown tự cấu trúc** - folder `docs/handoff/` hoặc bất kỳ convention nào team bạn quen
 
 Ý tưởng đều giống nhau: có một chỗ ghi lại "giai đoạn trước làm xong gì, phát hiện gì, quyết định gì" để giai đoạn sau đọc được mà không cần hỏi lại.
 
 <Callout type="tip">
-  File trung gian không cần đẹp. Nó chỉ cần đủ thông tin để agent tiếp theo không
-  phải hỏi lại hoặc đọc lại từ đầu. Nghĩ như bản bàn giao ca cho đồng nghiệp.
+  File trung gian không cần đẹp. Nó chỉ cần đủ thông tin để agent tiếp theo
+  không phải hỏi lại hoặc đọc lại từ đầu. Nghĩ như bản bàn giao ca cho đồng
+  nghiệp.
 </Callout>
 
 ### Opus nên làm gì?
@@ -464,7 +480,7 @@ Mình đang dùng Knowns vì mình thích có MCP-based project memory system: t
 
 Nhưng bạn hoàn toàn có thể dùng cách khác:
 
-- [Backlog.md](https://github.com/MrLesk/Backlog.md) — một hệ thống quản lý task bằng markdown, nhẹ, dễ dùng với agent
+- [Backlog.md](https://github.com/MrLesk/Backlog.md) - một hệ thống quản lý task bằng markdown, nhẹ, dễ dùng với agent
 - `TODO.md` hoặc `tasks.md` tự viết
 - folder `docs/`
 - file `decisions.md`
@@ -487,20 +503,24 @@ Ví dụ một `backlog.md` đơn giản cũng đủ dùng:
 ## Task: Add workspace slug validation
 
 ### Goal
+
 Prevent invalid workspace slugs during creation and update.
 
 ### Acceptance Criteria
+
 - Reject empty slug.
 - Reject slug with spaces.
 - Reject slug longer than 40 chars.
 - Keep existing API response shape.
 
 ### Relevant files
+
 - src/workspaces/slug.ts
 - src/workspaces/createWorkspace.ts
 - tests/workspaces/slug.test.ts
 
 ### Constraints
+
 - Do not add new dependency.
 - Follow existing validation error format.
 ```
@@ -526,8 +546,8 @@ Then spawn GPT sub-agent for implementation only after scope is clear.
 />
 
 <Quote color="green">
-  Đừng cố chấp vào một tool duy nhất. Hệ thống tốt là hệ thống giúp supervisor agent giữ
-  context đúng, không phải hệ thống có tên nghe xịn nhất.
+  Đừng cố chấp vào một tool duy nhất. Hệ thống tốt là hệ thống giúp supervisor
+  agent giữ context đúng, không phải hệ thống có tên nghe xịn nhất.
 </Quote>
 
 ## Ví dụ workflow thực tế
@@ -592,7 +612,7 @@ Constraints: Do not change backend files. Do not add new chart library.
 Return: summary and tests run.
 ```
 
-Mỗi sub-agent chỉ đụng phần của mình. Opus không cần theo dõi chi tiết từng dòng code — chỉ cần đọc summary và review diff.
+Mỗi sub-agent chỉ đụng phần của mình. Opus không cần theo dõi chi tiết từng dòng code - chỉ cần đọc summary và review diff.
 
 ### 3. Opus tổng hợp và review
 
@@ -615,7 +635,7 @@ Check:
 ## Debug lỗi thường gặp
 
 - **Sai model name / prefix**: route cần đúng prefix provider, ví dụ `kr/claude-opus-4.6`, không phải `claude-opus-4.6`. Tương tự GPT cần `cx/gpt-5.5`.
-- **Router chưa chạy**: `curl http://127.0.0.1:20128/v1/models -H "Authorization: Bearer $ANTHROPIC_AUTH_TOKEN"` — nếu connection refused thì cần start router.
+- **Router chưa chạy**: `curl http://127.0.0.1:20128/v1/models -H "Authorization: Bearer $ANTHROPIC_AUTH_TOKEN"` - nếu connection refused thì cần start router.
 - **Sai biến env**: Claude Code dùng `ANTHROPIC_AUTH_TOKEN`, không phải `ANTHROPIC_API_KEY`.
 - **Session cũ**: sửa `settings.json` xong cần restart Claude Code để load config mới.
 - **Sai format**: route GPT chỉ nhận OpenAI format mà router chưa chuyển đổi → lỗi body/schema. Kiểm tra chế độ tương thích.
@@ -648,8 +668,8 @@ Mình dùng mô hình này khi task có:
 - có nhiều phần implementation lặp lại
 
 <Callout type="note">
-  Workflow tốt không phải workflow phức tạp nhất. Workflow tốt là workflow vừa đủ
-  để giảm lỗi và giảm chi phí cho loại task đang làm.
+  Workflow tốt không phải workflow phức tạp nhất. Workflow tốt là workflow vừa
+  đủ để giảm lỗi và giảm chi phí cho loại task đang làm.
 </Callout>
 
 ## Kết
