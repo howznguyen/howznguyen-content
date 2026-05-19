@@ -281,6 +281,37 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 See the [Next.js docs](https://nextjs.org/docs) for more.
 
+## Tutorial Steps
+
+Interactive image-based walkthrough for tutorials. Each step shows a screenshot with animated highlights at pixel-precise positions. Highlights can be points (circles) or regions (rectangles), and tooltips appear on hover.
+
+<TutorialSteps autoAdvance={5000}>
+  <Step image="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729241/f616dd53-7e13-4188-a8d3-68439b878d9d.png" width={1200} height={800}>
+    <Highlight x={900} y={240} label="Click the Settings icon" />
+    <Highlight x={600} y={500} w={200} h={80} label="This area shows your profile" />
+  </Step>
+  <Step image="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729437/74fb1da0-58c9-4896-92c6-fba578c0348c.png" width={1200} height={800}>
+    <Highlight x={600} y={480} label="Select the 'Advanced' tab" />
+  </Step>
+</TutorialSteps>
+
+Without auto-advance (manual navigation only):
+
+<TutorialSteps>
+  <Step image="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729437/74fb1da0-58c9-4896-92c6-fba578c0348c.png" width={1200} height={800}>
+    <Highlight x={240} y={400} label="Open the sidebar menu" />
+  </Step>
+  <Step image="https://res.cloudinary.com/dkxhoyenc/image/upload/v1758729241/f616dd53-7e13-4188-a8d3-68439b878d9d.png" width={1200} height={800}>
+    <Highlight x={960} y={200} label="Click 'New Project'" />
+    <Highlight x={400} y={600} w={300} h={120} label="Or browse existing projects here" />
+  </Step>
+</TutorialSteps>
+
+Props:
+- `autoAdvance`: milliseconds between steps (optional, pauses on hover)
+- Each `<Step>` takes: `image` (URL), `width` (original px), `height` (original px)
+- Each `<Highlight>` inside a Step: `x`, `y` (pixel position in original image), optional `w`, `h` (makes it a rectangle region), `label` (tooltip on hover)
+
 ---
 
 *End of showcase. Happy writing.*

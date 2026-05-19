@@ -1,0 +1,236 @@
+---
+title: "Từ điển cho người mới bắt đầu"
+description: "LLM, Agent, Prompt, Token, Context Window, Memory, CLAUDE.md - mấy từ mình ước ai giải thích sớm hơn khi mới bắt đầu dùng AI để code."
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1779198292/image_534gre3fg34_pjlwok.png"
+---
+
+Hồi mới dùng agent coding, mình bị ngợp bởi một đống từ.
+
+Context window. Token. System prompt. Hallucination. Memory. CLAUDE.md. AGENTS.md. MCP. Agentic loop.
+
+Mỗi từ nghe đều có vẻ quan trọng. Nhưng không ai giải thích cho mình một cách đơn giản. Docs thì viết cho người đã hiểu rồi. Blog thì nhảy thẳng vào kỹ thuật nâng cao. Mình phải tự mò, tự ghép, tự hiểu sai rồi hiểu lại.
+
+Bài này là bản đồ mình vẽ lại cho chính mình. Những thuật ngữ cơ bản nhất, giải thích theo cách mình ước ai đó nói cho mình nghe từ đầu.
+
+## Bài này để làm gì
+
+Đây không phải glossary. Mình không liệt kê A-Z rồi định nghĩa khô khan.
+
+Thay vào đó, mình sắp xếp theo thứ tự mà một người mới sẽ gặp khi bắt đầu dùng AI để code. Từ cái tổng quát nhất tới cái cụ thể nhất.
+
+Và mình sẽ dùng một analogy xuyên suốt: **bộ não con người**. Vì LLM thực sự lấy cảm hứng từ cách não hoạt động - nên so sánh với não là cách dễ hiểu nhất.
+
+## LLM - bộ não của mọi thứ
+
+**LLM** là viết tắt của Large Language Model. Đây là bộ não đằng sau mọi AI coding tool bạn đang dùng. ChatGPT dùng GPT. Claude Code dùng Claude. Cursor, Copilot - đều chạy trên một LLM nào đó.
+
+Và mình thấy cách dễ nhất để hiểu mọi thuật ngữ trong bài này là nghĩ về bộ não con người. Vì LLM thực sự được thiết kế lấy cảm hứng từ cách não hoạt động - neural network, pattern recognition, prediction.
+
+Nên xuyên suốt bài này, mình sẽ dùng bộ não làm analogy chính.
+
+LLM giống một bộ não đã đọc gần như toàn bộ internet. Sách, code, docs, forum, paper - nó đã "thấy" hết. Nó có thể viết code, giải thích khái niệm, dịch ngôn ngữ, viết văn. Giống một người cực kỳ đa tài.
+
+Nhưng có một điểm khác biệt lớn: nó không có ký ức dài hạn mặc định. Mỗi lần bạn mở một conversation mới, nó bắt đầu từ zero. Không biết bạn là ai. Không biết project bạn đang làm gì. Không biết hôm qua bạn đã hỏi gì.
+
+Hình dung một bộ não cực kỳ thông minh, nhưng mỗi sáng thức dậy đều mất sạch ký ức ngày hôm trước. Đó là LLM.
+
+## Agent - khi bộ não có thêm tay chân
+
+Nếu LLM là bộ não, thì **Agent** là bộ não có thêm tay, chân, và mắt.
+
+Một chatbot thông thường chỉ biết nói. Bạn hỏi, nó trả lời. Hết. Giống một bộ não nằm trong lọ - suy nghĩ được nhưng không tương tác được với thế giới bên ngoài.
+
+Agent thì khác. Agent có thể:
+
+- Đọc file trong project của bạn (mắt)
+- Chạy command trong terminal (tay)
+- Tạo và sửa code (tay)
+- Search trên internet (mắt)
+- Gọi API (tay)
+
+Claude Code, Cursor Agent, GitHub Copilot Workspace - đây đều là agent. Chúng không chỉ "nghĩ" mà còn "làm".
+
+Khi bạn nghe ai nói "agent coding", họ đang nói về việc dùng một AI agent để viết code, chứ không phải chỉ hỏi đáp qua chatbox.
+
+## Prompt - cách bạn giao tiếp với bộ não
+
+**Prompt** là bất cứ thứ gì bạn gửi cho AI. Câu hỏi, yêu cầu, mô tả, instruction - tất cả đều là prompt.
+
+Nghĩ thế này: khi bạn nhờ ai đó làm việc, bạn không chỉ nói "làm đi". Bạn nói rõ làm gì, bối cảnh ra sao, giới hạn thế nào. Giao tiếp với AI cũng vậy.
+
+Một prompt tốt thường có ba phần:
+
+- **Instruction**: bạn muốn AI làm gì
+- **Context**: thông tin nền để AI hiểu bối cảnh
+- **Constraint**: giới hạn, ràng buộc, điều kiện
+
+Ví dụ: "Sửa bug trong auth redirect. File ở src/auth/redirect.ts. Giữ style hiện tại, đừng thêm abstraction mới."
+
+Câu này có đủ cả ba: instruction (sửa bug), context (file nào), constraint (giữ style, không thêm abstraction).
+
+Hồi mới dùng, mình hay viết prompt kiểu "làm cho tốt hơn" hoặc "fix cái này". Giống nói với đồng nghiệp "ê làm cái đó đi" mà không giải thích gì thêm. Kết quả thường không như ý.
+
+## Token - đơn vị nhỏ nhất mà bộ não xử lý
+
+Con người đọc theo từ. Nhưng bộ não AI không đọc theo từ - nó đọc theo **token**.
+
+Token là đơn vị nhỏ nhất mà LLM xử lý. Không phải từ, không phải ký tự - mà là một thứ ở giữa. Giống cách não bạn không xử lý từng chữ cái riêng lẻ, mà nhận diện cụm ký tự quen thuộc.
+
+Với tiếng Anh, "hello" là 1 token. "I don't know" là khoảng 4 token. Với tiếng Việt, mỗi từ có thể là 1-3 token tùy độ phổ biến.
+
+Tại sao cần biết token? Vì ba lý do:
+
+Một là **giới hạn**. Mỗi model có số token tối đa nó xử lý được trong một lần (context window - sẽ nói ở phần sau).
+
+Hai là **chi phí**. Các API tính tiền theo token. Prompt dài hơn = tốn tiền hơn.
+
+Ba là **tốc độ**. Càng nhiều token, AI càng mất thời gian xử lý và trả lời.
+
+<Callout type="tip">
+  Muốn xem một đoạn text có bao nhiêu token? Thử dùng tokenizer tool của OpenAI
+  hoặc Anthropic. Paste text vào là thấy ngay.
+</Callout>
+
+## Context Window - bộ nhớ ngắn hạn
+
+Đây là thuật ngữ quan trọng nhất bài này.
+
+**Context window** là tổng dung lượng mà AI có thể "nhìn thấy" trong một lần xử lý. Bao gồm tất cả: system prompt, lịch sử hội thoại, file đang đọc, code đang phân tích, và cả câu trả lời nó đang viết.
+
+Nghĩ về bộ nhớ ngắn hạn (working memory) của con người. Bạn chỉ giữ được khoảng 7 thứ trong đầu cùng lúc. Đang nghĩ về bug A, đọc thêm file B, nhớ requirement C - tới lúc nào đó bạn bắt đầu quên thứ đầu tiên.
+
+Context window cũng vậy, nhưng đo bằng token thay vì "7 thứ". Mọi thứ bạn nói, mọi file agent đọc, mọi kết quả command - tất cả đều chiếm chỗ trong bộ nhớ ngắn hạn này. Khi đầy, những thứ cũ phải bị xóa hoặc nén lại.
+
+Đây là lý do vì sao:
+
+- Agent "quên" những gì bạn nói ở đầu cuộc hội thoại dài
+- Paste cả repo vào prompt không work
+- Chia nhỏ task thường hiệu quả hơn một task khổng lồ
+
+<Quote color="blue">
+  Context window giống bộ nhớ ngắn hạn. Bạn không thể nhớ cả cuốn sách trong đầu
+  cùng lúc - bạn chỉ giữ được vài trang đang đọc. AI cũng vậy.
+</Quote>
+
+<Image src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1779202602/context-window_h9aq4a.png" alt="Context Window" />
+
+Hiện tại, các model mới có context window khá lớn (100K-200K token). Nhưng lớn không có nghĩa là vô hạn. Và context dài không đồng nghĩa với hiểu sâu - có hiện tượng gọi là "lost in the middle", giống khi bạn đọc một email quá dài và chỉ nhớ đoạn đầu với đoạn cuối.
+
+## System Prompt - tiềm thức của bộ não
+
+**System prompt** là một đoạn instruction đặc biệt mà AI luôn đọc trước khi xử lý bất cứ thứ gì bạn nói.
+
+Nghĩ về tiềm thức. Trước khi bạn phản ứng với bất cứ tình huống nào, có một lớp "lập trình" sẵn ảnh hưởng tới cách bạn hành xử: tính cách, giá trị, thói quen, văn hóa. Bạn không chủ động nghĩ về chúng, nhưng chúng định hình mọi phản ứng.
+
+System prompt là tiềm thức của AI. Nó nói: "Trả lời bằng tiếng Việt. Ngắn gọn. Không dùng emoji. Luôn kiểm tra code trước khi trả lời." Bạn không thấy nó. Nhưng nó ảnh hưởng tới mọi câu trả lời.
+
+Trong agent coding, system prompt thường chứa: personality của AI, rules cần tuân theo, cách format output, và các constraint an toàn. Khi bạn dùng Claude Code hay Cursor, chúng đều có system prompt riêng mà bạn không nhìn thấy trực tiếp.
+
+## Memory - bộ nhớ dài hạn
+
+Như đã nói ở phần LLM: mặc định, bộ não AI thức dậy mỗi sáng mà không nhớ gì. Mỗi conversation là một trang giấy trắng.
+
+**Memory** là các cơ chế giúp agent có "bộ nhớ dài hạn" - nhớ xuyên suốt nhiều cuộc trò chuyện.
+
+Con người có nhiều loại bộ nhớ: ngắn hạn (đang nghĩ gì), dài hạn (kinh nghiệm tích lũy), thủ tục (kỹ năng đã thành phản xạ). Agent cũng có nhiều dạng memory tương tự:
+
+**Conversation history** - bộ nhớ ngắn hạn. Lịch sử chat trong cùng một session. Bị giới hạn bởi context window.
+
+**Persistent memory** - bộ nhớ dài hạn. Thông tin được lưu lại giữa các session. Ví dụ: Claude Code có thể lưu memory về preference của bạn, convention của project, decision đã make. Lần sau mở lại, nó vẫn nhớ.
+
+**Project files** - kiến thức nền. Các file như `CLAUDE.md`, `AGENTS.md` đóng vai trò như "kiến thức chuyên môn" mà agent đọc mỗi khi bắt đầu làm việc. Giống developer đọc wiki nội bộ trước khi bắt tay vào project mới.
+
+Memory tốt giúp agent không phải hỏi lại từ đầu mỗi lần. Nhưng memory quá nhiều cũng gây nhiễu - giống nhồi quá nhiều thông tin vào đầu trước khi làm một task đơn giản.
+
+## Hallucination - khi bộ não tự tin... sai
+
+**Hallucination** là khi AI tạo ra thông tin không có thật, nhưng trình bày nó một cách rất tự tin.
+
+Thực ra não người cũng hallucinate. Khi ai đó hỏi bạn một câu mà bạn không nhớ rõ, não không trả lời "không biết". Nó tự động lắp ghép mảnh ký ức lại, fill vào chỗ trống, rồi đưa ra một câu trả lời nghe rất hợp lý - dù có thể sai. Bạn không cố bịa. Não bạn tự làm điều đó.
+
+LLM cũng hoạt động tương tự. Nó không "biết" đúng sai. Nó dự đoán token tiếp theo dựa trên pattern đã học. Khi gặp câu hỏi mà training data không cover rõ, nó không dừng lại nói "tôi không biết". Nó fill vào chỗ trống bằng thứ nghe hợp lý nhất - giống hệt cách não bạn fill ký ức giả vào chỗ bạn không nhớ.
+
+Khác biệt duy nhất: con người có thể tự nghi ngờ bản thân. LLM thì không. Nó luôn tự tin như nhau, dù đúng hay sai.
+
+Trong coding, hallucination thường trông như:
+
+- Gọi một API method không tồn tại
+- Import một package không có thật
+- Tự tin giải thích một behavior sai
+- Tạo ra URL, tên hàm, hoặc config key bịa
+
+<Callout type="warning">
+  Luôn verify code mà agent viết. Đặc biệt với tên package, API method, và
+  config. Agent viết rất trôi chảy - nhưng trôi chảy không có nghĩa là đúng.
+</Callout>
+
+## CLAUDE.md - sổ tay dự án cho agent
+
+**CLAUDE.md** là một file markdown đặt ở root của project. Khi Claude Code mở project, nó tự động đọc file này trước tiên.
+
+Quay lại analogy bộ não: nếu mỗi sáng bạn thức dậy mà không nhớ gì, thì việc đầu tiên bạn cần là đọc một cuốn sổ tay mà "bạn của hôm qua" đã viết sẵn. Ghi rõ: project này dùng gì, convention ra sao, không được làm gì, cần chạy lệnh gì.
+
+`CLAUDE.md` chính là cuốn sổ tay đó.
+
+Trong `CLAUDE.md`, bạn thường viết:
+
+- Convention của project (naming, style, folder structure)
+- Command cần biết (build, test, lint)
+- Constraint quan trọng (đừng commit tự ý, đừng sửa file X)
+- Cách làm việc mong muốn (chia nhỏ task, test trước khi báo xong)
+
+Mỗi AI tool có file tương đương riêng. Cursor có `.cursorrules`. GitHub Copilot có `.github/copilot-instructions.md`. Ý tưởng giống nhau: cho agent biết "project này hoạt động thế nào" trước khi nó bắt tay vào làm.
+
+Một tip quan trọng: giữ file này ngắn. Nó được load vào context window mỗi lần, nên càng dài càng chiếm chỗ. Chỉ nên chứa rules nền và chỉ đường, không nên biến thành mini-wiki.
+
+## AGENTS.md - khi có nhiều agent cùng làm việc
+
+**AGENTS.md** là file instruction dành cho AI agent nói chung, không riêng Claude.
+
+Nếu `CLAUDE.md` là sổ tay riêng cho Claude, thì `AGENTS.md` là sổ tay chung cho bất kỳ AI nào làm việc trong repo.
+
+Khi nào cần `AGENTS.md`?
+
+- Khi team dùng nhiều tool khác nhau (người dùng Claude, người dùng Cursor, người dùng Copilot)
+- Khi muốn có một bộ rules chung mà mọi agent đều tuân theo
+- Khi repo là open source và nhiều contributor dùng nhiều AI tool khác nhau
+
+Nội dung thường giống `CLAUDE.md`: convention, constraint, workflow rules. Nhưng viết theo cách tool-agnostic - không assume agent nào đang đọc.
+
+Nói đơn giản: `AGENTS.md` là README, nhưng viết cho robot thay vì cho người.
+
+## Hooks - phản xạ có điều kiện
+
+**Hooks** là các lệnh tự động chạy khi một sự kiện cụ thể xảy ra trong workflow của agent.
+
+Nghĩ về phản xạ có điều kiện của não. Khi tay chạm vật nóng, bạn rụt tay lại mà không cần suy nghĩ. Không cần ra quyết định. Kích thích → phản ứng tự động.
+
+Hooks hoạt động y vậy. Bạn cài đặt trước: "mỗi khi agent sửa file, tự động chạy linter" hoặc "trước khi commit, chạy test". Agent không cần quyết định có chạy hay không - nó tự xảy ra.
+
+Ví dụ thực tế:
+
+- **Pre-commit hook**: trước khi commit, chạy format + lint. Nếu fail thì không cho commit.
+- **File save hook**: mỗi khi save file, tự chạy type check.
+- **Post-tool hook**: sau khi agent gọi một tool, tự động log lại.
+
+Giống đặt báo thức vậy. Bạn set một lần, rồi nó tự kêu đúng lúc mà không cần bạn nhớ. Hooks giúp đảm bảo agent tuân thủ quy trình mà không cần bạn nhắc mỗi lần.
+
+## Vài thuật ngữ bonus
+
+Mấy từ này bạn sẽ gặp khi đi sâu hơn. Chưa cần hiểu kỹ ngay, nhưng biết mặt biết tên cũng tốt.
+
+**MCP (Model Context Protocol)** - một chuẩn giao tiếp giúp agent kết nối với tool bên ngoài. Ví dụ: đọc database, gọi API, truy cập file system. Giống như USB cho AI - cắm vào là dùng được.
+
+**Agentic loop** - vòng lặp cốt lõi của agent: suy nghĩ → hành động → quan sát kết quả → suy nghĩ tiếp. Agent không làm một lần rồi xong. Nó lặp đi lặp lại cho tới khi task hoàn thành (hoặc bí).
+
+**RAG (Retrieval-Augmented Generation)** - kỹ thuật cho agent search thông tin trước khi trả lời, thay vì chỉ dựa vào kiến thức đã học. Giống tra Google trước khi trả lời câu hỏi, thay vì cố nhớ.
+
+**Compaction** - khi context window gần đầy, hệ thống tự động nén lịch sử hội thoại lại. Giữ ý chính, bỏ chi tiết. Giống ghi chú tóm tắt thay vì giữ nguyên bản gốc.
+
+## Kết
+
+Đây là bản đồ thuật ngữ mình vẽ lại cho chính mình. Không đầy đủ, nhưng đủ để bạn không bị lạc khi bắt đầu.
+
+Còn nếu bạn mới bắt đầu - cứ mở một AI coding tool lên và thử. Mấy thuật ngữ này sẽ tự có nghĩa khi bạn gặp chúng trong thực tế. Không ai hiểu "context window" bằng lý thuyết bằng người đã từng bị agent quên mất yêu cầu giữa chừng.
+
+See yah.
