@@ -1,0 +1,225 @@
+---
+title: "Người ta request, mình build, rồi không ai dùng"
+description: "Một bài nhận định về chuyện vì sao sản phẩm kỹ thuật nhìn đúng yêu cầu nhưng vẫn không được dùng thật."
+date: 2026-06-04
+tags:
+  - Product
+  - Engineering
+  - Reflection
+author: howznguyen
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780545650/requested-built-never-used_r6eocd.png"
+---
+
+Chẳng qua là mình mới đọc được một bài khá đau trên Towards Data Science: **They Requested It. I Built It. Nobody Ever Used It.**
+
+Đọc title thôi là thấy quen rồi.
+
+Một team nào đó nói họ cần một model. Mình build. Họ review. Họ gật đầu. Rồi sau đó không ai dùng.
+
+Câu chuyện này nghe như chuyện riêng của data scientist hay ML engineer, nhưng mình nghĩ nó xảy ra ở rất nhiều nơi. Dashboard nội bộ. Automation script. AI agent. Internal tool. Side project. Thậm chí cả feature trong product thật.
+
+Build xong không ai dùng là một cảm giác rất khó chịu.
+
+Không phải vì mình lười. Không phải vì mình làm qua loa. Nhiều khi mình thật sự đã làm đúng yêu cầu.
+
+Nhưng đúng yêu cầu không có nghĩa là đúng nhu cầu.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780545063/unused_model_jritkk.png"
+  alt="Một model đã build xong nhưng không có ai sử dụng"
+  caption="Build xong không ai dùng là một kiểu feedback rất im lặng."
+/>
+
+<Bookmark
+  url="https://towardsdatascience.com/they-requested-it-i-built-it-nobody-ever-used-it/"
+  title="They Requested It. I Built It. Nobody Ever Used It."
+  description="Bài viết của Hayden Kastens trên Towards Data Science về lý do nhiều data product và model được request nhưng không được dùng sau khi giao."
+/>
+
+## Request không phải commitment
+
+Mình thấy đây là cái bẫy đầu tiên.
+
+Khi một team nói "tụi mình cần cái này", mình rất dễ hiểu thành "tụi mình sẽ dùng cái này". Nhưng hai câu đó khác nhau khá xa.
+
+"Cần" nhiều khi chỉ là một cảm giác. Một nỗi đau mơ hồ. Một ý tưởng nghe hợp lý trong cuộc họp. Một câu nói kiểu "nếu có cái này thì tốt".
+
+Còn "sẽ dùng" nghĩa là họ sẵn sàng thay đổi hành vi.
+
+Họ sẽ mở tool đó mỗi ngày. Họ sẽ tin output của nó. Họ sẽ đưa nó vào decision thật. Họ sẽ bỏ cách làm cũ, hoặc ít nhất là giảm phụ thuộc vào cách làm cũ.
+
+Khoảng cách giữa hai chuyện này rất lớn.
+
+Mình nghĩ nhiều sản phẩm chết ở khoảng giữa đó. Không phải vì không ai request. Mà vì request chưa bao giờ được biến thành một cam kết sử dụng rõ ràng.
+
+<Quote color="blue">
+  Người ta nói họ muốn một thứ không có nghĩa là họ đã sẵn sàng đổi workflow để
+  dùng nó.
+</Quote>
+
+## Model đúng chưa chắc đã đáng tin
+
+Với data product hay model, một vấn đề nữa là trust.
+
+Team kỹ thuật có thể nhìn vào metrics và thấy model ổn. Accuracy tốt. Precision/recall chấp nhận được. Demo chạy mượt. Notebook nhìn sạch.
+
+Nhưng người dùng không sống trong notebook đó.
+
+Họ nhìn thấy một prediction, một score, một recommendation, rồi phải quyết định có tin nó hay không. Nếu họ không hiểu vì sao model ra kết quả đó, họ sẽ rất dễ quay lại cách cũ.
+
+Nhất là trong những domain nhạy cảm như healthcare, finance, hiring, compliance. Một con số không giải thích được có thể làm người dùng thấy bất an hơn là hữu ích.
+
+Cái này không có nghĩa là model nào cũng phải explainable hoàn hảo. Nhưng ít nhất người dùng cần biết:
+
+Model này dùng dữ liệu gì? Nó giỏi ở đâu? Nó yếu ở đâu? Khi nào không nên tin nó? Nếu output sai thì ai chịu trách nhiệm?
+
+Nếu không trả lời được mấy câu đó, chuyện được dùng thật sẽ rất khó.
+
+Người dùng không chỉ cần một model chạy được. Họ cần một model họ dám dùng.
+
+## Ship chậm quá thì nhu cầu đã đổi
+
+Một lý do khác mình thấy rất thật: build quá lâu.
+
+Có những thứ lúc request nghe rất quan trọng. Nhưng vài tuần sau, context đã đổi. Team đổi priority. Người request chuyển role. Process nội bộ thay đổi. Data source đổi schema. Một vấn đề khác chen vào.
+
+Tới lúc mình deliver, mọi người vẫn lịch sự nói "ổn đó". Nhưng năng lượng ban đầu không còn nữa.
+
+Mình từng thấy chuyện này trong nhiều kiểu project. Ban đầu ai cũng hào hứng. Meeting nào cũng nhiều ý tưởng. Nhưng càng build lâu, feedback càng ít. Đến lúc xong thì không ai phản đối, nhưng cũng không ai thật sự kéo nó vào công việc hằng ngày.
+
+Đây là chỗ mình thấy **v1 nhanh** quan trọng hơn rất nhiều so với một bản đầu tiên quá hoàn chỉnh.
+
+Không phải ship ẩu. Mà là ship đủ sớm để kiểm tra xem người ta có thật sự dùng không.
+
+Vì feedback trong meeting rất khác feedback khi dùng thật.
+
+Meeting thì ai cũng có thể góp ý. Dùng thật mới biết thứ đó có sống được không.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780545224/fast_v1_feedback_nzuynv.png"
+  alt="Một bản v1 nhỏ được đưa tới người dùng thật sớm để lấy feedback"
+  caption="Feedback trong meeting rất khác feedback khi người dùng phải dùng thật."
+/>
+
+## Tool mới mà bắt người ta đổi workflow thì rất dễ chết
+
+Đây có lẽ là ý mình thích nhất từ bài gốc.
+
+Một sản phẩm kỹ thuật có thể đúng, nhưng nếu nó nằm ngoài workflow hiện tại thì rất dễ bị bỏ quên.
+
+Nếu muốn dùng model mà người dùng phải mở thêm dashboard, copy ID từ hệ thống này qua hệ thống kia, chờ vài giây, đọc một bảng riêng, rồi tự nhập kết quả ngược lại vào tool chính, khả năng cao là họ sẽ không dùng.
+
+Không phải vì họ ghét mình. Không phải vì họ không hiểu giá trị.
+
+Đơn giản là công việc hằng ngày đã đủ mệt rồi.
+
+Một tool mới nếu tạo thêm friction, nó đang cạnh tranh với thói quen cũ. Mà thói quen cũ thường thắng.
+
+Nên nhiều khi câu hỏi quan trọng không phải là:
+
+"Model này có tốt không?"
+
+Mà là:
+
+"Nó xuất hiện ở đúng chỗ người dùng đang làm việc chưa?"
+
+Nếu bác sĩ đang sống trong EHR, prediction nên nằm trong EHR. Nếu sales đang sống trong CRM, insight nên nằm trong CRM. Nếu engineer đang sống trong GitHub, Linear, Slack, terminal, thì context cũng nên đi vào những nơi đó.
+
+Bắt người dùng đi qua một cánh cửa mới chỉ để thấy một output mới là một cái giá khá cao.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780545345/workflow_friction_w1n3ia.png"
+  alt="Một tool mới nằm lệch khỏi workflow hiện tại và tạo thêm friction"
+  caption="Một tool mới nếu nằm ngoài workflow hiện tại thì rất dễ bị bỏ quên."
+/>
+
+## Chuyện được dùng thật không phải là việc sau khi build xong
+
+Mình nghĩ lỗi phổ biến của dân kỹ thuật là xem chuyện được dùng thật như bước cuối.
+
+Build xong rồi mới hỏi: "Làm sao để mọi người dùng cái này?"
+
+Nhưng lúc đó thường đã muộn.
+
+Chuyện được dùng thật phải được nghĩ từ đầu. Ngay lúc nhận request, mình nên hỏi:
+
+Ai sẽ dùng? Dùng khi nào? Dùng trong màn hình nào? Output này thay đổi decision gì? Nếu không có tool này thì họ đang làm thế nào? Cách cũ có gì bất tiện? Bất tiện đó có đủ đau để họ đổi không?
+
+Mấy câu này nghe product quá, nhưng thật ra rất engineering.
+
+Vì nếu không hiểu workflow, mình sẽ build nhầm interface. Nếu không hiểu decision, mình sẽ optimize nhầm metric. Nếu không hiểu thói quen cũ, mình sẽ underestimate friction.
+
+Một model không được dùng không tạo ra value, dù metric đẹp tới đâu.
+
+Một dashboard không ai mở không tạo ra insight.
+
+Một automation không ai tin thì cuối cùng vẫn là manual process, chỉ có thêm một lớp trang trí kỹ thuật ở bên cạnh.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780545400/adoption_loop_aagij8.png"
+  alt="Chuyện được dùng thật được nghĩ từ đầu như một phần của vòng lặp sản phẩm"
+  caption="Được dùng thật không phải bước cuối sau khi build xong. Nó là một phần của sản phẩm."
+/>
+
+## Bài học cho side project và AI agent
+
+Mình thấy bài này cũng rất đúng với side project và AI agent.
+
+Bây giờ build nhanh hơn trước rất nhiều. Có LLM, có template, có framework, có hosted database, có deploy platform. Một người cuối tuần cũng có thể dựng được một app nhìn khá ổn.
+
+Nhưng build được không còn là phần khó nhất.
+
+Phần khó hơn là: thứ này có chen được vào đời sống thật của người dùng không?
+
+Người dùng có quay lại vào ngày mai không? Có dùng nó khi đang bận không? Có nhớ tới nó khi gặp đúng problem không? Có trust output không? Có thấy nó đáng để đổi thói quen không?
+
+AI agent cũng vậy.
+
+Một agent demo tốt chưa chắc đã hữu ích trong workflow thật. Nó có thể trả lời hay trong video, nhưng khi đưa vào công việc hằng ngày thì lại vướng permission, context, latency, review, handoff, và đủ thứ cạnh nhỏ khác.
+
+Mình nghĩ câu hỏi nên bớt là:
+
+"Agent này làm được gì?"
+
+Mà nên là:
+
+"Khi nào mình thật sự gọi nó, và sau khi nó trả lời thì công việc của mình có tiến lên không?"
+
+Nghe đơn giản, nhưng khá đau.
+
+Vì nó kéo mình ra khỏi cảm giác thích build feature, quay lại câu hỏi rất căn bản: có ai thật sự cần đổi hành vi vì thứ này không?
+
+## Kết
+
+Bài gốc làm mình nhớ lại một điều: sản phẩm không chết lúc không build được. Nhiều sản phẩm chết sau khi đã build xong.
+
+Chết trong im lặng.
+
+Không bug lớn. Không drama. Không ai chửi. Chỉ là không ai dùng.
+
+Và đó nhiều khi là feedback thật nhất.
+
+Nên lần sau khi có ai đó nói họ cần một tool, một dashboard, một model, hay một agent, mình nghĩ nên hỏi thêm vài câu trước khi lao vào build.
+
+Không chỉ hỏi "bạn muốn gì?".
+
+Hỏi thêm:
+
+"Bạn sẽ dùng nó ở đâu?"
+
+"Khi nào bạn mở nó?"
+
+"Nó thay đổi quyết định nào?"
+
+"Nếu nó đúng, bạn có bỏ cách làm cũ không?"
+
+Nếu câu trả lời còn mơ hồ, có thể vấn đề chưa sẵn sàng để build. Hoặc ít nhất, mình nên build một bản rất nhỏ trước để kiểm tra hành vi thật.
+
+Vì cuối cùng, value không nằm ở chuyện mình đã ship.
+
+Value nằm ở chuyện có ai đó thật sự dùng nó.
+
+Cảm ơn bạn đã đọc bài viết này.
+
+See yah.
