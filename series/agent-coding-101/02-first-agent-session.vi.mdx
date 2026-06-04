@@ -1,0 +1,346 @@
+---
+title: "Buổi đầu tiên với coding agent"
+description: "Mở Claude Code, Cursor hay Copilot lên thì nên giao việc thế nào để agent hiểu đúng, làm đúng, và không đi quá xa?"
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780543732/02-first-agent-session-cover_as3a8w.png"
+---
+
+Ở bài trước mình nói về mấy thuật ngữ cơ bản: LLM, Agent, Prompt, Token, Context Window, Memory.
+
+Nhưng hiểu thuật ngữ xong thì câu hỏi tiếp theo thường là: **vậy mở tool lên rồi làm gì?**
+
+Mình nhớ hồi mới dùng coding agent, prompt đầu tiên của mình thường rất mơ hồ. Kiểu:
+
+```text
+Fix giúp bug này.
+```
+
+Hoặc:
+
+```text
+Refactor file này cho sạch hơn.
+```
+
+Nghe cũng bình thường mà. Mình nói chuyện với đồng nghiệp nhiều khi cũng nói vậy. Nhưng với agent thì mấy câu này rất dễ làm nó đi lạc.
+
+Không phải vì agent không thông minh. Mà vì mình chưa giao việc đủ rõ.
+
+## Đừng bắt agent làm feature lớn ngay từ đầu
+
+Lỗi đầu tiên của mình là mở agent lên rồi giao luôn một cục việc to.
+
+Kiểu:
+
+```text
+Build hệ thống billing cho app này.
+```
+
+Nghe thì tiện. Một câu thôi. Agent tự đọc repo, tự hiểu architecture, tự code backend, tự làm frontend, tự viết test. Nếu làm được thì quá ngon.
+
+Nhưng thực tế thường không mượt như vậy.
+
+Feature càng lớn thì agent càng phải tự đoán nhiều thứ:
+
+- Billing tính theo user hay workspace?
+- Có subscription chưa hay phải tạo mới?
+- UI theo style nào?
+- API contract nằm ở đâu?
+- Error state xử lý ra sao?
+- Test cần cover tới mức nào?
+
+Nếu mình không nói, agent sẽ assume. Và khi agent assume sai, nó vẫn viết code rất tự tin.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780542580/big_feature_dzsij5.png"
+  alt="Developer giao một feature quá lớn cho coding agent, khiến agent phải tự đoán quá nhiều thứ"
+  caption="Giao một cục việc quá to thường làm agent phải tự đoán nhiều hơn là thực sự hiểu."
+/>
+
+Bài học đầu tiên của mình: **buổi đầu với agent nên bắt đầu bằng task nhỏ**.
+
+Không phải vì agent không làm được task lớn. Mà vì task nhỏ giúp mình học được cách nó đọc repo, cách nó suy luận, cách nó sửa code, và chỗ nào nó hay sai.
+
+Giống như làm việc với một đồng nghiệp mới. Ngày đầu tiên bạn không ném nguyên hệ thống payment cho họ rồi đi uống cà phê. Bạn giao một việc đủ nhỏ để cả hai hiểu cách làm việc của nhau.
+
+Agent cũng vậy.
+
+## Một prompt tối thiểu nên có gì
+
+Ở bài trước mình có nói prompt tốt thường có ba phần:
+
+- **Instruction**: muốn agent làm gì
+- **Context**: bối cảnh liên quan
+- **Constraint**: giới hạn hoặc điều kiện cần giữ
+
+Sau khi dùng nhiều hơn, mình hay thêm một phần nữa: **done condition**.
+
+Tức là làm tới đâu thì được xem là xong.
+
+Một prompt tối thiểu có thể trông như vầy:
+
+```text
+Sửa bug redirect sau khi login.
+
+Context:
+- Bắt đầu đọc từ src/features/auth/redirect.ts.
+- Có test liên quan trong src/features/auth/redirect.test.ts.
+- Bug hiện tại: login xong user bị redirect về /dashboard thay vì URL ban đầu.
+
+Constraint:
+- Giữ public API hiện tại.
+- Không thêm package mới.
+- Không refactor ngoài phần redirect.
+
+Done:
+- Giải thích nguyên nhân bug.
+- Sửa code.
+- Chạy test liên quan.
+```
+
+Câu này vẫn ngắn. Nhưng nó cho agent đủ đường đi.
+
+Nó biết bắt đầu từ đâu. Biết lỗi là gì. Biết không được làm quá tay. Biết xong thì phải kiểm tra bằng gì.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780542774/prompt_structure_zlzy8k.png"
+  alt="Cấu trúc prompt gồm Instruction, Context, Constraint và Done condition"
+  caption="Một prompt tối thiểu nên nói rõ việc cần làm, bối cảnh, giới hạn, và tiêu chí hoàn thành."
+/>
+
+## Prompt là điểm neo, không phải phép thuật
+
+Có một điểm mình nghĩ cần nói rõ.
+
+Các model hiện tại đã giỏi hơn trước rất nhiều. Chúng không còn kiểu "ngu ngơ" như mấy chatbot đời đầu. Nhiều lúc mình prompt khá sơ sài mà agent vẫn tự suy luận được đúng hướng.
+
+Nhưng điều đó không có nghĩa là prompt không còn quan trọng.
+
+Với mình, prompt không chỉ để "dạy" model phải làm gì. Nó còn là **điểm neo** cho cả hai bên.
+
+Với agent, prompt là cái khung để nó biết đang làm trong phạm vi nào. Nó có thể thông minh, nhưng vẫn cần biết đâu là mục tiêu, đâu là giới hạn, và làm tới đâu thì dừng.
+
+Với mình, prompt là cách buộc bản thân suy nghĩ rõ hơn.
+
+Khi phải viết ra instruction, context, constraint, done condition, mình tự phát hiện rất nhiều chỗ mơ hồ trong đầu. Nhiều khi chưa cần agent trả lời, chỉ cần ngồi viết prompt tử tế là mình đã nhận ra: "ủa thật ra mình chưa biết behavior mong muốn là gì", hoặc "mình đang yêu cầu refactor nhưng chưa nói phần nào không được đụng".
+
+Đó là phần mình thấy khá thú vị. Viết prompt tốt không chỉ làm agent hiểu mình hơn. Nó làm mình hiểu vấn đề của chính mình hơn.
+
+Nói hơi vui: prompt giống một cách tập suy nghĩ có logic như máy. Không phải máy móc theo nghĩa cứng nhắc, mà là rõ đầu vào, rõ ràng buộc, rõ output mong muốn.
+
+<Callout type="note">
+  Model càng giỏi thì prompt càng không cần dài dòng. Nhưng prompt vẫn cần rõ.
+  Rõ để agent không đi lạc, và rõ để mình biết mình đang thật sự muốn gì.
+</Callout>
+
+## Prompt tệ và prompt đỡ tệ hơn
+
+Mình không nghĩ có prompt hoàn hảo. Nhưng có prompt quá mơ hồ và prompt đỡ làm agent đoán mò hơn.
+
+Ví dụ prompt này khá nguy hiểm:
+
+```text
+Refactor component này cho clean hơn.
+```
+
+Vấn đề là "clean hơn" nghĩa là gì?
+
+Với mình, clean hơn có thể là tách logic ra hook. Với agent, clean hơn có thể là tạo thêm 5 component, đổi naming, thêm abstraction, rồi tiện tay sửa luôn style.
+
+Một version đỡ mơ hồ hơn:
+
+```text
+Refactor UserMenu component để dễ đọc hơn.
+
+Context:
+- File chính: src/components/UserMenu.tsx.
+- Component đang có nhiều conditional render lồng nhau.
+
+Constraint:
+- Không đổi UI.
+- Không đổi props public.
+- Không thêm state management mới.
+- Chỉ tách helper nhỏ nếu thật sự cần.
+
+Done:
+- Output phải giữ behavior cũ.
+- Nếu có test liên quan thì chạy lại.
+```
+
+Vẫn là refactor. Nhưng phạm vi rõ hơn rất nhiều.
+
+Một ví dụ khác:
+
+```text
+Làm UI trang settings.
+```
+
+Câu này gần như mời agent tự sáng tác.
+
+Tốt hơn:
+
+```text
+Tạo Settings page cho user profile.
+
+Context:
+- Xem style hiện tại ở src/pages/account.tsx và src/components/FormField.tsx.
+- Trang này chỉ cần các field: display name, avatar URL, timezone.
+
+Constraint:
+- Dùng component form hiện có.
+- Không thêm design system mới.
+- Mobile phải không vỡ layout.
+
+Done:
+- Có loading state.
+- Có empty/error state nếu API fail.
+- Chạy lint sau khi sửa.
+```
+
+Mình thích gọi đây là kiểu prompt "đủ đường ray".
+
+Không cần viết một bài luận dài. Chỉ cần đặt đường ray để agent chạy đúng hướng.
+
+## Cho agent đọc trước khi sửa
+
+Một thói quen mình rất recommend: **đừng cho agent sửa ngay nếu bạn chưa chắc nó hiểu codebase**.
+
+Thay vì nói:
+
+```text
+Fix bug này luôn.
+```
+
+Mình hay nói:
+
+```text
+Trước tiên hãy đọc các file liên quan và giải thích nguyên nhân có thể.
+Chưa sửa code vội.
+```
+
+Hoặc:
+
+```text
+Research flow auth redirect trong repo này.
+Tìm file liên quan, đọc test nếu có, rồi tóm tắt plan sửa.
+Đừng edit file cho tới khi mình confirm.
+```
+
+Nghe hơi chậm hơn. Nhưng với task lạ, bước này tiết kiệm rất nhiều thời gian.
+
+Vì nếu agent hiểu sai ngay từ đầu, càng để nó code lâu thì mình càng mất công gỡ.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780543063/read_before_edit_n9h5xd.png"
+  alt="Coding agent nên đọc và lập plan trước khi sửa code"
+  caption="Với task chưa rõ, để agent đọc và tóm tắt plan trước thường đỡ tốn công sửa lại hơn."
+/>
+
+Mình biết có lúc chỉ muốn bảo agent "làm luôn đi". Đặc biệt với bug nhỏ.
+
+Nhưng nếu đang ở buổi đầu tiên, hoặc đang thử một repo mới, cứ bắt nó đọc trước. Bạn sẽ học được cách agent nhìn codebase. Nó đọc đúng chỗ không. Nó có bỏ qua test không. Nó có hiểu convention không.
+
+Đó cũng là cách mình kiểm tra agent, chứ không chỉ kiểm tra output cuối cùng.
+
+## Review diff như review code của người khác
+
+Một bẫy rất dễ dính là thấy agent chạy xong, test xanh, rồi tin luôn.
+
+Mình cũng từng vậy.
+
+Nhưng agent viết code rất trôi. Chính vì trôi nên nhiều lỗi nhìn qua không thấy. Naming hơi lệch. Edge case thiếu. Abstraction hơi quá. Một đoạn logic nhìn hợp lý nhưng thực ra đổi behavior cũ.
+
+Vậy nên sau khi agent sửa xong, mình thường review theo vài câu hỏi:
+
+- Nó có sửa đúng phạm vi không?
+- Nó có đổi public API không?
+- Nó có thêm abstraction không cần thiết không?
+- Nó có bỏ qua test hoặc state lỗi không?
+- Có file nào bị sửa mà mình không yêu cầu không?
+
+Không cần căng thẳng. Cứ review như review code của một bạn junior rất nhanh tay.
+
+Nhanh tay là tốt. Nhưng vẫn cần người giữ hướng.
+
+<Callout type="warning">
+  Agent chạy test pass không có nghĩa là task đúng hoàn toàn. Test chỉ chứng
+  minh những thứ đã được test. Phần còn lại vẫn cần mình đọc lại.
+</Callout>
+
+## Workflow 5 bước cho buổi đầu tiên
+
+Nếu bạn mới bắt đầu, mình nghĩ cứ dùng workflow rất đơn giản này.
+
+Một là chọn task nhỏ.
+
+Đừng chọn "build payment system". Hãy chọn "sửa redirect sau login", "thêm empty state cho list", "viết test cho helper này".
+
+Hai là chỉ đường cho agent.
+
+Nói file nào nên đọc trước. Nếu không biết file nào, bảo agent search và báo lại trước khi sửa.
+
+Ba là nói constraint.
+
+Không đổi public API. Không thêm package. Không refactor ngoài scope. Không commit. Không sửa file không liên quan.
+
+Bốn là yêu cầu plan ngắn.
+
+Không cần plan 20 bước. Chỉ cần agent nói nó hiểu gì, định sửa file nào, và sẽ verify bằng gì.
+
+Năm là review diff.
+
+Đọc lại thay đổi. Chạy test nếu cần. Nếu chưa ổn, feedback vào đúng chỗ sai thay vì prompt lại từ đầu.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780543318/five_step_workflow_cmwml0.png"
+  alt="Workflow 5 bước cho buổi đầu tiên làm việc với coding agent"
+  caption="Một workflow nhỏ đủ dùng: chọn task nhỏ, chỉ context, đặt constraint, xem plan, rồi review diff."
+/>
+
+Đây không phải quy trình thần thánh gì. Nó chỉ là cách để buổi đầu tiên đỡ loạn.
+
+Khi quen hơn, bạn có thể bỏ bớt bước. Có task nhỏ thì cho agent làm luôn. Có task lớn thì tách thành research, plan, implement, review. Nhưng lúc mới bắt đầu, một vòng lặp chậm hơn một chút thường đáng tiền.
+
+## Một prompt mẫu để copy
+
+Nếu chưa biết bắt đầu từ đâu, bạn có thể dùng template này:
+
+```text
+Mình muốn bạn xử lý task sau: [mô tả task].
+
+Trước khi sửa code:
+- Search/read các file liên quan.
+- Tóm tắt bạn hiểu vấn đề là gì.
+- Nói rõ bạn định sửa file nào.
+
+Context:
+- [file hoặc folder nên bắt đầu đọc]
+- [bug/feature hiện tại]
+- [behavior mong muốn]
+
+Constraint:
+- Không đổi public API nếu không cần.
+- Không thêm package mới.
+- Không refactor ngoài scope.
+- Giữ style hiện tại của repo.
+
+Done:
+- Sửa code theo scope.
+- Chạy test/lint liên quan nếu có.
+- Tóm tắt thay đổi và rủi ro còn lại.
+```
+
+Bạn không cần dùng y nguyên. Quan trọng là nhớ bốn thứ: **muốn gì, bối cảnh gì, giới hạn gì, xong là như thế nào**.
+
+## Kết
+
+Buổi đầu tiên với coding agent không cần prompt cao siêu.
+
+Mình nghĩ thứ quan trọng hơn là học cách giao việc rõ hơn một chút. Task nhỏ hơn một chút. Constraint cụ thể hơn một chút. Review kỹ hơn một chút.
+
+Agent coding không phải bấm nút rồi ngồi chờ phép màu. Nó giống làm việc với một người rất nhanh, rất giỏi pattern, nhưng không tự hiểu hết context ngầm trong đầu mình.
+
+Mình giao việc càng rõ, agent càng ít phải đoán.
+
+Và khi agent ít phải đoán, mình ít phải ngồi sửa lại hơn.
+
+See yah.
