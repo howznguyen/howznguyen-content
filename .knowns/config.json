@@ -1,15 +1,39 @@
 {
-  "name": "howznguyen-content",
-  "id": "howznguyen-content",
   "createdAt": "2026-05-12T14:49:41.370718Z",
+  "id": "howznguyen-content",
+  "name": "howznguyen-content",
   "settings": {
     "defaultPriority": "medium",
-    "gitTrackingMode": "git-ignored",
+    "enableChatUI": false,
     "gitTracking": {
-      "tasks": false,
       "docs": true,
-      "templates": false,
-      "memories": false
+      "memories": false,
+      "tasks": false,
+      "templates": false
+    },
+    "gitTrackingMode": "git-ignored",
+    "lsp": {
+      "enabled": false
+    },
+    "platforms": [
+      "claude-code",
+      "agents"
+    ],
+    "semanticSearch": {
+      "dimensions": 384,
+      "enabled": true,
+      "huggingFaceId": "Xenova/multilingual-e5-small",
+      "maxTokens": 512,
+      "model": "multilingual-e5-small"
+    },
+    "statusColors": {
+      "blocked": "red",
+      "done": "green",
+      "in-progress": "blue",
+      "in-review": "purple",
+      "on-hold": "yellow",
+      "todo": "gray",
+      "urgent": "orange"
     },
     "statuses": [
       "todo",
@@ -20,33 +44,12 @@
       "on-hold",
       "urgent"
     ],
-    "statusColors": {
-      "blocked": "red",
-      "done": "green",
-      "in-progress": "blue",
-      "in-review": "purple",
-      "on-hold": "yellow",
-      "todo": "gray",
-      "urgent": "orange"
-    },
     "visibleColumns": [
       "todo",
       "in-progress",
       "blocked",
       "done",
       "in-review"
-    ],
-    "semanticSearch": {
-      "enabled": true,
-      "model": "multilingual-e5-small",
-      "huggingFaceId": "Xenova/multilingual-e5-small",
-      "dimensions": 384,
-      "maxTokens": 512
-    },
-    "platforms": [
-      "claude-code",
-      "agents"
-    ],
-    "enableChatUI": false
+    ]
   }
 }
