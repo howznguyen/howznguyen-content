@@ -1,0 +1,420 @@
+---
+title: "What is Knowns, really?"
+description: "Knowns is not something to FOMO into. It is one way to build a memory layer for agent workflows, but the underlying habit matters more than the tool."
+date: 2026-06-04
+tags:
+  - AI
+  - Agent
+  - Developer Tools
+  - Knowns
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565975/what-is-knowns-really_yktjzz.png"
+---
+
+I know. I have been talking about **Knowns** a lot lately.
+
+Enough that some of you are probably thinking: "Okay, but what is it actually? Do I really need it? I can still use Claude, Cursor, and Copilot without it, right? Are you not tired of promoting this thing?"
+
+Fair.
+
+And the short answer is: **yes, you can absolutely do AI coding without Knowns**.
+
+In fact, if your AI coding workflow already feels fine, your tasks are small, your context is clean, your docs are not messy, your team is small, and you do not have to re-explain the project every day, then maybe you do not need Knowns yet.
+
+This post is not a "go install Knowns right now" pitch. I want to explain why I built it, how it is actually used, when it is just another piece of junk, and why the more important thing to learn is not Knowns itself, but how to build a **Second Brain** for your system.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565376/chaos-to-clarity_ebupjj.png"
+  alt="Scattered context being organized into a second brain for a system"
+  caption="Knowns does not start from the tool. It starts from the need to turn scattered context into reusable knowledge."
+/>
+
+## You can still do AI coding without Knowns, right?
+
+Yes.
+
+If your task is restructuring folders, renaming things, grouping files, splitting a module, or cleaning up a clear piece of code, an agent can read the repo and do it. It can use `rg`, inspect imports, read related files, and make the change.
+
+For tasks where the source of truth already lives inside the codebase, I do not think Knowns needs to get in the way.
+
+Not every piece of work needs a formal task. Not every refactor needs a doc. Not every bug fix needs memory.
+
+If one short prompt plus a few related files is enough, keep it lightweight.
+
+<Callout type="note">
+  Knowns should not turn a simple job into a heavier workflow. If it does, it
+  is playing the wrong role.
+</Callout>
+
+So where is the actual problem?
+
+The problem starts when the task is no longer just "read the current code and change it."
+
+It starts needing things that live outside the code:
+
+- why the folder structure was designed this way
+- which convention is current and which one is legacy
+- past decisions: no service layer, no Zustand, this API must remain backward compatible
+- acceptance criteria that do not live in the code
+- tasks that stretch across multiple sessions
+- multiple people or multiple agents working together
+- lessons that should be saved after the task is done
+
+Code tells the agent how the system currently works.
+
+But code does not always tell the agent what the team decided, what is being built, and what "done" means.
+
+## Yes, and do not FOMO into Knowns
+
+I do not want people to FOMO into Knowns.
+
+If you already have a good way to manage context, your docs are clean, your tasks are clear, your agent understands the project, and you do not copy-paste the same context every day, keep using what works.
+
+Do not add a tool just because someone else is using it.
+
+Do not turn your repo into a playground for every new workflow.
+
+And definitely do not expect Knowns to magically understand your whole system the moment you install it.
+
+That is not how it works.
+
+Knowns is not magic. It does not think for you. It is a local-first CLI tool that helps you organize tasks, docs, memory, templates, and workflows in a way an agent can retrieve.
+
+In other words, Knowns is an implementation of a way of thinking.
+
+That way of thinking matters more than the tool.
+
+## What you need to learn is a Second Brain for your system
+
+I often call this a **Second Brain for the system**.
+
+Not a second brain in the personal note-taking sense, where you store book notes, quotes, or personal plans.
+
+This is a second brain for a project:
+
+- how the system is designed
+- why the team chose option A instead of B
+- where implementation conventions live
+- which patterns should be reused
+- what the current task's acceptance criteria are
+- which gotchas have wasted time before
+- which workflows should be repeated
+
+If you work with agents long enough, I think this becomes the important skill.
+
+Not just "writing better prompts."
+
+Good prompts help for a while. But if system knowledge is still scattered, every session still needs re-explanation, docs are duplicated, and decisions live in old chats, the agent still has to guess.
+
+And when an agent guesses, sometimes it guesses wrong with confidence.
+
+A good Second Brain reduces that. It does not make the model smarter. It gives the model fewer reasons to guess.
+
+<Quote color="blue">
+  The thing worth learning is not "install Knowns." The thing worth learning is
+  how to organize project knowledge so both humans and agents can retrieve it.
+</Quote>
+
+## A memory layer does not grow by itself
+
+This is the part I want to be very clear about: **a memory layer does not grow by itself**.
+
+You cannot install Knowns today, open the repo tomorrow, and expect it to understand the whole system like a senior engineer who has worked there for two years.
+
+No tool can do that well.
+
+My team and I still have to collect knowledge gradually. A little every day. When an important decision appears, we write it down. When a pattern repeats, we turn it into a doc. When a gotcha hurts, we store it as memory. When there is a PRD, we put it somewhere the agent can read. When there is a convention, we do not leave it only inside one person's head.
+
+For example, a real repo might have `.knowns/docs` like this:
+
+```text
+.knowns/docs
+├── architecture
+│   ├── adr-hybrid-authentication-context-architecture.md
+│   ├── attendance-system.md
+│   ├── audit-trail-soft-delete-patterns.md
+│   ├── clean-architecture-overview.md
+│   ├── content-management-system.md
+│   ├── file-management-and-storage.md
+│   ├── identity-and-clerk-integration.md
+│   ├── module-and-request-flow.md
+│   ├── multi-campus-architecture.md
+│   ├── queue-and-cronjob.md
+│   └── rbac-system.md
+├── conventions
+│   ├── implementation-checklist.md
+│   ├── knowns-workflow-gotchas.md
+│   └── naming-conventions.md
+├── guides
+│   ├── code-generation-pattern.md
+│   ├── pagination-and-filtering.md
+│   └── working-with-campuses.md
+├── patterns
+│   ├── controller-pattern.md
+│   ├── decorators-pattern.md
+│   ├── domain-events-pattern.md
+│   ├── dto-pattern.md
+│   ├── entity-pattern.md
+│   ├── event-handler-pattern.md
+│   ├── exception-pattern.md
+│   ├── guards-pattern.md
+│   ├── mapper-pattern.md
+│   ├── module-pattern.md
+│   ├── prisma-migration-patterns.md
+│   ├── read-projection-patterns.md
+│   ├── repository-pattern.md
+│   ├── saga-pattern.md
+│   ├── standard-response-pattern.md
+│   ├── testing-pattern.md
+│   ├── unit-of-work-pattern.md
+│   ├── use-case-pattern.md
+│   ├── validation-pattern.md
+│   └── value-object-pattern.md
+├── prds
+│   ├── frontend-multi-campus-migration-guide.md
+│   └── post-and-content-management.md
+└── readme.md
+```
+
+Looking at that tree, the valuable part is not the `.knowns/docs` folder by itself.
+
+The valuable part is the habit of collecting team knowledge in a structured place.
+
+`architecture/` helps the agent understand how the system is designed.
+
+`conventions/` tells the agent how the team wants code to be written.
+
+`guides/` helps the agent move through common workflows.
+
+`patterns/` keeps the agent from reinventing controllers, DTOs, repositories, and use cases in a different style every time.
+
+`prds/` helps the agent understand product requirements instead of guessing from code alone.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565000/knowns-doc-tree_xt00rx.jpg"
+  alt="A structured Knowns docs knowledge base with architecture, conventions, guides, patterns, and PRDs"
+  caption="A part of the knowledge base my team built after around 3-4 months of using Knowns."
+/>
+
+Knowns does not learn the system for you.
+
+It gives that learning a place to accumulate.
+
+And once enough knowledge has accumulated, the value becomes clearer: the agent has something to search, docs to read, memory to recall, tasks to understand, and acceptance criteria to know when the work is done.
+
+## So how do you actually use Knowns?
+
+Words like "memory layer", "context", and "knowledge graph" can sound vague.
+
+Actual usage can start very simply:
+
+```bash
+knowns init
+```
+
+If you want to use it with an AI assistant, you currently set up the integration for that assistant:
+
+```bash
+knowns setup --global claude
+# or
+knowns setup --global codex
+```
+
+`--global` means you set it up once for the agent environment you are using. `knowns init` initializes Knowns for the current repo.
+
+Then, inside the repo, I can create a task:
+
+```bash
+knowns task create "Add OAuth login for users"
+```
+
+That task can have a description, acceptance criteria, notes, and links to docs or specs.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565830/task-in-knowns_x0yeig.png"
+  alt="A task in Knowns with description, acceptance criteria, and implementation plan"
+  caption="A Knowns task is not just one todo line. It is working context so the agent knows what to do and when it is done."
+/>
+
+Instead of opening an agent and typing this every time:
+
+```text
+Here is what the project is, here is how the auth flow works,
+here are the team conventions, here is what done means,
+and here is what we decided before...
+```
+
+I can say:
+
+```text
+Implement @task-abc123.
+Read the related docs first, plan before editing.
+Validate the acceptance criteria before finishing.
+```
+
+Or more concretely:
+
+```text
+I want to add OAuth login.
+Read @doc/architecture/identity-and-clerk-integration,
+work from @task-login-oauth, keep the current conventions,
+and validate the acceptance criteria before finishing.
+```
+
+If I use workflow skills, the loop can look like this:
+
+```text
+/kn-research @task-abc123
+/kn-plan @task-abc123
+/kn-implement @task-abc123
+/kn-extract @task-abc123
+```
+
+Roughly:
+
+- `research`: find relevant context
+- `plan`: plan from the task and docs
+- `implement`: edit according to the plan
+- `extract`: after finishing, save useful memory or docs
+
+The difference is not that the AI suddenly becomes smarter.
+
+The difference is that you stop being the secretary who copy-pastes context into every session.
+
+## How is this different from Linear, Notion, Obsidian, or GitHub Issues?
+
+This is a fair question.
+
+There are already many tools for tasks, docs, notes, and knowledge.
+
+Linear and Jira are great for human work management.
+
+Notion and Obsidian are great for writing and notes.
+
+GitHub Issues is convenient if your workflow already lives around the repo.
+
+`AGENTS.md` and `CLAUDE.md` are useful for baseline instructions.
+
+So why add another tool?
+
+My answer is: if Knowns is only another place to write tasks, then yes, it is junk.
+
+If Knowns forces you to maintain a parallel system without reducing context switching, then it is also junk.
+
+It only makes sense when it becomes an **agent-facing workspace**: tasks, docs, memory, templates, and acceptance criteria in a shape that an agent can read, search, reference, and connect.
+
+Knowns is not trying to replace Linear, Notion, Obsidian, or GitHub Issues.
+
+I see it as closer to the repo, more local-first, and designed around one question: "How does the agent need this context in order to work?"
+
+Humans need dashboards, roadmaps, timelines, owners, priorities, and status reports.
+
+Agents need the right context, enough structure, references, and a clear definition of done.
+
+Those needs overlap, but they are not exactly the same.
+
+## When is Knowns just more junk?
+
+Knowns is junk if you add it because of FOMO.
+
+Knowns is junk if your task is small, the context already lives in code, and a short prompt is enough.
+
+Knowns is junk if you create docs just to have docs, but never update them.
+
+Knowns is junk if it becomes a duplicate of Notion, Linear, or GitHub Issues without a clear workflow.
+
+Knowns is junk if the agent does not actually retrieve from it, and you still copy-paste context manually.
+
+Knowns is junk if the team does not build the habit of collecting knowledge, but still expects the tool to produce a high-quality memory layer by itself.
+
+I think that is the honest framing.
+
+Any tool can become junk if it does not reduce a real cost.
+
+## When does Knowns start to help?
+
+Knowns starts to help when these things keep happening:
+
+- every AI coding session starts with explaining the project again
+- old decisions live in chats, PR comments, or someone's head
+- docs exist, but the agent often reads the wrong outdated doc
+- tasks have acceptance criteria, but not somewhere the agent can easily fetch
+- the team has repeated patterns, but the agent generates a different shape every time
+- lessons from completed tasks are not saved
+- you want a more structured research, plan, implement, verify, extract loop
+
+That is where Knowns starts to have room to matter.
+
+Not because it makes the model smarter.
+
+Because it gives project knowledge a clearer shape.
+
+A task is not just a todo line. It has a description, acceptance criteria, notes, and related docs.
+
+A doc is not just a markdown file somewhere. It can be searched, referenced with `@doc/...`, and linked to tasks.
+
+A memory is not just a reminder inside a prompt. It has tags, scope, and can be reused in another session.
+
+A template is not just a snippet. It is a packaged pattern so the agent does not spend tokens recreating the structure from scratch.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565559/agent_workflow_loop_gkiklu.png"
+  alt="Research, plan, implement, and extract workflow around project knowledge"
+  caption="Knowns is most useful when it supports a repeatable workflow, not when it is just another place to write notes."
+/>
+
+## Why do I keep talking about it?
+
+Because I run into this problem every day.
+
+When working with agents, context matters a lot. Too little context and the agent assumes. Too much context and the agent gets noisy. Wrong context and the output can still look smooth, just smoothly wrong.
+
+I have used backlog markdown files. I have had docs scattered around. I have stuffed too much into instruction files. I have pasted the same context into chats. It works, but it gets tiring.
+
+Knowns is my attempt to package the workflow I want:
+
+- project knowledge close to the repo
+- tasks and docs with references
+- scoped memory
+- agents search before they read
+- completed work extracts useful knowledge back into the system
+
+I talk about Knowns because I am building it, using it, and learning from it.
+
+But I do not think the right message is "everyone should use Knowns."
+
+The better message is:
+
+<Quote color="blue">
+  Do not FOMO into Knowns. Learn how to build a Second Brain for your system.
+  If Knowns makes that easier for you, then use it.
+</Quote>
+
+## Closing
+
+So what is Knowns, really?
+
+For me, Knowns is a CLI tool for building a memory layer around agent workflows.
+
+Less marketing version: it is a place where my team and I collect the things an agent needs to know but the code does not fully explain: tasks, docs, decisions, conventions, patterns, PRDs, gotchas, and memory.
+
+It does not replace Linear. It does not replace Notion. It does not replace GitHub Issues. It does not replace reading code. It does not replace thinking.
+
+It tries to answer a narrower question:
+
+```text
+How do we stop the agent from starting from zero every time a new session opens?
+```
+
+If you do not have that problem yet, do not add the tool.
+
+If you already have a good second brain for your system, keep using it.
+
+If your context is starting to scatter, your docs are hard to retrieve, your tasks lack structure, and your memory lives in old chats, then maybe Knowns is worth trying.
+
+And if not, that is fine too.
+
+The tool matters less than the habit of collecting knowledge.
+
+See yah.

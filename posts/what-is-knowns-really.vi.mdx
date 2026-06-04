@@ -1,0 +1,419 @@
+---
+title: "Thực sự Knowns là cái gì?"
+description: "Knowns không phải thứ để FOMO. Nó là một cách xây memory layer cho agent workflow, nhưng nguyên lý phía sau quan trọng hơn tool."
+date: 2026-06-04
+tags:
+  - AI
+  - Agent
+  - Developer Tools
+  - Knowns
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565975/what-is-knowns-really_yktjzz.png"
+---
+
+Mình biết. Dạo này mình nhắc **Knowns** hơi nhiều.
+
+Nhắc riết tới mức chắc sẽ có bạn nghĩ: "Ủa rồi thực sự nó là cái gì? Có cần thiết không? Không có nó thì vẫn dùng Claude, Cursor, Copilot bình thường mà? Sao cứ quảng cáo hoài không chán vậy?"
+
+Fair.
+
+Và câu trả lời ngắn là: **đúng, không có Knowns vẫn dùng AI coding được**.
+
+Thậm chí nếu bạn đang dùng AI coding rất ổn, task nhỏ, context gọn, docs sạch, team ít người, không phải giải thích lại project mỗi ngày, thì có thể bạn chưa cần Knowns.
+
+Bài này không phải để nói "hãy cài Knowns ngay". Ngược lại, mình muốn nói rõ hơn vì sao mình build nó, nó dùng thực tế như thế nào, khi nào nó chỉ là thêm rác, và vì sao cái đáng học hơn không phải là Knowns, mà là cách xây một **Second Brain** cho hệ thống của bạn.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565376/chaos-to-clarity_ebupjj.png"
+  alt="Context rời rạc được gom lại thành một second brain cho hệ thống"
+  caption="Knowns không bắt đầu từ tool. Nó bắt đầu từ nhu cầu gom context rời rạc thành một lớp hiểu biết có thể dùng lại."
+/>
+
+## Không có Knowns vẫn dùng được AI coding mà?
+
+Đúng.
+
+Nếu task của bạn là restructure thư mục, đổi naming, gom file, tách module, cleanup một đoạn code rõ scope, thì agent có thể tự đọc repo và làm được. Nó dùng `rg`, đọc import, xem file liên quan, rồi sửa.
+
+Với những task mà source of truth đã nằm hết trong codebase, mình không nghĩ Knowns nên chen vào.
+
+Không phải việc gì cũng cần task formal. Không phải refactor nào cũng cần doc. Không phải sửa bug nào cũng cần memory.
+
+Nếu một prompt ngắn cộng với vài file liên quan là đủ, thì cứ làm vậy cho nhẹ.
+
+<Callout type="note">
+  Knowns không nên biến một việc đơn giản thành workflow phức tạp hơn. Nếu nó
+  làm vậy, nó đang sai vai.
+</Callout>
+
+Vậy vấn đề nằm ở đâu?
+
+Vấn đề bắt đầu xuất hiện khi task không còn chỉ là "đọc code hiện tại rồi sửa".
+
+Nó bắt đầu cần thêm mấy thứ nằm ngoài code:
+
+- vì sao folder structure hiện tại được thiết kế như vậy
+- convention nào là mới, convention nào là legacy
+- decision trước đó: không dùng service layer, không thêm Zustand, API này phải giữ backward compatibility
+- acceptance criteria không nằm trong code
+- task kéo dài qua nhiều session
+- nhiều người hoặc nhiều agent cùng làm
+- sau khi làm xong cần lưu lại pattern để lần sau không lặp lỗi
+
+Code cho agent biết hệ thống đang chạy như thế nào.
+
+Nhưng nhiều khi code không nói rõ team đã quyết định gì, đang làm gì, và "done" nghĩa là gì.
+
+## Đúng, và đừng FOMO vào Knowns
+
+Mình không muốn các bạn FOMO vào Knowns.
+
+Nếu bạn đã có một cách quản lý context tốt, docs sạch, task rõ, agent hiểu được project, và bạn không phải copy-paste lại mọi thứ mỗi ngày, thì cứ dùng tiếp cái đang work.
+
+Đừng thêm tool chỉ vì thấy người khác dùng.
+
+Đừng biến repo của mình thành chỗ thử mọi workflow mới.
+
+Và càng đừng nghĩ cài Knowns vào là agent tự nhiên hiểu hết hệ thống.
+
+Không có chuyện đó.
+
+Knowns không phải phép màu. Nó cũng không thay bạn suy nghĩ. Nó chỉ là một CLI tool local-first để giúp bạn tổ chức task, docs, memory, template và workflow theo cách agent có thể retrieve được.
+
+Nói cách khác: Knowns là một implementation cho một cách nghĩ.
+
+Còn cách nghĩ đó mới là phần quan trọng hơn.
+
+## Cái cần học là Second Brain cho hệ thống của bạn
+
+Mình hay gọi nó là **Second Brain cho hệ thống**.
+
+Không phải second brain kiểu personal note-taking, nơi mình lưu sách đã đọc, quote hay, hay kế hoạch cá nhân.
+
+Ở đây là second brain cho project:
+
+- hệ thống được thiết kế ra sao
+- vì sao team chọn hướng A thay vì B
+- convention implement nằm ở đâu
+- pattern nào nên dùng lại
+- task hiện tại có acceptance criteria gì
+- gotcha nào từng làm mình mất thời gian
+- workflow nào nên lặp lại
+
+Nếu làm với agent lâu dài, mình nghĩ đây mới là skill quan trọng.
+
+Không phải "biết prompt hay".
+
+Prompt hay giúp được một đoạn. Nhưng nếu knowledge của hệ thống vẫn rời rạc, mỗi session vẫn phải giải thích lại, docs vẫn duplicate, decision vẫn nằm trong chat cũ, thì agent vẫn sẽ phải đoán.
+
+Và agent đoán thì hên xui.
+
+Second Brain tốt giúp giảm chuyện đó. Nó không làm agent thông minh hơn theo nghĩa model mạnh hơn. Nó làm agent ít phải đoán hơn.
+
+<Quote color="blue">
+  Cái đáng học không phải là "cài Knowns". Cái đáng học là cách tổ chức project
+  knowledge để người và agent cùng retrieve được.
+</Quote>
+
+## Memory layer không tự mọc ra
+
+Đây là chỗ mình muốn nói rất rõ: **memory layer không tự mọc ra**.
+
+Bạn không thể cài Knowns hôm nay, mở repo ngày mai, rồi kỳ vọng nó hiểu toàn bộ hệ thống như một senior engineer đã làm ở đó hai năm.
+
+Không có tool nào làm được chuyện đó một cách tử tế.
+
+Mình và team cũng phải collect knowledge dần. Mỗi ngày làm một chút. Gặp decision quan trọng thì ghi lại. Gặp pattern lặp lại thì biến thành doc. Gặp gotcha thì lưu vào memory. Có PRD thì đưa vào chỗ agent đọc được. Có convention thì đừng để nó nằm trong đầu một người.
+
+Ví dụ một repo thật có thể có `.knowns/docs` kiểu như vầy:
+
+```text
+.knowns/docs
+├── architecture
+│   ├── adr-hybrid-authentication-context-architecture.md
+│   ├── attendance-system.md
+│   ├── audit-trail-soft-delete-patterns.md
+│   ├── clean-architecture-overview.md
+│   ├── content-management-system.md
+│   ├── file-management-and-storage.md
+│   ├── identity-and-clerk-integration.md
+│   ├── module-and-request-flow.md
+│   ├── multi-campus-architecture.md
+│   ├── queue-and-cronjob.md
+│   └── rbac-system.md
+├── conventions
+│   ├── implementation-checklist.md
+│   ├── knowns-workflow-gotchas.md
+│   └── naming-conventions.md
+├── guides
+│   ├── code-generation-pattern.md
+│   ├── pagination-and-filtering.md
+│   └── working-with-campuses.md
+├── patterns
+│   ├── controller-pattern.md
+│   ├── decorators-pattern.md
+│   ├── domain-events-pattern.md
+│   ├── dto-pattern.md
+│   ├── entity-pattern.md
+│   ├── event-handler-pattern.md
+│   ├── exception-pattern.md
+│   ├── guards-pattern.md
+│   ├── mapper-pattern.md
+│   ├── module-pattern.md
+│   ├── prisma-migration-patterns.md
+│   ├── read-projection-patterns.md
+│   ├── repository-pattern.md
+│   ├── saga-pattern.md
+│   ├── standard-response-pattern.md
+│   ├── testing-pattern.md
+│   ├── unit-of-work-pattern.md
+│   ├── use-case-pattern.md
+│   ├── validation-pattern.md
+│   └── value-object-pattern.md
+├── prds
+│   ├── frontend-multi-campus-migration-guide.md
+│   └── post-and-content-management.md
+└── readme.md
+```
+
+Nhìn vào tree này sẽ thấy phần có giá trị không phải là folder `.knowns/docs` tự nó.
+
+Phần có giá trị là thói quen gom hiểu biết của team vào một nơi có cấu trúc.
+
+`architecture/` giúp agent hiểu hệ thống được thiết kế ra sao.
+
+`conventions/` giúp agent biết team muốn code được viết như thế nào.
+
+`guides/` giúp agent đi qua các workflow hay gặp.
+
+`patterns/` giúp agent không mỗi lần lại tự nghĩ ra controller, DTO, repository, use-case theo một style khác.
+
+`prds/` giúp agent hiểu yêu cầu sản phẩm thay vì chỉ đoán từ code.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565000/knowns-doc-tree_xt00rx.jpg"
+  alt="Một kho docs có cấu trúc trong Knowns cho architecture, conventions, guides, patterns và PRDs"
+  caption="Một phần kho kiến thức team mình tích luỹ được sau khoảng 3-4 tháng dùng Knowns."
+/>
+
+Knowns không làm thay việc học hệ thống.
+
+Nó chỉ làm cho việc học đó có chỗ để tích luỹ.
+
+Và khi đã tích luỹ đủ lâu, lợi ích bắt đầu rõ hơn: agent có chỗ để search, có docs để đọc, có memory để nhớ lại, có task để biết đang làm gì, có acceptance criteria để biết khi nào xong.
+
+## Thực tế thì Knowns dùng như thế nào?
+
+Nói hết mấy chữ "memory layer", "context", "knowledge graph" nghe rất dễ mơ hồ.
+
+Thực tế thì usage có thể bắt đầu rất đơn giản:
+
+```bash
+knowns init
+```
+
+Nếu muốn dùng với AI assistant, hiện tại bạn cần setup integration cho assistant đó:
+
+```bash
+knowns setup --global claude
+# hoặc
+knowns setup --global codex
+```
+
+`--global` ở đây nghĩa là setup một lần cho môi trường agent bạn đang dùng. Còn `knowns init` là để khởi tạo Knowns cho repo hiện tại.
+
+Sau đó trong repo, mình tạo task:
+
+```bash
+knowns task create "Thêm OAuth login cho user"
+```
+
+Task đó có thể có mô tả, acceptance criteria, notes, link tới docs hoặc spec.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565830/task-in-knowns_x0yeig.png"
+  alt="Một task trong Knowns với mô tả, acceptance criteria và implementation plan"
+  caption="Task trong Knowns không chỉ là một dòng todo. Nó là context làm việc để agent biết cần làm gì và khi nào thì xong."
+/>
+
+Thay vì mỗi lần mở agent lại gõ:
+
+```text
+Đây là project gì, auth flow hiện tại chạy ra sao, team có convention gì,
+feature này done khi nào, trước đó mình đã quyết định gì...
+```
+
+Mình có thể nói:
+
+```text
+Implement @task-abc123.
+Đọc docs liên quan trước, plan rồi mới sửa.
+Validate acceptance criteria trước khi kết thúc.
+```
+
+Hoặc cụ thể hơn:
+
+```text
+Mình muốn thêm OAuth login.
+Hãy đọc @doc/architecture/identity-and-clerk-integration,
+làm theo @task-login-oauth, giữ convention hiện tại,
+và validate acceptance criteria trước khi kết thúc.
+```
+
+Nếu dùng workflow skill, vòng làm việc có thể là:
+
+```text
+/kn-research @task-abc123
+/kn-plan @task-abc123
+/kn-implement @task-abc123
+/kn-extract @task-abc123
+```
+
+Nôm na:
+
+- `research`: tìm context liên quan
+- `plan`: lập hướng làm dựa trên task/docs
+- `implement`: sửa theo plan
+- `extract`: sau khi làm xong, rút ra memory hoặc docs đáng lưu
+
+Điểm khác nhau không phải là AI tự nhiên giỏi hơn.
+
+Điểm khác là bạn bớt phải làm người thư ký copy-paste context mỗi session.
+
+## Vậy nó khác gì Linear, Notion, Obsidian, GitHub Issues?
+
+Câu hỏi này rất đáng hỏi.
+
+Vì đúng là có rất nhiều tool cũng sinh ra để quản lý task, docs, notes, knowledge.
+
+Linear và Jira rất mạnh cho quản lý công việc của người.
+
+Notion và Obsidian rất mạnh cho ghi chép.
+
+GitHub Issues rất tiện nếu workflow đã xoay quanh repo.
+
+`AGENTS.md` và `CLAUDE.md` rất hợp cho instruction nền.
+
+Vậy sao lại thêm một tool nữa?
+
+Câu trả lời của mình là: nếu Knowns chỉ là thêm một chỗ để ghi task, thì nó rác thật.
+
+Nếu Knowns bắt bạn maintain thêm một hệ thống song song mà không giảm được context switching, thì nó cũng rác.
+
+Nó chỉ có lý khi nó trở thành một lớp **agent-facing workspace**: task, docs, memory, template, acceptance criteria nằm ở dạng agent có thể đọc, search, reference, và nối lại với nhau.
+
+Knowns không cố thay hết Linear, Notion, Obsidian hay GitHub Issues.
+
+Mình nghĩ nó nằm sát repo hơn, local-first hơn, và được thiết kế với câu hỏi: "Agent cần context này như thế nào để làm việc?"
+
+Người cần dashboard đẹp, roadmap, timeline, owner, priority, status report.
+
+Agent cần context đúng, đủ, có cấu trúc, có reference, và có tiêu chí hoàn thành.
+
+Hai nhu cầu này có overlap, nhưng không giống nhau hoàn toàn.
+
+## Khi nào Knowns chỉ là thêm rác?
+
+Knowns là rác nếu bạn thêm nó chỉ vì FOMO.
+
+Knowns là rác nếu task của bạn nhỏ, context nằm hết trong code, và prompt ngắn đã đủ.
+
+Knowns là rác nếu bạn tạo docs cho có, nhưng không update.
+
+Knowns là rác nếu nó trở thành một nơi duplicate với Notion, Linear, GitHub Issues mà không có workflow rõ ràng.
+
+Knowns là rác nếu agent không thật sự retrieve từ đó, còn bạn thì vẫn phải copy-paste thủ công như cũ.
+
+Knowns là rác nếu team không có thói quen collect knowledge, nhưng lại kỳ vọng tool tự sinh ra memory layer chất lượng.
+
+Mình nghĩ nói vậy công bằng hơn.
+
+Tool nào cũng có thể thành rác nếu nó không giảm chi phí thật.
+
+## Khi nào Knowns bắt đầu có ích?
+
+Knowns bắt đầu có ích khi bạn thấy mấy dấu hiệu này lặp lại:
+
+- mỗi session AI coding phải giải thích lại project
+- decision cũ nằm trong chat, PR comment, hoặc trong đầu một người
+- docs có, nhưng agent hay đọc nhầm docs cũ
+- task có acceptance criteria, nhưng không nằm ở chỗ agent dễ lấy
+- team có nhiều pattern lặp lại, nhưng agent mỗi lần generate một kiểu
+- sau khi xong task, bài học không được lưu lại
+- bạn muốn workflow research, plan, implement, verify, extract diễn ra có trật tự hơn
+
+Lúc đó Knowns mới bắt đầu có đất diễn.
+
+Không phải vì nó làm model thông minh hơn.
+
+Mà vì nó làm project knowledge có hình dạng rõ hơn.
+
+Một task không chỉ là một dòng todo. Nó có description, acceptance criteria, notes, docs liên quan.
+
+Một doc không chỉ là file markdown nằm đâu đó. Nó có thể được search, reference bằng `@doc/...`, và liên kết với task.
+
+Một memory không chỉ là câu nhắc trong prompt. Nó là thứ có tag, có scope, có thể dùng lại ở session sau.
+
+Một template không chỉ là snippet. Nó là pattern đã được đóng gói để agent không phải tốn token nghĩ lại structure từ đầu.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565559/agent_workflow_loop_gkiklu.png"
+  alt="Workflow research, plan, implement và extract xoay quanh project knowledge"
+  caption="Knowns hữu ích nhất khi nó hỗ trợ một workflow lặp lại, không chỉ là nơi để ghi thêm note."
+/>
+
+## Vì sao mình vẫn cứ nhắc tới nó?
+
+Vì mình gặp vấn đề này mỗi ngày.
+
+Mỗi khi làm với agent, mình thấy context là thứ quyết định rất nhiều. Không đủ context thì agent assume. Quá nhiều context thì agent nhiễu. Context sai thì output nhìn vẫn trôi, nhưng trôi theo hướng sai.
+
+Mình từng dùng backlog markdown. Từng để docs rải rác. Từng nhét nhiều thứ vào instruction file. Từng paste lại context trong chat. Làm được, nhưng mệt.
+
+Knowns là cách mình thử đóng gói lại cái workflow mình muốn:
+
+- project knowledge nằm sát repo
+- task và docs có reference
+- memory có scope
+- agent có thể search trước khi đọc
+- làm xong thì extract lại thứ đáng nhớ
+
+Mình nhắc tới Knowns nhiều vì mình đang build nó, dùng nó, và học từ nó.
+
+Nhưng mình không nghĩ thông điệp đúng là "mọi người hãy dùng Knowns".
+
+Thông điệp đúng hơn là:
+
+<Quote color="blue">
+  Đừng FOMO vào Knowns. Hãy học cách xây một Second Brain cho hệ thống của bạn.
+  Nếu Knowns giúp bạn làm việc đó dễ hơn, lúc đó hãy dùng.
+</Quote>
+
+## Kết
+
+Thực sự Knowns là cái gì?
+
+Với mình, Knowns là một CLI tool để build memory layer cho agent workflow.
+
+Nhưng nếu nói ít marketing hơn nữa, nó là một chỗ để mình và team gom lại những thứ agent cần biết nhưng code không tự nói hết: task, docs, decision, convention, pattern, PRD, gotcha, memory.
+
+Nó không thay Linear. Không thay Notion. Không thay GitHub Issues. Không thay việc đọc code. Không thay việc suy nghĩ.
+
+Nó chỉ cố trả lời một câu hỏi hẹp hơn:
+
+```text
+Làm sao để agent không phải bắt đầu từ số không mỗi lần mở session mới?
+```
+
+Nếu bạn chưa gặp vấn đề đó, đừng thêm tool.
+
+Nếu bạn đã có second brain tốt cho hệ thống, cứ dùng tiếp.
+
+Nếu bạn đang bắt đầu thấy context rời rạc, docs khó retrieve, task thiếu cấu trúc, memory nằm trong chat cũ, thì có thể Knowns đáng để thử.
+
+Còn nếu không, cũng không sao.
+
+Tool không quan trọng bằng thói quen collect knowledge.
+
+See yah.
