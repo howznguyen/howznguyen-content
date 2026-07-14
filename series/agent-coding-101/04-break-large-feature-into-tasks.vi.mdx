@@ -1,0 +1,599 @@
+---
+title: "Từ feature lớn tới spec và các task nhỏ"
+description: "Cách biến một feature mơ hồ thành spec rõ behavior, constraint và acceptance criteria, rồi chia thành task để coding agent thực hiện."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784045507/d7165fdf-3d25-4647-905d-6d16b68caa39.png"
+---
+
+Ở bài 2, mình có nói một nguyên tắc khá đơn giản: đừng mở coding agent lên rồi giao luôn một feature khổng lồ.
+
+Chọn một task nhỏ trước. Cho agent đọc code. Nói rõ constraint. Xem plan. Review diff.
+
+Nhưng rồi sẽ tới lúc mình không thể chỉ sửa bug nhỏ mãi. Project thật vẫn có những việc kiểu:
+
+```text
+Thêm tính năng mời thành viên vào workspace.
+```
+
+Đây là lúc câu hỏi khó hơn xuất hiện: **task nhỏ là nhỏ tới đâu, và chia kiểu gì để các phần ghép lại vẫn thành một feature đúng?**
+
+Hồi đầu mình hay để agent tự chia. Nó thường trả về một plan nhìn rất có tổ chức: database, backend, frontend, test. Đọc qua thấy hợp lý.
+
+Tới lúc implement mới lộ ra vấn đề. Mỗi task sửa quá nhiều thứ. Dependency không rõ. Frontend chờ backend. Test để cuối. Một decision nhỏ ở task đầu làm ba task sau phải đổi theo.
+
+Bài này là cách mình đang dùng để biến một yêu cầu lớn thành **spec**, rồi từ spec chia ra các task mà agent có thể hiểu, làm, và mình có thể review từng phần.
+
+## Feature, spec và task là ba tầng khác nhau
+
+Ba từ này rất dễ bị dùng lẫn với nhau.
+
+Với mình, **feature idea** là outcome mình muốn tạo ra cho người dùng.
+
+**Spec** là bản mô tả behavior đã được làm rõ và review. Nó giữ goal, requirement, constraint, acceptance criteria, scenario, decision đã chốt, phần out of scope và câu hỏi còn mở.
+
+**Task** là một bước implementation có thể thực hiện và kiểm tra được. Nhiều task cùng fulfil một spec.
+
+Flow trông như vầy:
+
+```text
+Feature idea
+  -> Research và làm rõ decision
+  -> Spec được review và approve
+  -> Task 1, Task 2, Task 3...
+  -> Implement và verify lại theo spec
+```
+
+{/* IMAGE PROMPT:
+Create a 16:9 horizontal editorial workflow diagram on warm cream paper. Show four connected stages labeled exactly "FEATURE IDEA", "SPEC", "TASKS", and "VERIFY". Use a tangled idea cloud, an open specification handbook, a fan of task cards, and a verification shield. Include a friendly coding robot moving through the flow. Hand-drawn navy ink, soft watercolor fills, blue, coral, yellow, and sage accents. No extra text, logos, gradients, or watermark.
+Generated asset: ../../assets/agent-coding-101-04-feature-spec-task-flow.webp
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784045521/009bb6e8-94e0-4d02-9913-15bab2fcfc36.png"
+  alt="Workflow từ feature idea qua spec và các task nhỏ tới bước verify"
+  caption="Feature idea được làm rõ thành spec, rồi mới chia thành task và verify ngược lại theo outcome ban đầu."
+/>
+
+Spec không phải danh sách file sẽ sửa. Phần đó thuộc implementation plan.
+
+Spec trả lời "hệ thống cần hoạt động thế nào". Task và plan trả lời "mình sẽ thay đổi code theo những bước nào".
+
+Ví dụ:
+
+```text
+Feature idea: Workspace admin có thể mời một người khác tham gia workspace.
+```
+
+Nghe chỉ có một câu. Nhưng bên dưới có khá nhiều câu hỏi:
+
+- Ai được quyền gửi lời mời?
+- Mời bằng email hay username?
+- Link có hết hạn không?
+- Một email có thể nhận nhiều lời mời không?
+- Người đã là member thì sao?
+- Accept invite sẽ tạo account hay chỉ dành cho người đã đăng nhập?
+- Có cần resend hoặc revoke không?
+
+Nếu đưa nguyên câu feature idea cho agent rồi bảo "implement", những câu chưa trả lời sẽ không tự biến mất.
+
+Agent sẽ tự chọn câu trả lời.
+
+Và vì code của nó thường nhìn khá trôi chảy, mình có thể chỉ phát hiện assumption sai sau khi nó đã sửa cả database, API và UI.
+
+<Callout type="warning">
+  Spec không loại bỏ mọi uncertainty. Nó chỉ kéo các decision quan trọng ra
+  trước khi agent bắt đầu sửa code, thay vì để chúng bị chôn trong diff.
+</Callout>
+
+## Bắt đầu spec bằng outcome, không bắt đầu bằng folder
+
+Trước khi chia task, mình cố viết lại feature bằng behavior mà người dùng có thể quan sát.
+
+Thay vì:
+
+```text
+Làm invitation system.
+```
+
+Mình viết:
+
+```text
+Workspace admin nhập email và gửi lời mời.
+Người nhận mở link, đăng nhập, rồi trở thành member của workspace.
+Admin có thể xem và thu hồi lời mời đang chờ.
+Lời mời hết hạn sau 7 ngày.
+```
+
+Bây giờ spec bắt đầu có hình dạng rõ hơn.
+
+Nó có ba user flow chính:
+
+1. Tạo lời mời
+2. Chấp nhận lời mời
+3. Quản lý lời mời đang chờ
+
+Và có vài rule dùng chung: permission, duplicate invite, expiry, token security.
+
+Đây là điểm bắt đầu tốt hơn nhiều so với việc nhìn vào cây thư mục rồi nói: "task một làm database, task hai làm API, task ba làm UI".
+
+## Research trước khi khoá spec và chia task
+
+Mình không nghĩ nên chia task chỉ dựa trên yêu cầu sản phẩm.
+
+Cần nhìn codebase trước.
+
+Không phải để đọc hết repo. Chỉ để biết feature mới sẽ đi qua những phần nào và project đã có pattern gì để tái sử dụng.
+
+Với ví dụ invitation, mình có thể giao cho agent một research task như sau:
+
+```text
+Research flow workspace membership trong repo này.
+Chưa sửa code.
+
+Tìm và tóm tắt:
+- Model hoặc schema liên quan tới workspace member.
+- Cách project kiểm tra quyền admin.
+- Pattern tạo token có thời hạn nếu đã có.
+- Cách gửi email hiện tại.
+- Page hoặc route phù hợp cho invite acceptance.
+- Test pattern gần nhất có thể tái sử dụng.
+
+Cuối cùng, liệt kê các decision chưa rõ cần mình xác nhận.
+```
+
+Output của bước này không phải code. Nó là bản đồ.
+
+Agent có thể phát hiện project đã có bảng `workspace_invitations`, hoặc ngược lại chưa có email service. Nó có thể thấy permission nằm trong domain service chứ không nằm ở route. Nó có thể tìm ra app đã có pattern signed token cho password reset.
+
+Những thông tin đó ảnh hưởng trực tiếp tới decision nào cần khoá trong spec và cách chia task sau đó.
+
+Nếu chưa research mà đã chốt spec lẫn plan, rất dễ viết requirement dựa trên assumption và tạo task dựa trên architecture tưởng tượng.
+
+## Cách chia nghe hợp lý nhưng dễ gây kẹt
+
+Một plan rất phổ biến trông như vầy:
+
+```text
+Task 1: Tạo database schema.
+Task 2: Viết API.
+Task 3: Làm UI.
+Task 4: Viết test.
+```
+
+Mình từng chia như vậy khá nhiều.
+
+Nó gọn. Mỗi task ứng với một layer. Người đọc nhìn vào là hiểu phần kỹ thuật nào đang được làm.
+
+Nhưng nó có vài vấn đề.
+
+Sau task 1, chưa có behavior nào dùng được. Sau task 2, vẫn chưa có user flow hoàn chỉnh. Task 3 có thể phát hiện API shape không hợp với UI. Task 4 mới lộ ra assumption sai ở schema, lúc đó phải quay lại sửa cả ba task trước.
+
+Test để cuối cũng tạo ra một tín hiệu khá tệ: ba task đầu được xem là "xong" dù chưa có cách verify behavior.
+
+Kiểu chia theo layer không phải lúc nào cũng sai. Với migration lớn hoặc refactor hạ tầng, đôi khi nó là lựa chọn hợp lý.
+
+Nhưng với feature hướng tới user, mình thích chia theo **vertical slice** hơn.
+
+{/* IMAGE PROMPT:
+Create a 16:9 split-screen editorial comparison on warm cream paper using a layered-cake metaphor. The left side labeled exactly "BY LAYER" shows one large block with four horizontal layers for database, API, UI, and tests, with separate task cards pointing to each layer. The right side labeled exactly "VERTICAL SLICE" shows the same block cut into three vertical slices, each containing all four layers and ending in a verified user outcome. Include one confused coding robot on the left and one confident robot with a checklist on the right. Hand-drawn navy ink, soft watercolor fills, restrained blue, coral, yellow, and sage palette. No extra text, logos, gradients, or watermark.
+Generated asset: ../../assets/agent-coding-101-04-layer-vs-vertical-slice-v2.webp
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784047272/a0655a11-02cd-4f75-b82f-d348bd436756.png"
+  alt="Ẩn dụ một khối nhiều tầng được chia theo technical layer và được cắt thành vertical slice"
+  caption="Chia theo layer tách riêng từng tầng kỹ thuật. Vertical slice cắt xuyên đủ database, API, UI và test để tạo một outcome có thể verify."
+/>
+
+## Vertical slice là một lát cắt có behavior hoàn chỉnh
+
+Vertical slice đi qua những layer cần thiết để hoàn thành một behavior nhỏ.
+
+Với invitation feature, một slice có thể là:
+
+```text
+Admin gửi được một lời mời mới.
+```
+
+Task này có thể chạm vào persistence, domain logic, API, một form UI nhỏ và test liên quan. Nghe có vẻ nhiều layer hơn một task backend thuần túy.
+
+Nhưng tất cả thay đổi đều phục vụ một outcome duy nhất.
+
+Khi task xong, mình có thứ để quan sát và verify:
+
+- Admin nhập email
+- Request được gửi
+- Invitation được lưu
+- Người không có quyền bị từ chối
+- Email trùng được xử lý theo rule đã chốt
+
+Slice tiếp theo là:
+
+```text
+Người nhận chấp nhận lời mời và trở thành member.
+```
+
+Slice này lại đi qua token validation, membership logic, accept route, UI state và test. Nhưng nó có một điểm kết thúc rõ ràng.
+
+Mình thấy task kiểu này dễ review hơn vì mọi file trong diff đang cùng kể một câu chuyện.
+
+<Quote color="blue">
+  Một task tốt không nhất thiết chỉ chạm một layer. Nó cần tạo ra một thay đổi
+  có cùng mục tiêu và có thể verify độc lập.
+</Quote>
+
+## Task nhỏ tới mức nào là vừa
+
+Không có số dòng code hay số file cố định.
+
+Một task sửa hai file vẫn có thể rất khó nếu behavior mơ hồ. Một task sửa tám file vẫn có thể dễ review nếu đó là một thay đổi cơ học với rule rõ ràng.
+
+Mình thường dùng vài câu hỏi để kiểm tra.
+
+### Task có một outcome không?
+
+Mình có thể mô tả kết quả của task trong một câu không?
+
+Tốt:
+
+```text
+Workspace admin gửi được lời mời tới một email chưa phải member.
+```
+
+Quá rộng:
+
+```text
+Hoàn thiện invitation system.
+```
+
+### Task có thể verify riêng không?
+
+Sau khi task xong, có test, command hoặc user flow cụ thể để chứng minh behavior không?
+
+Nếu câu trả lời là "phải chờ ba task sau mới test được", task có thể đang bị chia sai ranh giới.
+
+### Agent có cần giữ quá nhiều decision cùng lúc không?
+
+Nếu một task vừa thiết kế token, vừa chọn email provider, vừa sửa permission, vừa làm UI, vừa xử lý analytics, context sẽ loãng rất nhanh.
+
+Có thể cần tách một decision task trước, hoặc thu hẹp phase đầu.
+
+### Diff có review được trong một lượt không?
+
+Mình không dùng một giới hạn cứng. Nhưng nếu mở diff lên mà phải nhớ năm behavior khác nhau cùng lúc, đó thường là dấu hiệu task đang chứa nhiều outcome.
+
+### Nếu task fail, có quay lại được không?
+
+Task có boundary rõ sẽ dễ revert, sửa lại hoặc giao tiếp tiếp hơn. Task thay đổi nửa hệ thống trong một lượt thì rất khó biết phần nào nên giữ.
+
+## Dependency phải được viết ra
+
+Chia được danh sách task chưa đủ. Cần biết task nào phụ thuộc task nào.
+
+Với invitation feature, plan có thể là:
+
+```text
+T0 Research membership, permission, token và email patterns
+  |
+  v
+T1 Admin tạo invitation end-to-end
+  |\
+  | \
+  v  v
+T2 Accept invitation   T3 List và revoke pending invitations
+  |
+  v
+T4 Expiry, duplicate và security hardening
+```
+
+`T2` cần dữ liệu và token từ `T1`, nên không thể làm trước.
+
+`T3` cũng cần invitation tồn tại, nhưng sau `T1` thì nó gần như độc lập với `T2`.
+
+`T4` nhìn giống một task "dọn edge case", nhưng cần cẩn thận. Các rule quan trọng như authorization hoặc token không được để trống ở task trước. T4 chỉ nên harden những behavior đã có, không phải vá lại security cơ bản đáng lẽ phải làm từ đầu.
+
+Viết dependency ra giúp mình tránh hai lỗi:
+
+- Bắt đầu task khi prerequisite chưa ổn định
+- Cho hai task cùng sửa một vùng code rồi tốn công merge lại
+
+Không cần vẽ graph đẹp. Một danh sách `depends on` là đủ.
+
+## Ví dụ từ một spec tới các task
+
+Giả sử sau research và vài vòng hỏi đáp, mình có một spec rút gọn như sau:
+
+```text
+Spec: Workspace invitations
+
+Overview:
+Workspace admin có thể mời người khác bằng email.
+
+Locked decisions:
+- D1: Chỉ admin được gửi và revoke invitation.
+- D2: Invitation hết hạn sau 7 ngày.
+- D3: Người nhận phải đăng nhập đúng email để accept.
+
+Requirements:
+- FR-1: Admin tạo invitation cho email chưa phải member.
+- FR-2: Người nhận dùng link hợp lệ để tham gia workspace.
+- FR-3: Admin xem và revoke pending invitation.
+- FR-4: Mỗi workspace chỉ có một pending invitation cho cùng email.
+
+Acceptance criteria:
+- AC-1: Admin hoàn thành flow tạo invitation.
+- AC-2: Người nhận đúng email accept và trở thành member.
+- AC-3: Member thường không tạo hoặc revoke invitation.
+- AC-4: Invitation expired hoặc revoked không thể được accept.
+
+Out of scope:
+- Resend email.
+- Tuỳ chỉnh email template.
+- Bulk invite.
+
+Open questions:
+- Không còn câu hỏi blocking trước implementation.
+```
+
+Phần `Out of scope` rất quan trọng.
+
+Không ghi thì agent có thể thấy "invitation system" và tiện tay thêm resend, role selector, email preview, audit log. Toàn những thứ nghe hợp lý nhưng không thuộc phase này.
+
+Acceptance criteria trong spec mô tả outcome của cả feature. Khi chia task, mỗi task sẽ có acceptance criteria hẹp hơn và link ngược về phần spec mà nó fulfil.
+
+Từ spec trên, mình chia thành bốn implementation task.
+
+### Task 1: Admin tạo invitation
+
+Outcome: admin nhập email và tạo được một pending invitation.
+
+Scope:
+
+- Thêm invitation model hoặc dùng schema hiện có
+- Kiểm tra quyền admin
+- Chặn member hiện tại và pending invitation trùng
+- Tạo token an toàn với expiry 7 ngày
+- Thêm API và form UI tối thiểu
+- Gửi email qua pattern hiện có hoặc fake adapter trong test
+- Viết test cho happy path, permission và duplicate
+
+Task này khá dày, nhưng chỉ có một behavior: tạo invitation.
+
+Nếu codebase lớn hoặc email integration phức tạp, mình có thể tách phần email adapter thành prerequisite riêng. Nhưng không nên tách chỉ vì "email nằm ở folder khác".
+
+### Task 2: Người nhận accept invitation
+
+Outcome: người đăng nhập đúng email dùng token hợp lệ để trở thành member.
+
+Depends on: Task 1.
+
+Scope:
+
+- Validate token, expiry và trạng thái pending
+- Kiểm tra email của user hiện tại
+- Tạo membership theo transaction phù hợp
+- Đánh dấu invitation đã accepted
+- Thêm accept page với success và error state
+- Viết test cho valid token, expired token, wrong email và replay
+
+### Task 3: Admin xem và revoke invitation
+
+Outcome: admin thấy danh sách invitation đang chờ và thu hồi được một lời mời.
+
+Depends on: Task 1.
+
+Scope:
+
+- Query pending invitations của workspace
+- Hiển thị email, thời gian tạo và expiry
+- Thêm revoke action với permission check
+- Không cho accept token đã revoke
+- Viết test cho list, revoke và unauthorized access
+
+### Task 4: Verify flow và harden boundary
+
+Outcome: toàn bộ phase invitation hoạt động đúng khi ghép lại.
+
+Depends on: Task 2 và Task 3.
+
+Scope:
+
+- Chạy integration test xuyên suốt create, accept và revoke
+- Review transaction boundary
+- Kiểm tra log không lộ raw token
+- Kiểm tra race condition cho duplicate invitation và double accept
+- Cập nhật docs hoặc instruction nếu có convention mới
+
+Task cuối không phải chỗ gom test của ba task trước. Mỗi task vẫn phải tự có test liên quan.
+
+Nó là vòng integration và hardening sau khi các slice đã đứng được độc lập.
+
+## Acceptance criteria phải quan sát được
+
+Task nhỏ nhưng acceptance criteria mơ hồ thì agent vẫn phải đoán.
+
+Ví dụ:
+
+```text
+- Invitation hoạt động đúng.
+- Xử lý error hợp lý.
+- UI thân thiện.
+```
+
+Mấy câu này nghe ổn nhưng không có điểm kiểm tra rõ.
+
+Mình thích viết theo behavior:
+
+```text
+Acceptance criteria:
+- Workspace admin gửi email chưa phải member và nhận response thành công.
+- Database chỉ có một pending invitation cho cùng workspace và email.
+- Member thường gọi cùng endpoint sẽ nhận forbidden.
+- Email đã là member không tạo invitation mới.
+- Form hiển thị error message khi API từ chối request.
+- Test liên quan pass.
+```
+
+Mỗi dòng đều có thể quan sát qua UI, API, database state hoặc test.
+
+Đó là thứ agent có thể dùng để tự kiểm tra trước khi báo xong. Và mình cũng dùng đúng danh sách đó khi review.
+
+## Một task template để copy
+
+Đây là format ngắn mình thấy đủ dùng:
+
+```text
+Title:
+[Tên task có một outcome rõ]
+
+Goal:
+[Người dùng hoặc hệ thống làm được gì sau task này]
+
+Context:
+- [Flow hiện tại]
+- [File hoặc folder nên đọc trước]
+- [Pattern cần tái sử dụng]
+
+Scope:
+- [Thay đổi bắt buộc 1]
+- [Thay đổi bắt buộc 2]
+
+Acceptance criteria:
+- [Behavior quan sát được 1]
+- [Behavior quan sát được 2]
+- [Verification cần pass]
+
+Constraints:
+- [Public API cần giữ]
+- [Không thêm dependency nếu chưa được phép]
+- [Không refactor ngoài scope]
+
+Out of scope:
+- [Thứ nghe liên quan nhưng chưa làm trong task này]
+
+Depends on:
+- [Task hoặc decision cần hoàn thành trước]
+
+Done:
+- Implement theo scope
+- Chạy test hoặc command liên quan
+- Review diff
+- Tóm tắt rủi ro và phần chưa cover
+```
+
+Không phải task nào cũng cần điền đủ mọi dòng.
+
+Nhưng `Goal`, `Acceptance criteria`, `Out of scope` và `Done` là bốn phần mình cố giữ. Chúng giúp agent biết đi đâu, giúp mình biết khi nào dừng, và giảm chuyện task tự phình ra giữa đường.
+
+## Với Knowns, đây chính là chỗ của `/kn-spec`
+
+Mình đang build Knowns nên workflow này cũng là lý do có skill `/kn-spec`.
+
+Khi bắt đầu từ một idea như workspace invitation, mình có thể chạy:
+
+```text
+/kn-spec workspace-invitations
+```
+
+Mục tiêu của bước này chưa phải tạo task hay sửa code.
+
+`/kn-spec` đi theo flow: tìm gray area, hỏi để kéo decision ra khỏi đầu mình, khoá các decision đã thống nhất, rồi viết spec gồm requirement, acceptance criteria, scenario, out of scope và open question.
+
+Spec vẫn là draft cho tới khi mình review và approve.
+
+Sau khi approve, nếu muốn chạy full workflow từ plan tới implement, review và verify:
+
+```text
+/kn-flow @doc/specs/2026-07-14/workspace-invitations
+```
+
+Nếu chỉ muốn generate task rồi đi từng task bằng tay:
+
+```text
+/kn-plan --from @doc/specs/2026-07-14/workspace-invitations
+```
+
+Điểm mình thích ở flow này là task không đứng riêng lẻ. Nó link về spec, biết mình fulfil acceptance criteria nào, và tới lúc verify có thể đối chiếu implementation với outcome ban đầu.
+
+Nhưng không phải việc gì cũng cần `/kn-spec`.
+
+Một bug nhỏ, copy change hoặc empty state có scope rõ thì tạo task trực tiếp sẽ nhẹ hơn:
+
+```text
+/kn-plan --new "Thêm empty state cho danh sách invitation"
+```
+
+Spec có ích khi feature chứa nhiều behavior, decision, edge case hoặc thay đổi đi qua nhiều phần hệ thống. Nếu requirement đã rõ và việc chỉ mất một task, thêm spec có thể chỉ làm workflow nặng hơn.
+
+## Để agent đề xuất plan, nhưng đừng giao luôn quyền quyết định
+
+Agent khá giỏi tìm pattern và liệt kê vùng code bị ảnh hưởng. Mình vẫn dùng nó để draft plan.
+
+Nếu chưa dùng một workflow như `/kn-spec`, prompt thủ công có thể như vầy:
+
+```text
+Research feature dưới đây và draft một spec trước khi đề xuất task.
+Chưa implement.
+
+Yêu cầu:
+- Liệt kê gray area và decision cần xác nhận.
+- Spec phải có goal, requirements, acceptance criteria và out of scope.
+- Mỗi task có một outcome có thể verify riêng.
+- Ưu tiên vertical slice thay vì tách frontend/backend/test máy móc.
+- Ghi rõ dependency giữa các task.
+- Mỗi task có acceptance criteria và out of scope.
+
+Feature:
+[mô tả feature]
+```
+
+Nhưng plan của agent vẫn là proposal.
+
+Mình cần review xem nó có assume product behavior không, có để test tới cuối không, có task nào quá rộng không, có hai task cùng sửa một vùng code không.
+
+Agent giúp mình nhìn nhanh hơn. Nó không thay mình quyết định product nên hoạt động thế nào.
+
+## Khi nào không cần spec hoặc không cần chia
+
+Không phải thay đổi nào cũng cần một spec, năm task, graph dependency và tài liệu dài.
+
+Nếu thay đổi có một behavior rõ, chạm một vùng code nhỏ, có test trực tiếp và không chứa decision mới, cứ để nó là một task.
+
+Ví dụ:
+
+```text
+Thêm empty state cho danh sách invitation khi chưa có lời mời nào.
+```
+
+Tách tiếp thành "tạo component", "thêm copy", "viết test" chỉ làm workflow nặng hơn.
+
+Mục tiêu của chia task không phải tạo nhiều task nhất có thể.
+
+Mục tiêu là tạo boundary vừa đủ để agent ít đoán hơn và mình review dễ hơn.
+
+<Callout type="tip">
+  Nếu việc giải thích dependency còn dài hơn chính thay đổi, có thể task đó chưa
+  cần tách thêm.
+</Callout>
+
+## Kết
+
+Ở bài trước, mình nói đừng giao feature lớn cho agent trong một câu rồi mong nó tự làm đúng mọi thứ.
+
+Bước tiếp theo không phải là viết prompt dài hơn. Mà là viết một spec đủ rõ trước, review nó, rồi mới biến spec thành một chuỗi outcome nhỏ có scope, dependency và cách verify.
+
+Mình thường đi theo thứ tự:
+
+1. Viết behavior người dùng quan sát được
+2. Research codebase và tìm pattern hiện có
+3. Kéo gray area ra và khoá decision
+4. Viết, review và approve spec
+5. Chia implementation task theo vertical slice
+6. Viết dependency và acceptance criteria cho từng task
+7. Implement rồi verify lại theo spec
+
+Task nhỏ không làm feature nhỏ đi.
+
+Nó chỉ làm cho mỗi bước đủ rõ để cả mình và agent biết đang thay đổi điều gì.
+
+Và khi từng bước đều có thể kiểm tra ngược về spec, feature lớn bớt giống một canh bạc hơn rất nhiều.
+
+See yah.
