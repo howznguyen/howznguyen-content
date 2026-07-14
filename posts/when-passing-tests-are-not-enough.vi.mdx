@@ -1,0 +1,279 @@
+---
+title: "Test xanh chưa chắc task đúng"
+description: "Coding agent chạy test pass chưa có nghĩa feature đã đúng. Vấn đề đôi khi nằm ở task, test và cách chúng ta định nghĩa hoàn thành."
+date: 2026-07-14
+tags:
+  - AI
+  - Agent
+  - Programming
+  - Testing
+author: howznguyen
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784029466/319bc045-e320-44d5-80d2-c41a92e29df2.png"
+---
+
+Gần đây mình đọc một bài audit của OpenAI về SWE-Bench Pro, một benchmark dùng để đánh giá khả năng làm task phần mềm của coding agent.
+
+Con số làm mình khựng lại không phải model nào đang đứng đầu. Mà là OpenAI ước tính khoảng **30% task trong benchmark có vấn đề**.
+
+Nghĩa là có những trường hợp agent làm đúng nhưng vẫn bị chấm sai. Cũng có những trường hợp agent chưa làm đủ nhưng test vẫn xanh.
+
+Nghe hơi giống công việc hằng ngày không?
+
+Mình giao một task. Agent đọc code, sửa vài file, chạy test rồi báo hoàn thành. Màn hình hiện một hàng xanh lè. Mình nhìn qua diff thấy cũng hợp lý nên merge.
+
+Vài ngày sau user đụng đúng case test chưa cover.
+
+Lúc đó câu hỏi không còn là "model này có đủ thông minh không?". Câu hỏi khó chịu hơn là: **ngay từ đầu mình đã định nghĩa đúng thế nào là hoàn thành chưa?**
+
+## Một benchmark bị hỏng nói gì về task hằng ngày của mình
+
+Trong audit công bố ngày 8 tháng 7 năm 2026, OpenAI dùng cả agent lẫn các software engineer có kinh nghiệm để kiểm tra lại 731 task trong public split của SWE-Bench Pro.
+
+Pipeline tự động đánh dấu 27,4% task có khả năng bị hỏng. Nhóm human reviewer đánh dấu 34,1%. Từ đó, OpenAI ước tính khoảng 30% task trong benchmark không tạo ra tín hiệu đánh giá đáng tin cậy.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784029404/Share_of_Dataset_Flagged_by_Issue_Type_ptjbwv.png"
+  alt="Biểu đồ Share of Dataset Flagged by Issue Type so sánh kết quả từ datapoint analysis và human annotation"
+  caption="Chart do ChatGPT tạo về “Share of Dataset Flagged by Issue Type”. Datapoint analysis pipeline đánh dấu 200 task bị hỏng (27,4%), trong khi human annotation campaign xác định 249 task (34,1%)."
+/>
+
+Các lỗi được chia thành bốn nhóm:
+
+- **Test quá cứng:** test bắt đúng một implementation cụ thể, dù cách làm khác vẫn cho ra kết quả hợp lệ.
+- **Prompt thiếu yêu cầu:** task không nói rõ một constraint nhưng hidden test lại bắt buộc constraint đó.
+- **Test thiếu coverage:** agent làm chưa đủ nhưng vẫn pass vì phần bị thiếu không được kiểm tra.
+- **Prompt gây hiểu lầm:** mô tả task dẫn agent đi theo một hướng, còn test lại chờ một hành vi khác.
+
+Đây là benchmark được thiết kế để đo coding agent. Nhưng bốn lỗi này cũng xuất hiện đầy trong issue, ticket và acceptance criteria mà mình viết mỗi ngày.
+
+Đôi khi agent sai thật. Đôi khi task sai. Đôi khi test sai. Và có lúc cả ba cùng sai nhưng vẫn tạo ra một dấu check màu xanh nhìn rất thuyết phục.
+
+<Bookmark
+  url="https://openai.com/index/separating-signal-from-noise-coding-evaluations/"
+  title="Separating signal from noise in coding evaluations"
+  description="Audit của OpenAI về các task bị hỏng trong SWE-Bench Pro và bốn failure mode phổ biến."
+/>
+
+## Test xanh đang trả lời câu hỏi nào?
+
+Test chỉ trả lời những câu hỏi đã được viết vào test.
+
+Nếu test kiểm tra một function trả về đúng value, test xanh chứng minh function đó trả về đúng value trong các case đã cover. Nó không tự chứng minh UI dễ dùng, error message dễ hiểu, dữ liệu cũ không bị ảnh hưởng hay feature đúng với thứ user cần.
+
+Ví dụ task là:
+
+> Thêm validation cho email ở màn hình đăng ký.
+
+Agent có thể thêm một regex, viết vài unit test cho email hợp lệ và không hợp lệ, sau đó chạy test pass.
+
+Nhưng task thật có thể còn những câu hỏi khác:
+
+- Có trim khoảng trắng trước khi validate không?
+- Email viết hoa có được xử lý đúng không?
+- Error từ server có bị error phía client ghi đè không?
+- Người dùng bàn phím và screen reader có nhận được thông báo lỗi không?
+- Form có submit hai lần khi mạng chậm không?
+- Validation mới có làm hỏng flow đăng nhập hiện tại không?
+
+Nếu những điều này không nằm trong task, acceptance criteria hoặc test, agent không có lý do rõ ràng để quan tâm tới chúng.
+
+<Callout type="warning" title="Test pass là một signal, không phải phán quyết">
+  Một test suite tốt giúp giảm uncertainty. Nó không biến một yêu cầu mơ hồ
+  thành một feature đúng.
+</Callout>
+
+Mình thấy coding agent làm lộ vấn đề này rõ hơn vì nó thực thi yêu cầu rất nhanh. Với human developer, nhiều assumption được tự lấp bằng kinh nghiệm, câu chuyện trong meeting hoặc kiến thức về product.
+
+Agent thường không có những thứ đó. Nó bám vào những gì nhìn thấy được: prompt, code, test, docs và tool output.
+
+Nếu contract giữa các phần này lệch nhau, agent chỉ đang chạy thật nhanh về một đích sai.
+
+## Task, acceptance criteria và test phải kể cùng một câu chuyện
+
+Mình hay nghĩ một task tốt có bốn lớp:
+
+| Lớp | Câu hỏi cần trả lời | Evidence |
+|---|---|---|
+| Task | Cần thay đổi điều gì và vì sao? | Mô tả ngắn, scope rõ |
+| Acceptance criteria | Nhìn vào đâu để biết đã xong? | Các hành vi quan sát được |
+| Automated checks | Phần nào có thể kiểm tra bằng máy? | Test, lint, typecheck, static analysis |
+| Review | Phần nào vẫn cần judgment? | Diff, UI thật, logs, product behavior |
+
+Nếu task nói một chuyện, acceptance criteria nói chuyện khác và test chỉ cover một phần ba, kết quả xanh không có nhiều ý nghĩa.
+
+Ngược lại, khi bốn lớp này khớp nhau, agent dễ làm hơn và mình cũng dễ review hơn. Không phải vì prompt dài hơn. Mà vì mỗi yêu cầu đều có một cách kiểm chứng tương ứng.
+
+Ví dụ acceptance criteria "user thấy thông báo lỗi dễ hiểu" vẫn còn khá mơ hồ.
+
+Mình có thể cụ thể hơn:
+
+- Khi server trả về email đã tồn tại, form hiển thị message ngay dưới field email.
+- Focus được chuyển tới field lỗi sau khi submit.
+- Giá trị user đã nhập không bị mất.
+- Không gọi lại API nếu client validation đã fail.
+
+Tới đây agent biết cần sửa gì. Test biết cần check gì. Người review cũng biết cần bấm thử flow nào.
+
+## Outcome quan trọng hơn lời agent báo cáo
+
+Trong bài viết về eval cho AI agent, Anthropic phân biệt **transcript** và **outcome**.
+
+Transcript là toàn bộ quá trình agent suy nghĩ, gọi tool và phản hồi. Outcome là trạng thái thật của hệ thống sau khi agent kết thúc.
+
+Một agent đặt vé có thể nói "đã đặt xong", nhưng outcome cần kiểm tra là reservation có thật sự tồn tại trong database hay không.
+
+Với coding agent cũng vậy.
+
+Final message đẹp không phải outcome. Danh sách file đã sửa không phải outcome. Thậm chí test xanh cũng chỉ là một phần evidence cho outcome.
+
+Outcome thật nằm ở working tree, behavior của ứng dụng, dữ liệu được ghi, logs được tạo và trải nghiệm mà user nhận được.
+
+<Bookmark
+  url="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+  title="Demystifying evals for AI agents"
+  description="Anthropic giải thích cách đánh giá outcome bằng code-based, model-based và human graders."
+/>
+
+Điểm mình thích ở cách nhìn này là nó kéo sự chú ý ra khỏi câu agent nói cuối cùng.
+
+Thay vì hỏi "agent đã làm gì?", mình hỏi "hệ thống bây giờ có hành xử đúng không?".
+
+Hai câu đó nghe gần giống nhau, nhưng dẫn tới hai kiểu review rất khác.
+
+## Ba tầng verification mình thấy thực tế
+
+Không phải project nào cũng cần một hệ thống eval phức tạp. Nhưng mình nghĩ task coding nào cũng nên có ba tầng verification.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784029760/4a68fe04-2fee-4793-9f7f-63cf3278fd58.png"
+  alt="Ba tầng verification gồm automated checks, real behavior và engineering judgment cùng dẫn tới verified outcome"
+  caption="Ba tầng verification - automated checks, real behavior và engineering judgment - cùng hội tụ thành một verified outcome."
+/>
+
+**Tầng 1: kiểm tra bằng máy.**
+
+Đây là lint, typecheck, unit test, integration test, security scan hoặc bất kỳ check nào cho ra kết quả lặp lại được.
+
+Tầng này nhanh, rẻ và khách quan. Agent cũng có thể tự chạy lại nhiều lần cho tới khi sạch.
+
+Nhưng automated check chỉ mạnh bằng những assertion đã được viết. Test coverage thấp thì khoảng mù vẫn còn nguyên. Test quá cứng thì một implementation hợp lệ cũng có thể bị reject.
+
+**Tầng 2: kiểm tra behavior thật.**
+
+Chạy ứng dụng. Đi qua user journey. Gọi API thật trong local environment. Xem screenshot, DOM, logs, database state hoặc metrics sau thay đổi.
+
+Một UI task mà agent không nhìn thấy UI thì khá giống sửa CSS trong bóng tối. Một performance task mà agent không đọc được metrics thì chỉ đang đoán.
+
+Tầng này biến product behavior thành thứ agent có thể quan sát, thay vì bắt nó suy ra mọi thứ từ source code.
+
+**Tầng 3: engineering judgment.**
+
+Đây là phần khó encode hoàn toàn vào test: scope có bị phình không, abstraction mới có cần thiết không, naming có hợp convention không, thay đổi có tạo thêm debt không, và feature này có thật sự giải quyết vấn đề không.
+
+Human review vẫn có giá trị lớn ở đây. Không nhất thiết phải đọc từng dòng như trước, nhưng mình vẫn cần nhìn vào những chỗ judgment quan trọng.
+
+<Callout type="note" title="Không phải mọi thứ đều cần human review giống nhau">
+  Một rename nhỏ và một thay đổi payment flow không nên dùng cùng một mức kiểm
+  tra. Verification nên tỷ lệ với rủi ro của task.
+</Callout>
+
+## Agent tốt hơn khi môi trường biết phản hồi
+
+OpenAI gọi phần việc này là **harness engineering**: thiết kế môi trường, tool và feedback loop để agent có thể làm việc đáng tin cậy.
+
+Trong một thử nghiệm xây sản phẩm bằng Codex, team của OpenAI nhận ra tiến độ ban đầu chậm không hẳn vì model yếu. Môi trường của họ chưa mô tả đủ rõ, thiếu tool và thiếu cấu trúc để agent tự tiến tới mục tiêu.
+
+Họ làm cho UI, logs và metrics trở nên đọc được bởi agent. Agent có thể tự chạy app, tái hiện bug, nhìn screenshot, query logs rồi lặp lại quá trình sửa và kiểm tra.
+
+Khi đó feedback không còn là một câu chung chung kiểu "vẫn chưa đúng". Môi trường trả về evidence cụ thể để agent biết mình sai ở đâu.
+
+<Bookmark
+  url="https://openai.com/index/harness-engineering/"
+  title="Harness engineering: leveraging Codex in an agent-first world"
+  description="Cách OpenAI thiết kế repository, tool và feedback loop để coding agent tự kiểm tra công việc."
+/>
+
+Mình nghĩ đây là bước tiếp theo sau prompt engineering.
+
+Prompt nói agent cần đi đâu. Harness giúp agent nhìn thấy đường, nhận ra lúc đi sai và biết khi nào đã tới.
+
+Nếu mỗi lần agent sai mình chỉ viết thêm ba đoạn instruction, file hướng dẫn sẽ dài dần nhưng hệ thống chưa chắc tốt hơn. Có những rule nên trở thành lint. Có những failure nên trở thành regression test. Có những hành vi nên được quan sát bằng screenshot hoặc logs.
+
+Instruction nhắc agent điều nên làm. Feedback loop cho agent biết nó đã làm đúng hay chưa.
+
+## Một workflow nhỏ để không bị màu xanh đánh lừa
+
+Đây là flow mình thấy đủ gọn cho phần lớn task:
+
+1. **Viết outcome trước.** Một câu mô tả trạng thái mong muốn của hệ thống sau khi hoàn thành.
+2. **Viết acceptance criteria có thể quan sát.** Tránh các câu như "hoạt động tốt", "UX hợp lý" hoặc "xử lý đầy đủ".
+3. **Gắn mỗi criterion với evidence.** Criterion nào do test chứng minh, criterion nào cần screenshot, logs hay kiểm tra thủ công.
+4. **Cho agent đọc trước khi sửa.** Đọc code liên quan, test hiện tại và convention của repo.
+5. **Yêu cầu agent tự verify.** Không chỉ trả về file đã sửa, mà trả về command đã chạy và evidence thu được.
+6. **Review độc lập ở phần rủi ro.** Đừng chỉ đọc summary do chính agent tạo.
+7. **Biến failure lặp lại thành guardrail.** Nếu cùng một lỗi xuất hiện lần hai, cân nhắc thêm test, lint, doc hoặc tool thay vì tiếp tục nhắc bằng prompt.
+
+Một prompt ngắn có thể trông như thế này:
+
+> **Task:** Thêm validation email cho signup form.
+>
+> **Outcome:** User không thể submit email sai định dạng và luôn thấy lý do rõ ràng.
+>
+> **Constraints:** Giữ nguyên API hiện tại. Không thêm dependency.
+>
+> **Acceptance criteria:** Trim khoảng trắng; giữ lại giá trị đã nhập; hiển thị server error đúng field; không gọi API khi client validation fail.
+>
+> **Verification:** Chạy test liên quan, typecheck và kiểm tra signup flow trên browser.
+>
+> **Return:** Tóm tắt thay đổi, evidence cho từng criterion và phần chưa thể tự kiểm tra.
+
+Không cần prompt 100 dòng. Chỉ cần contract giữa yêu cầu và verification đủ rõ.
+
+## Project nhỏ thì bắt đầu từ đâu?
+
+Đọc tới harness, eval và multi-layer verification rất dễ thấy mình lại sắp build thêm một platform trước khi build feature.
+
+Mình không recommend vậy.
+
+Với side project nhỏ, có thể bắt đầu bằng:
+
+- Một command chạy được lint, typecheck và test liên quan.
+- Ba tới năm acceptance criteria cho mỗi task.
+- Một cách khởi động app local ổn định.
+- Screenshot hoặc API response cho thay đổi user-facing.
+- Review diff trước khi merge.
+
+Thế là đủ để feedback loop tốt hơn rất nhiều.
+
+Khi một loại failure lặp lại, lúc đó mới thêm guardrail tương ứng. Đừng build observability stack chỉ để sửa một button. Nhưng cũng đừng bắt agent sửa production bug trong khi nó không đọc được một dòng log nào.
+
+## Knowns nằm ở đâu trong chuyện này?
+
+Mình đang build Knowns nên tất nhiên mình cũng nhìn vấn đề này từ góc task, acceptance criteria và verification.
+
+Knowns không thể tự biến một criterion tệ thành criterion tốt. Nó cũng không biết product outcome thay cho mình.
+
+Thứ nó làm được là giữ task, docs, memory và acceptance criteria ở một chỗ agent có thể search và reference. Khi tới bước verify, agent có thể đối chiếu thay đổi với những tiêu chí đã được ghi từ đầu thay vì dựa vào trí nhớ của phiên chat.
+
+Với mình, đó là phần nền. Còn chất lượng của verification vẫn phụ thuộc vào việc mình chọn đúng evidence và chịu khó xem lại những assumption ban đầu.
+
+Tool giúp workflow có cấu trúc. Nó không thay thế judgment.
+
+## Kết
+
+Test xanh vẫn rất quan trọng. Mình không hề muốn quay về thời sửa code xong rồi cầu nguyện.
+
+Nhưng test xanh chưa chắc task đúng.
+
+Coding agent càng làm nhanh, khoảng cách giữa "đã chạy xong" và "đã làm đúng" càng dễ bị bỏ qua. Vì vậy kỹ năng quan trọng không chỉ là viết prompt hay hơn. Nó còn là định nghĩa outcome rõ hơn, tạo feedback loop tốt hơn và biết evidence nào đủ để tin.
+
+Có lẽ agent coding không làm testing bớt quan trọng. Nó buộc mình nghiêm túc hơn với câu hỏi mà test đang trả lời.
+
+Và trước khi merge một hàng xanh đẹp mắt, đôi khi mình nên dừng lại hỏi thêm một câu:
+
+**Task này thật sự đúng, hay chỉ đang đúng với test?**
+
+Cảm ơn các bạn đã đọc bài viết này.
+
+See yah.
