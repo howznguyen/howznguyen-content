@@ -1,0 +1,405 @@
+---
+title: "Viết sổ tay dự án cho coding agent"
+description: "Cách viết AGENTS.md hoặc CLAUDE.md vừa đủ để agent hiểu repo, giữ đúng convention, và không phải giải thích lại từ đầu."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784030814/6b38ddac-d41e-4a8e-aebe-f967cfdd0b06.png"
+---
+
+Ở bài trước, mình đã nói về cách giao một task nhỏ cho coding agent: nói rõ việc cần làm, cho đủ context, đặt constraint, rồi review diff.
+
+Workflow đó khá ổn trong một session.
+
+Nhưng sang session tiếp theo, mình lại gặp một vấn đề khác. Agent không còn nhớ project dùng `pnpm` hay `npm`. Không biết folder nào chứa business logic. Không biết team không cho phép sửa migration cũ. Mấy điều mình đã giải thích hôm qua, hôm nay phải nói lại từ đầu.
+
+Lúc đó mình mới hiểu vì sao các file như `AGENTS.md` hay `CLAUDE.md` lại có ích.
+
+Nó không làm agent thông minh hơn. Nó chỉ đưa cho agent một cuốn sổ tay ngắn trước khi bắt đầu làm việc.
+
+Và giống sổ tay cho người mới vào team, viết quá ít thì không giúp được gì. Viết quá nhiều thì chẳng ai nhớ nổi.
+
+## Prompt chưa thay thế được instruction của project
+
+Prompt và project instruction giải quyết hai việc khác nhau.
+
+Prompt nói về **task hiện tại**:
+
+```text
+Sửa bug redirect sau khi login.
+Không đổi public API.
+Chạy test liên quan sau khi sửa.
+```
+
+Project instruction nói về **những điều gần như task nào cũng cần biết**:
+
+```text
+Project dùng pnpm.
+Business logic nằm trong src/domain.
+Không sửa migration đã được deploy.
+Mọi thay đổi trong auth phải chạy test integration.
+Không tự commit hoặc push.
+```
+
+Nếu một rule chỉ liên quan tới task đang làm, để nó trong prompt.
+
+Nếu một rule lặp lại qua nhiều task và nhiều session, lúc đó mới nên đưa vào file instruction.
+
+Phân biệt được hai loại này giúp file không biến thành chỗ mình đổ mọi ghi chú linh tinh vào.
+
+{/* IMAGE PROMPT:
+Create a 16:9 two-column editorial diagram on warm off-white paper. On the left, one coral card labeled "PROMPT" leads to one target and one completed task. On the right, one blue handbook labeled "PROJECT GUIDE" connects to multiple task cards and session windows. Hand-drawn navy ink outlines, soft watercolor fills, cream, blue, coral, yellow, and sage palette. No extra text, logos, gradients, or watermark.
+Generated asset: ../../assets/agent-coding-101-03-prompt-vs-project-guide.webp
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784030819/14fcfaba-ac9a-428f-b5fe-83392999d9ef.png"
+  alt="So sánh prompt dành cho một task với project guide được dùng lại qua nhiều task và session"
+  caption="Prompt giữ agent đi đúng hướng trong một task. Project instruction giữ các rule lặp lại qua nhiều task và session."
+/>
+
+## `AGENTS.md` và `CLAUDE.md` là gì
+
+Hiểu đơn giản, đây là những file Markdown chứa hướng dẫn dành cho coding agent.
+
+Nếu bạn dùng Claude Code, file quen thuộc nhất là `CLAUDE.md`. Nếu tool của bạn hỗ trợ `AGENTS.md`, bạn có thể dùng file đó như một bộ hướng dẫn chung cho agent.
+
+Tên file khác nhau tùy tool, nhưng ý tưởng giống nhau:
+
+- Giải thích project này làm gì
+- Chỉ cho agent biết nên bắt đầu đọc từ đâu
+- Ghi lại command cần dùng
+- Nói rõ convention và giới hạn quan trọng
+- Định nghĩa thế nào là hoàn thành một task
+
+Mình hay nghĩ nó giống tờ giấy đặt trên bàn của một đồng nghiệp mới.
+
+Tờ giấy đó không cần dạy họ toàn bộ hệ thống. Nó chỉ cần giúp họ không phạm mấy lỗi cơ bản trong ngày đầu tiên.
+
+<Callout type="note">
+  Không phải tool nào cũng đọc cùng một tên file hoặc cùng một cách. Hãy kiểm
+  tra docs của tool bạn đang dùng. Phần quan trọng trong bài này là cách chọn
+  nội dung, không phải cố dùng một tên file cho mọi nơi.
+</Callout>
+
+## Bắt đầu bằng năm thứ thật sự cần thiết
+
+Hồi đầu mình từng nghĩ instruction file càng chi tiết thì agent càng làm tốt.
+
+Sau đó file cứ dài dần. Có architecture, coding style, product roadmap, lịch sử decision, cách deploy, vài đoạn giải thích bug cũ. Nhìn thì đầy đủ, nhưng task nhỏ nào agent cũng phải đọc cả đống thứ không liên quan.
+
+Giờ nếu tạo file mới, mình chỉ bắt đầu bằng năm nhóm thông tin.
+
+{/* IMAGE PROMPT:
+Create a 16:9 editorial diagram on warm off-white paper. Place one open blue handbook labeled "AGENTS.md" in the center. Connect it to five color-coded cards labeled exactly "PROJECT", "STRUCTURE", "COMMANDS", "CONVENTIONS", and "RULES + DONE", each with a simple matching icon. Hand-drawn navy ink outlines, soft watercolor fills, generous whitespace. No extra text, logos, gradients, or watermark.
+Generated asset: ../../assets/agent-coding-101-03-instruction-anatomy.webp
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784030847/eb60045f-3c5c-4a99-9ee1-8c220bca0e16.png"
+  alt="Năm phần chính của một file instruction dành cho coding agent"
+  caption="Một instruction file tối thiểu chỉ cần nói rõ project, cấu trúc, command, convention, rule và điều kiện hoàn thành."
+/>
+
+### 1. Project này là gì
+
+Chỉ cần một hoặc hai câu.
+
+```md
+# Project
+
+Đây là web app quản lý booking cho các studio nhỏ.
+Frontend và API nằm chung trong một monorepo.
+```
+
+Mục tiêu là giúp agent có một mental model tối thiểu. Nó cần biết đây là app, library, CLI tool hay content repository.
+
+Đừng paste nguyên phần giới thiệu marketing từ README. Agent cần sự thật để làm việc, không cần tagline.
+
+### 2. Cấu trúc quan trọng
+
+Không cần liệt kê toàn bộ cây thư mục. Chỉ ghi những chỗ agent dễ đi nhầm.
+
+```md
+## Structure
+
+- `apps/web`: giao diện Next.js
+- `apps/api`: API server
+- `packages/domain`: business rules dùng chung
+- `packages/ui`: component dùng chung
+- `tests/e2e`: test cho các user flow chính
+```
+
+Nếu tên folder đã quá rõ thì không cần giải thích lại. `tests` là nơi chứa test - chuyện đó agent thường tự hiểu được.
+
+Nhưng nếu project có một folder tên `core` mà thật ra chỉ chứa integration với vendor, nên nói rõ. Mấy chỗ tên nghe một đằng nhưng trách nhiệm một nẻo rất dễ làm cả người lẫn agent hiểu sai.
+
+### 3. Command phải chạy
+
+Đây là phần mình thấy có giá trị ngay lập tức.
+
+```md
+## Commands
+
+- Cài dependency: `pnpm install`
+- Chạy dev: `pnpm dev`
+- Chạy unit test: `pnpm test`
+- Chạy một test file: `pnpm test <path>`
+- Kiểm tra type: `pnpm typecheck`
+- Lint: `pnpm lint`
+```
+
+Nếu không ghi, agent có thể tự đọc `package.json` để tìm. Nhưng một command rõ ràng giúp nó đỡ đoán và đỡ chạy nhầm lệnh tốn thời gian.
+
+Nhớ kiểm tra command còn chạy được. Instruction sai còn nguy hiểm hơn không có instruction, vì agent sẽ tin nó là rule chính thức của project.
+
+### 4. Convention dễ bị phá
+
+Chỉ ghi những convention mà agent không thể dễ dàng suy ra từ code.
+
+Ví dụ:
+
+```md
+## Conventions
+
+- Business rule mới đặt trong `packages/domain`, không đặt trong route handler.
+- Dùng component có sẵn trong `packages/ui` trước khi tạo component mới.
+- Error trả về API dùng mã ổn định, không dùng nguyên error message làm mã.
+- Không tạo barrel export mới.
+```
+
+Nếu codebase đã dùng TypeScript ở mọi nơi, không cần viết "hãy dùng TypeScript".
+
+Nếu formatter đã tự xử lý dấu chấm phẩy, cũng không cần dành năm dòng để tranh luận chuyện dấu chấm phẩy.
+
+Instruction có giá trị nhất ở chỗ nó chứa **context mà code không tự kể được**.
+
+### 5. Giới hạn và điều kiện hoàn thành
+
+Đây là phần giúp agent biết khi nào phải dừng.
+
+```md
+## Working rules
+
+- Không tự commit hoặc push.
+- Không thêm package mới nếu chưa được yêu cầu.
+- Không sửa migration đã được deploy.
+- Không refactor file ngoài phạm vi task.
+
+## Definition of done
+
+- Chạy test liên quan tới phần đã sửa.
+- Chạy typecheck nếu thay đổi TypeScript.
+- Tóm tắt file đã đổi và rủi ro còn lại.
+```
+
+Mình rất thích phần `Definition of done` vì nó giảm được kiểu agent sửa code xong rồi báo "Done" ngay lập tức.
+
+Code đã được viết chưa chắc task đã xong. Có thể test chưa chạy. Type chưa check. Diff có file thừa. Một done condition ngắn giúp hai bên dùng chung một cách hiểu về chữ "xong".
+
+## Một file tối thiểu có thể trông như thế nào
+
+Gộp các phần trên lại, đây là một file đủ dùng cho một project nhỏ:
+
+```md
+# Project
+
+Đây là web app quản lý booking cho các studio nhỏ.
+Project dùng TypeScript và pnpm.
+
+## Structure
+
+- `apps/web`: giao diện
+- `apps/api`: API
+- `packages/domain`: business rules dùng chung
+- `packages/ui`: component dùng chung
+
+## Commands
+
+- Dev: `pnpm dev`
+- Test: `pnpm test`
+- Typecheck: `pnpm typecheck`
+- Lint: `pnpm lint`
+
+## Conventions
+
+- Đặt business rule trong `packages/domain`, không đặt trong route handler.
+- Tái sử dụng component trong `packages/ui` trước khi tạo component mới.
+- Giữ public API hiện tại trừ khi task yêu cầu thay đổi.
+
+## Working rules
+
+- Đọc file liên quan trước khi sửa.
+- Không thêm package mới nếu chưa được yêu cầu.
+- Không refactor ngoài scope.
+- Không tự commit hoặc push.
+
+## Definition of done
+
+- Chạy test liên quan.
+- Chạy typecheck nếu sửa TypeScript.
+- Tóm tắt thay đổi và rủi ro còn lại.
+```
+
+Không có gì cao siêu trong file này.
+
+Nhưng nó trả lời được mấy câu agent cần biết nhất: đây là repo gì, code nằm ở đâu, chạy lệnh nào, không được làm gì, và làm tới đâu thì xong.
+
+Với project nhỏ, vậy là đủ để bắt đầu.
+
+## Đừng biến instruction file thành wiki
+
+Một file tốt không phải file chứa nhiều thông tin nhất. Nó là file giúp agent đưa ra quyết định đúng hơn.
+
+Mấy thứ mình thường không bỏ vào:
+
+- Toàn bộ architecture của hệ thống
+- Lịch sử mọi decision từ ngày đầu project
+- Tài liệu API dài hàng trăm dòng
+- Roadmap vài quý tới
+- Chi tiết của một task tạm thời
+- Secret, token, password hoặc credential
+
+Tài liệu dài nên nằm ở docs riêng. Instruction file chỉ cần chỉ đường tới đúng tài liệu khi cần.
+
+Ví dụ:
+
+```md
+## References
+
+- Khi sửa authentication, đọc `docs/auth-flow.md` trước.
+- Khi đổi database schema, đọc `docs/database-migrations.md`.
+- Quy ước API nằm trong `docs/api-conventions.md`.
+```
+
+Như vậy agent chỉ mở tài liệu sâu khi task thật sự liên quan.
+
+Đỡ phải nhét toàn bộ wiki vào đầu nó mỗi lần chỉ muốn sửa một button.
+
+<Callout type="warning">
+  Không bao giờ đặt API key, password hoặc credential vào instruction file. Đây
+  là file nằm trong repo và thường được gửi vào context của agent.
+</Callout>
+
+## Rule tốt phải cụ thể và kiểm tra được
+
+Một lỗi khác mình hay gặp là viết rule nghe đúng nhưng không giúp agent hành động.
+
+Ví dụ:
+
+```text
+Viết code clean và maintainable.
+Tuân theo best practices.
+Ưu tiên performance.
+```
+
+Ai lại muốn code bẩn, khó maintain và chậm đâu.
+
+Vấn đề là mỗi người hiểu mấy câu đó một kiểu. Agent cũng vậy. Nó có thể tạo thêm abstraction vì nghĩ đó là clean code, trong khi mình chỉ muốn sửa ba dòng.
+
+Rule cụ thể hơn sẽ hữu ích hơn:
+
+```text
+Không tạo abstraction mới nếu chỉ có một nơi sử dụng.
+Không đổi public API trong task refactor.
+Query danh sách phải có pagination.
+Mọi thay đổi trong auth phải chạy test integration.
+```
+
+Mình hay tự hỏi hai câu khi thêm một rule:
+
+Một là, agent có biết phải làm gì khác đi sau khi đọc câu này không?
+
+Hai là, lúc review mình có kiểm tra được nó đã tuân theo chưa?
+
+Nếu cả hai câu đều là không, rule đó có lẽ chỉ đang làm file dài thêm.
+
+## Viết từ lỗi thật, không viết từ nỗi sợ
+
+Mình không recommend ngồi một buổi rồi cố tưởng tượng mọi thứ agent có thể làm sai.
+
+Kết quả thường là một file rất dài, đầy những câu "không được". Nhiều rule chưa bao giờ cần tới. Một số rule còn mâu thuẫn với nhau.
+
+Cách đơn giản hơn là bắt đầu nhỏ, rồi để file lớn lên từ lỗi thật.
+
+Ví dụ agent dùng `npm` trong khi project dùng `pnpm`. Thêm command đúng.
+
+Agent sửa luôn file ngoài scope. Thêm rule không refactor ngoài task.
+
+Agent báo xong nhưng chưa chạy test. Thêm `Definition of done`.
+
+Agent tạo business logic trong route handler. Thêm một dòng chỉ tới `packages/domain`.
+
+Mỗi rule lúc này đều có lý do tồn tại.
+
+Nó giống onboarding document của một team. Những phần hữu ích nhất thường được viết sau khi có ai đó vấp đúng chỗ đó.
+
+<Quote color="blue">
+  Instruction file tốt không phải bản danh sách mọi lỗi có thể xảy ra. Nó là ký
+  ức ngắn gọn về những lỗi project không muốn lặp lại.
+</Quote>
+
+## Kiểm tra xem agent có hiểu project chưa
+
+Sau khi viết file, đừng vội giao một feature lớn để thử.
+
+Mình hay bắt đầu bằng một câu hỏi read-only:
+
+```text
+Đọc instruction của project và các file cần thiết.
+Chưa sửa code.
+
+Hãy tóm tắt:
+- Project này làm gì?
+- Với một thay đổi trong auth, bạn sẽ bắt đầu đọc từ đâu?
+- Bạn cần chạy command nào để verify?
+- Có giới hạn nào bạn phải giữ?
+```
+
+Câu trả lời của agent cho mình biết instruction có rõ không.
+
+Nếu nó trả lời sai, chưa chắc lỗi nằm ở model. Có thể file viết mơ hồ. Có thể command cũ. Có thể hai rule đang mâu thuẫn. Có thể mình đặt thông tin quan trọng trong một đoạn quá dài.
+
+Sửa instruction cũng giống sửa prompt: nhìn vào chỗ hiểu sai rồi làm context rõ hơn.
+
+Sau đó mới giao một task nhỏ, giống workflow ở bài trước.
+
+## Nếu team dùng nhiều coding agent
+
+Một team có thể có người dùng Claude Code, người dùng một agent trong editor, và CI cũng có bot review code.
+
+Nếu mỗi tool có một file instruction riêng chứa nguyên một bản copy, sớm muộn chúng cũng lệch nhau.
+
+Một file nói dùng `pnpm test`. File kia vẫn nói dùng `npm test`. Một file cấm sửa migration cũ. File kia không có rule đó.
+
+Với trường hợp này, mình thích chọn một nơi làm nguồn chính. Các file dành riêng cho từng tool chỉ giữ phần khác biệt và trỏ về nguồn đó nếu workflow cho phép.
+
+Project nhỏ chưa cần nghĩ phức tạp vậy. Nhưng nếu bạn thấy mình đang copy cùng một rule qua ba file, đó là lúc nên dừng lại và chọn một source of truth.
+
+## Workflow mình recommend
+
+Nếu hôm nay bạn muốn thêm instruction cho một repo đang có, mình nghĩ cứ làm theo vòng nhỏ này:
+
+Một là tạo `AGENTS.md`, `CLAUDE.md`, hoặc file mà tool của bạn hỗ trợ ở root project.
+
+Hai là chỉ viết năm nhóm: project, structure, commands, conventions, working rules.
+
+Ba là hỏi agent tóm tắt lại project trước khi sửa code.
+
+Bốn là giao một task nhỏ và review xem nó còn đi sai ở đâu.
+
+Năm là chỉ thêm rule khi lỗi đó có khả năng lặp lại.
+
+Đừng cố viết file hoàn hảo ngay lần đầu. Mình nghĩ instruction file nên sống cùng project. Project đổi thì nó đổi. Workflow đổi thì nó đổi.
+
+Quan trọng nhất là giữ nó đúng và gọn.
+
+## Kết
+
+Prompt tốt giúp agent làm đúng một task.
+
+Project instruction tốt giúp agent bước vào repo với ít câu hỏi ngớ ngẩn hơn.
+
+Bạn không cần viết một cuốn sách cho robot. Chỉ cần nói rõ repo này là gì, đường đi nằm ở đâu, mấy rule nào không được phá, và thế nào mới được xem là xong.
+
+Bắt đầu bằng một file ngắn. Dùng nó qua vài task. Chỗ nào agent vẫn hiểu sai thì sửa đúng chỗ đó.
+
+Ít nhưng đúng thường hữu ích hơn rất nhiều so với đầy đủ nhưng không ai biết phần nào còn chính xác.
+
+See yah.
