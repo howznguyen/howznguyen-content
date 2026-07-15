@@ -8,3 +8,33 @@ featured: true
 status: "active"
 author: howznguyen
 ---
+
+Mở một coding agent lên thì khá dễ. Nhưng để agent hiểu đúng project, nhận đúng task, sửa đúng chỗ và không kéo mình vào một buổi debug dài hơn tự code thì lại là câu chuyện khác.
+
+**Agent Coding 101** là series mình viết cho những bạn mới bắt đầu dùng AI để code. Không quan trọng bạn đang dùng Claude Code, Codex, Cursor hay Copilot. Mục tiêu của series không phải là dạy một bộ prompt thần kỳ, mà là giúp bạn xây được một workflow đủ rõ để làm việc với coding agent mỗi ngày.
+
+Series bắt đầu từ những khái niệm cơ bản, sau đó đi dần vào cách giao việc, cách giúp agent hiểu project, cách biến một feature mơ hồ thành spec và các task có thể verify. Những bài sau sẽ nói về context, memory và multi-agent, khi một session hoặc một agent không còn đủ cho công việc.
+
+## Series này dành cho ai
+
+Series này phù hợp nếu bạn đã biết code nhưng vẫn chưa thật sự thoải mái khi giao việc cho agent. Có thể bạn từng đưa cho agent một prompt khá dài nhưng kết quả vẫn sai. Hoặc agent làm đúng ở vài file đầu, rồi bắt đầu quên constraint, sửa quá scope và tạo ra một diff khó review.
+
+Bạn không cần biết quá sâu về LLM hay phải dùng đúng một tool nào đó. Chỉ cần có một project thật và sẵn sàng bắt đầu bằng những task nhỏ.
+
+## Bạn sẽ học được gì
+
+Mình sẽ đi từ những tình huống thường gặp khi dùng coding agent, giải thích vì sao chúng xảy ra và đưa ra một workflow có thể áp dụng ngay vào project thật.
+
+Sau series này, bạn sẽ biết cách giao một task có scope rõ, cung cấp đúng context, viết project instructions vừa đủ và review kết quả của agent thay vì chỉ nhìn xem code có chạy hay không. Khi feature lớn hơn, bạn cũng sẽ biết cách đi từ idea tới spec, chia thành các task nhỏ và quyết định lúc nào một session hoặc một agent không còn đủ.
+
+Mục tiêu cuối cùng không phải là để agent viết được nhiều code hơn. Mà là để bạn kiểm soát được agent đang làm gì, vì sao nó làm như vậy và cách kiểm tra kết quả trước khi merge.
+
+## Cách đọc series
+
+Bạn nên đọc theo thứ tự nếu mới bắt đầu. Nếu đã dùng coding agent một thời gian, bạn có thể nhảy thẳng tới bài đang đúng với vấn đề mình gặp.
+
+Mỗi bài tập trung vào một vấn đề và có thể đọc riêng. Danh sách chapter bên dưới cũng chính là thứ tự mình recommend cho người mới. Các bài mới sẽ tiếp tục được thêm vào danh sách này, nên không cần một roadmap riêng.
+
+<Callout type="tip" title="Không cần học hết rồi mới bắt đầu">
+  Chọn một task nhỏ trong project đang làm, đọc bài tương ứng và thử ngay. Làm việc với coding agent cũng giống học một tool mới: đọc giúp mình hiểu, nhưng vài lần giao task sai mới giúp mình biết rule nào thật sự quan trọng.
+</Callout>
