@@ -9,6 +9,7 @@ Public content repository for [howznguyen.dev](https://howznguyen.dev). Blog pos
 ```
 howznguyen-content/
 ├── README.md              ← you are here
+├── glossary/              ← one contextual term note per .md file
 ├── CONTRIBUTING.md        ← contribution guide
 ├── AGENTS.md              ← AI coding assistant instructions
 ├── llms.txt               ← AI agent reference
@@ -185,6 +186,39 @@ See [`posts/_demo.mdx`](posts/_demo.mdx) for a live example of every component. 
 - `<TodoList>` + `<Todo checked>` — checklist
 - `<Quote color="blue|red|green|...">` — styled blockquote
 - `<Code language="..." title="...">` — code block with custom title
+- `<TermNote id="...">term</TermNote>` — inline contextual note resolved from `glossary/<id>.md`
+
+### Shared term notes
+
+Terms that appear across several posts live in `glossary/`. Each term has one
+Markdown file; its filename is the stable key used by `<TermNote>`:
+
+```md
+---
+title: "Context window"
+defaultLocale: vi
+---
+
+# vi
+
+Phần chú thích tiếng Việt.
+
+# en
+
+The English contextual note.
+```
+
+Reference it directly in MDX without importing anything:
+
+```mdx
+Agent chỉ nhìn thấy dữ liệu nằm trong <TermNote id="context-window">context window</TermNote> hiện tại.
+```
+
+Name files with a lowercase kebab-case key, for example
+`glossary/context-window.md`. Locale sections use a level-one heading such as
+`# vi` or `# en`. Keep each note short and contextual, usually one or two
+sentences. For a note used only once, pass `explanation="..."` directly instead
+of adding it to the shared glossary.
 
 ## Publishing workflow
 

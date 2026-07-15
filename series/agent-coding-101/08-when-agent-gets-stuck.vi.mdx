@@ -1,83 +1,80 @@
 ---
 title: "Khi coding agent bị kẹt hoặc đi sai hướng"
-description: "Cách dừng vòng lặp, chẩn đoán bằng evidence và hypothesis, rồi quyết định tiếp tục session, handoff hay hỏi người sở hữu."
+description: "Cách dừng một vòng sửa mãi không xong, dựng giả thuyết có căn cứ rồi quyết định tiếp tục, bàn giao hay hỏi con người."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784097436/tqpq1icrlhjuiqvprldx.webp"
 ---
 
-Ở bài trước, mình đã đóng băng trạng thái, review diff và chạy verification trước khi tin lời agent báo `done`.
+Ở bài trước, mình đã chốt trạng thái, review diff và chạy các bước kiểm tra trước khi tin lời agent báo `done`.
 
-Nhưng nếu verification cứ fail thì sao?
+Nhưng nếu test vẫn đỏ hết vòng này tới vòng khác thì sao?
 
-Agent sửa một chỗ. Test vẫn đỏ. Nó đổi sang cách khác. Một test xanh lên thì hai test khác fail. Sau vài vòng, diff lớn gấp ba nhưng mình vẫn chưa biết lỗi ban đầu nằm ở đâu.
+Agent sửa một chỗ. Test vẫn đỏ. Nó đổi sang cách khác. Một test xanh lên thì hai test khác lại đỏ. Sau vài vòng, diff lớn gấp ba nhưng mình vẫn chưa biết lỗi ban đầu nằm ở đâu.
 
 Đây là lúc một coding agent dễ biến từ người làm việc rất nhanh thành một người **thử mọi thứ cũng rất nhanh**.
 
-Phản xạ thường gặp là prompt thêm "hãy suy nghĩ kỹ hơn", "thử lại" hoặc đổi model. Đôi khi cách đó có tác dụng. Nhưng nếu vòng lặp không tạo ra evidence mới, thêm token chỉ giúp agent đi thêm vài vòng quanh cùng một chỗ.
+Phản xạ thường gặp là nhắc thêm “hãy suy nghĩ kỹ hơn”, “thử lại” hoặc đổi model. Đôi khi có tác dụng. Nhưng nếu mỗi vòng không tạo ra bằng chứng mới, thêm token chỉ giúp agent chạy nhanh hơn quanh đúng cái vòng cũ.
 
-Bài này nói về lúc cần dừng tay. Mình sẽ tách lỗi requirement, context, reproduction, environment và implementation; dựng hypothesis có thể kiểm tra; rồi chọn tiếp tục session hiện tại, mở session mới hay đưa decision về cho con người.
+Bài này nói về lúc cần dừng tay. Mình sẽ tách vấn đề nằm ở yêu cầu, ngữ cảnh, cách tái hiện lỗi, môi trường hay phần code; dựng vài giả thuyết có thể kiểm tra; rồi chọn tiếp tục session, mở session mới hay đưa quyết định về cho con người.
 
 ## Agent bị kẹt không có nghĩa là nó ngừng trả lời
 
 Một agent có thể trả lời liên tục nhưng công việc vẫn đứng yên.
 
-Với mình, **bị kẹt** là khi mỗi vòng không làm giảm uncertainty. Agent vẫn đọc file, sửa code và chạy command, nhưng sau vòng đó mình không biết thêm điều gì đáng tin về nguyên nhân lỗi.
+Với mình, **bị kẹt** là khi mỗi vòng không làm mình hiểu vấn đề hơn. Agent vẫn đọc file, sửa code và chạy câu lệnh, nhưng sau vòng đó mình chẳng biết thêm điều gì đáng tin về nguyên nhân lỗi.
 
 Một vòng debug tốt thường tạo ra ít nhất một trong ba thứ:
 
-- Một hypothesis bị loại
+- Một giả thuyết bị loại
 - Một vùng nghi ngờ được thu hẹp
-- Một evidence mới làm thay đổi hướng điều tra
+- Một bằng chứng mới làm thay đổi hướng điều tra
 
-Nếu không có thứ nào xuất hiện, đó chỉ là activity chứ chưa phải progress.
+Nếu không có thứ nào xuất hiện, đó chỉ là nhiều hoạt động chứ chưa chắc có tiến triển. Quạt quay rất nhanh nhưng phòng chưa chắc mát.
 
 Mình thường để ý các dấu hiệu sau:
 
 - Agent lặp lại cùng một giải thích bằng từ khác
-- Diff chuyển qua lại giữa hai cách implement
-- Test fail đổi chỗ nhưng root cause chưa rõ hơn
+- Diff chuyển qua lại giữa hai cách làm
+- Test đỏ đổi chỗ nhưng nguyên nhân gốc chưa rõ hơn
 - Agent thêm retry, delay, mock hoặc catch chung để làm lỗi biến mất
-- Scope mở rộng dần sang config, dependency hoặc module không liên quan
-- Command trả lỗi nhưng agent bỏ qua rồi kết luận bằng suy đoán
-- Final summary rất tự tin nhưng evidence vẫn giống vòng trước
+- Phạm vi mở rộng dần sang cấu hình, dependency hoặc module không liên quan
+- Câu lệnh trả lỗi nhưng agent bỏ qua rồi kết luận bằng suy đoán
+- Bản tóm tắt cuối rất tự tin nhưng bằng chứng vẫn giống vòng trước
 - Agent liên tục nói cần "một fix nhỏ nữa"
 
 Một lần lặp chưa phải vấn đề. Debug vốn là quá trình thử và quan sát.
 
-Nhưng nếu **cùng một failure condition xuất hiện hai hoặc ba lần mà không có evidence mới**, mình dùng một stop rule đơn giản:
+Nhưng nếu **cùng một lỗi xuất hiện hai hoặc ba lần mà không có bằng chứng mới**, mình dùng một quy tắc dừng đơn giản:
 
 ```text
 Dừng sửa file.
-Không thử thêm implementation mới.
-Tóm tắt evidence hiện có, điều đã bị loại và điều còn chưa biết.
+Không thử thêm cách làm mới.
+Tóm tắt bằng chứng hiện có, điều đã bị loại và điều còn chưa biết.
 ```
 
-Stop rule không phải bỏ cuộc. Nó đổi mode từ **implement** sang **diagnose**.
+Quy tắc dừng không phải bỏ cuộc. Nó chỉ đổi từ chế độ **sửa code** sang **chẩn đoán**.
 
-{/* IMAGE PROMPT:
-Create a 16:9 editorial technical diagram on warm off-white paper. On the left, show a friendly navy coding agent trapped in a circular coral path through three stages. A bold checkpoint breaks the circle and leads right into a calm blue diagnostic workspace with evidence cards and a magnifying glass. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only the exact short labels "EDIT", "TEST", "FAIL", "STOP", and "DIAGNOSE". Make the arrows and exit path unambiguous. No logos, fake application UI, gradients, watermark, tiny text, or decorative clutter.
-*/}
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784097436/txiaegmfmdmsbakoffix.webp"
-  alt="Vòng lặp edit, test và fail được chặn lại để chuyển sang diagnose"
-  caption="Khi một vòng lặp không tạo ra evidence mới, bước tiếp theo không phải edit thêm mà là chuyển sang diagnosis."
+  alt="Vòng lặp sửa, test và lỗi được chặn lại để chuyển sang chẩn đoán"
+  caption="Khi một vòng lặp không tạo ra bằng chứng mới, bước tiếp theo không phải sửa thêm mà là chuyển sang chẩn đoán."
 />
 
-<Callout type="warning" title="Đừng để recovery làm mất evidence">
-  Khi agent bắt đầu kẹt, không bảo nó reset, xoá log, rewrite cả module hoặc dọn
-  working tree cho sạch. Trước hết phải giữ lại trạng thái đang fail và những gì
+<Callout type="warning" title="Đừng dọn mất bằng chứng">
+  Khi agent bắt đầu kẹt, không bảo nó reset, xoá log, viết lại cả module hoặc dọn
+  thư mục làm việc cho sạch. Trước hết phải giữ lại trạng thái đang lỗi và những gì
   đã quan sát được.
 </Callout>
 
 ## Đóng băng trạng thái trước khi chẩn đoán
 
-Ở bài 07, mình đóng băng trạng thái để review một final diff.
+Ở bài 07, mình đóng băng trạng thái để review diff cuối.
 
 Ở đây mình đóng băng vì một lý do khác: cần giữ nguyên hiện trường đủ lâu để hiểu lỗi.
 
-Nếu agent vừa điều tra vừa thay code liên tục, mỗi observation có thể đến từ một trạng thái khác nhau. Test fail lần đầu trên implementation A. Log lần sau lại đến từ implementation B. Tới lúc so sánh, cả hai không còn cùng một thí nghiệm.
+Nếu agent vừa điều tra vừa thay code liên tục, mỗi quan sát có thể đến từ một trạng thái khác nhau. Test lỗi lần đầu trên cách làm A. Log lần sau lại đến từ cách làm B. Tới lúc so sánh, cả hai không còn cùng một thí nghiệm.
 
-Snapshot tối thiểu của mình thường gồm:
+Ảnh chụp trạng thái tối thiểu của mình thường gồm:
 
 ```bash
 git status --short
@@ -88,302 +85,299 @@ git diff
 Sau đó ghi lại:
 
 ```text
-Expected:
-[Behavior đáng lẽ xảy ra]
+Mong đợi:
+[Cách hệ thống đáng lẽ hoạt động]
 
-Actual:
-[Behavior thật sự quan sát được]
+Thực tế:
+[Điều thật sự quan sát được]
 
-Reproduction:
-[Command hoặc các bước ngắn nhất làm lỗi xuất hiện]
+Cách tái hiện:
+[Câu lệnh hoặc các bước ngắn nhất làm lỗi xuất hiện]
 
-Failure:
-[Error chính xác, exit code hoặc state sai]
+Lỗi:
+[Thông báo lỗi chính xác, mã thoát hoặc trạng thái sai]
 
-Last known good:
-[Commit, branch, version hoặc thời điểm từng hoạt động]
+Lần gần nhất còn tốt:
+[Commit, nhánh, phiên bản hoặc thời điểm từng hoạt động]
 
-Current scope:
+Phạm vi hiện tại:
 [File và module đang bị nghi ngờ]
 ```
 
-Google SRE gọi expected behavior, actual behavior và cách reproduce là những phần cốt lõi của một problem report tốt. Với coding agent, format này cũng rất hợp vì nó buộc cuộc nói chuyện quay về điều quan sát được.
+Google SRE xem điều mong đợi, điều thực tế và cách tái hiện là những phần cốt lõi của một báo cáo lỗi tốt. Với coding agent, mẫu này cũng rất hợp vì nó buộc cuộc nói chuyện quay về điều quan sát được.
 
 Đừng chỉ ghi "test invitation đang lỗi".
 
-Một report hữu ích hơn sẽ là:
+Một báo cáo hữu ích hơn sẽ là:
 
 ```text
-Expected:
-Hai request đồng thời cho cùng workspace và email chỉ tạo một pending invitation.
+Mong đợi:
+Hai yêu cầu đồng thời cho cùng workspace và email chỉ tạo một lời mời đang chờ.
 
-Actual:
-Có hai record pending với cùng workspaceId và normalizedEmail.
+Thực tế:
+Có hai bản ghi đang chờ với cùng workspaceId và normalizedEmail.
 
-Reproduction:
+Cách tái hiện:
 bun test test/invitations.concurrent.test.ts
 
-Failure:
+Lỗi:
 Expected invitation count 1, received 2.
 
-Current scope:
-Invitation service, database constraint và transaction boundary.
+Phạm vi hiện tại:
+Service lời mời, ràng buộc database và ranh giới transaction.
 ```
 
-Report này chưa nói root cause là gì. Chính vì vậy nó tốt.
+Báo cáo này chưa nói nguyên nhân gốc là gì. Chính vì vậy nó tốt.
 
-Nó mô tả failure mà chưa trộn assumption vào fact.
+Nó mô tả lỗi mà chưa trộn giả định vào điều đã biết.
 
 ## Trước khi sửa code, phân loại thứ đang sai
 
-Nhiều vòng lặp kéo dài vì agent mặc định mọi failure đều là implementation bug.
+Nhiều vòng lặp kéo dài vì agent mặc định mọi lỗi đều nằm ở phần code.
 
 Thực tế, ít nhất có năm nhóm khác nhau.
 
 | Nhóm | Dấu hiệu | Câu hỏi cần trả lời |
 | --- | --- | --- |
-| **Requirement hoặc decision** | Hai behavior đều nghe hợp lý, acceptance criteria không phân biệt được | Người dùng thật sự muốn điều gì? Ai có quyền chốt? |
-| **Context hoặc mental model** | Agent gọi nhầm abstraction, bỏ qua project instruction, hiểu sai data flow | Source of truth nào đang thiếu hoặc stale? |
-| **Reproduction** | Test flaky, bước chạy không ổn định, không tái hiện được lỗi | Failure nào là tín hiệu thật? Có case tối thiểu chưa? |
-| **Environment hoặc tooling** | Sai version, thiếu service, credential, port, fixture hoặc generated artifact | Command có đang chạy trong môi trường hợp lệ không? |
-| **Implementation hypothesis** | Failure ổn định, requirement rõ, environment đáng tin | Cơ chế nào trong code có thể tạo ra behavior này? |
+| **Yêu cầu hoặc quyết định** | Hai cách hoạt động đều nghe hợp lý, tiêu chí hoàn thành không phân biệt được | Người dùng thật sự muốn điều gì? Ai có quyền chốt? |
+| **Ngữ cảnh hoặc cách hiểu** | Agent gọi nhầm abstraction, bỏ qua sổ tay project, hiểu sai luồng dữ liệu | Nguồn chuẩn nào đang thiếu hoặc đã cũ? |
+| **Cách tái hiện** | Test lúc xanh lúc đỏ, bước chạy không ổn định, không tái hiện được lỗi | Lỗi nào là tín hiệu thật? Có trường hợp tối thiểu chưa? |
+| **Môi trường hoặc công cụ** | Sai phiên bản, thiếu service, thông tin đăng nhập, cổng, dữ liệu test hoặc đầu ra sinh tự động | Câu lệnh có đang chạy trong môi trường hợp lệ không? |
+| **Giả thuyết về phần code** | Lỗi ổn định, yêu cầu rõ, môi trường đáng tin | Cơ chế nào trong code có thể tạo ra kết quả này? |
 
 Phân loại này không cần đúng tuyệt đối ngay từ đầu.
 
 Nó chỉ giúp mình không giao nhầm loại công việc.
 
-Nếu requirement mơ hồ, agent cần đưa ra decision cần chốt chứ không nên tự chọn behavior rồi sửa test theo.
+Nếu yêu cầu mơ hồ, agent cần đưa ra quyết định cần chốt chứ không nên tự chọn cách hoạt động rồi sửa test theo.
 
-Nếu context sai, thêm một source of truth chính xác hữu ích hơn thêm một đoạn prompt dài.
+Nếu ngữ cảnh sai, thêm một nguồn chuẩn chính xác hữu ích hơn thêm một đoạn prompt dài.
 
-Nếu reproduction không ổn định, việc đầu tiên là thu nhỏ case và kiểm soát input. Không nên bắt agent sửa production code theo một failure lúc có lúc không.
+Nếu cách tái hiện không ổn định, việc đầu tiên là thu nhỏ trường hợp và kiểm soát đầu vào. Không nên bắt agent sửa code chạy thật theo một lỗi lúc có lúc không.
 
-Nếu environment hỏng, đổi assertion để suite xanh chỉ che mất vấn đề.
+Nếu môi trường hỏng, đổi assertion để bộ test xanh chỉ che mất vấn đề.
 
-Chỉ khi bốn nhóm đầu đủ rõ, mình mới tập trung vào implementation hypothesis.
+Chỉ khi bốn nhóm đầu đủ rõ, mình mới tập trung vào giả thuyết về phần code.
 
 <Callout type="note" title="Có thể có nhiều nguyên nhân cùng lúc">
-  Một test có thể vừa flaky vì environment, vừa phát hiện một race condition thật.
-  Phân loại không nhằm ép mọi lỗi vào đúng một ô. Nó giúp mình biết evidence nào
+  Một test có thể vừa lúc xanh lúc đỏ vì môi trường, vừa phát hiện một race condition thật.
+  Phân loại không nhằm ép mọi lỗi vào đúng một ô. Nó giúp mình biết bằng chứng nào
   còn thiếu trước khi sửa tiếp.
 </Callout>
 
-## Tách fact, assumption và unknown
+## Tách điều đã biết, điều đang đoán và điều chưa biết
 
 Agent rất giỏi nối những mảnh thông tin thành một câu chuyện trôi chảy.
 
-Khi debug, điểm mạnh đó cũng là một cái bẫy. Một assumption nghe hợp lý có thể bị lặp lại vài lần rồi dần được đối xử như fact.
+Khi gỡ lỗi, điểm mạnh đó cũng là một cái bẫy. Một giả định nghe hợp lý có thể bị lặp lại vài lần rồi dần được đối xử như điều đã biết.
 
 Mình dùng ba cột rất đơn giản:
 
-| Loại | Ví dụ trong invitation flow |
+| Loại | Ví dụ trong luồng lời mời |
 | --- | --- |
-| **Fact** | Concurrent test tạo hai record; schema hiện tại không có unique constraint phù hợp |
-| **Assumption** | Hai insert đi qua cùng một check-then-insert window |
-| **Unknown** | Transaction isolation hiện tại có serialize hai request không? |
+| **Điều đã biết** | Test đồng thời tạo hai bản ghi; schema hiện tại không có ràng buộc duy nhất phù hợp |
+| **Giả định** | Hai insert đi qua cùng một khoảng hở giữa bước kiểm tra và bước ghi |
+| **Điều chưa biết** | Mức cô lập transaction hiện tại có tuần tự hoá hai yêu cầu không? |
 
-Fact phải trỏ được tới evidence như diff, test output, schema, log hoặc database state.
+Điều đã biết phải trỏ được tới bằng chứng như diff, kết quả test, schema, log hoặc trạng thái database.
 
-Assumption là cách giải thích tạm thời.
+Giả định là cách giải thích tạm thời.
 
-Unknown là câu hỏi chưa có evidence đủ để trả lời.
+Điều chưa biết là câu hỏi chưa có đủ bằng chứng để trả lời.
 
-Nếu một dòng không biết nên đặt ở đâu, mình hỏi: "Có observation nào chứng minh điều này chưa?"
+Nếu một dòng không biết nên đặt ở đâu, mình hỏi: “Có quan sát nào chứng minh điều này chưa?”
 
-Chưa có thì nó chưa phải fact.
+Chưa có thì nó chưa phải điều đã biết.
 
-Đây cũng là lúc mình xoá bớt context không còn đáng tin. Summary cũ nói module có transaction không quan trọng bằng việc mở implementation hiện tại ra kiểm tra. Một error từ ba vòng trước không quan trọng bằng reproduction trên snapshot đang giữ.
+Đây cũng là lúc mình xoá bớt ngữ cảnh không còn đáng tin. Bản tóm tắt cũ nói module có transaction không quan trọng bằng việc mở code hiện tại ra kiểm tra. Một lỗi từ ba vòng trước không quan trọng bằng kết quả tái hiện trên trạng thái đang giữ.
 
-## Dùng hypothesis để quyết định thí nghiệm tiếp theo
+## Dùng giả thuyết để chọn phép thử tiếp theo
 
-Diagnosis không phải liệt kê mười nguyên nhân có thể xảy ra rồi chọn cái nghe thông minh nhất.
+Chẩn đoán không phải liệt kê mười nguyên nhân có thể xảy ra rồi chọn cái nghe thông minh nhất.
 
-Mỗi hypothesis cần dẫn tới một experiment có khả năng bác bỏ nó.
+Mỗi giả thuyết cần dẫn tới một phép thử có khả năng bác bỏ nó.
 
 Mình hay dùng bảng này:
 
-| Hypothesis | Evidence ủng hộ | Evidence chống lại | Experiment rẻ nhất | Kết quả |
+| Giả thuyết | Bằng chứng ủng hộ | Bằng chứng chống lại | Phép thử rẻ nhất | Kết quả |
 | --- | --- | --- | --- | --- |
-| Unique constraint không tồn tại | Schema không có constraint | Chưa có | Đọc migration và inspect test DB schema | Chưa chạy |
-| Service check rồi insert ngoài transaction | Hai request cùng tạo record | Chưa đọc boundary | Trace code path và transaction wrapper | Chưa chạy |
-| Test dùng hai database khác nhau | Fixture có worker isolation | Cả hai record xuất hiện trong cùng assertion | In database identity của từng request | Chưa chạy |
-| Email normalize không nhất quán | Input có khác casing | Failure vẫn xảy ra với email giống hệt | Chạy case với literal giống nhau | Bị loại |
+| Không có ràng buộc duy nhất | Schema không có ràng buộc | Chưa có | Đọc migration và xem schema database test | Chưa chạy |
+| Service kiểm tra rồi ghi ngoài transaction | Hai yêu cầu cùng tạo bản ghi | Chưa đọc ranh giới | Lần theo đường code và transaction wrapper | Chưa chạy |
+| Test dùng hai database khác nhau | Dữ liệu test có tách theo agent | Cả hai bản ghi xuất hiện trong cùng assertion | In định danh database của từng yêu cầu | Chưa chạy |
+| Email chuẩn hoá không nhất quán | Đầu vào khác chữ hoa, chữ thường | Lỗi vẫn xảy ra với email giống hệt | Chạy trường hợp với cùng một giá trị | Bị loại |
 
-Experiment tốt không nhất thiết phải sửa code.
+Phép thử tốt không nhất thiết phải sửa code.
 
 Nó có thể là:
 
-- Đọc đúng một function và caller của nó
-- Chạy một targeted test với input được kiểm soát
-- Query state trước và sau command
+- Đọc đúng một hàm và nơi gọi nó
+- Chạy một test liên quan với đầu vào được kiểm soát
+- Truy vấn trạng thái trước và sau câu lệnh
 - So sánh commit tốt và commit lỗi
-- Bật log có scope trong test environment
-- Thay một dependency thật bằng fake có quan sát được
-- Chạy cùng command ở một environment sạch
+- Bật log có giới hạn trong môi trường test
+- Thay một dependency thật bằng bản giả có thể quan sát
+- Chạy cùng câu lệnh ở một môi trường sạch
 
-Nếu regression chỉ xuất hiện sau một khoảng commit, `git bisect` có thể dùng binary search để tìm commit đầu tiên đưa bug vào. Đây là ví dụ đẹp của việc thu hẹp không gian tìm kiếm thay vì đọc toàn bộ lịch sử theo cảm giác.
+Nếu lỗi chỉ xuất hiện sau một khoảng commit, `git bisect` có thể tìm nhị phân để xác định commit đầu tiên đưa bug vào. Đây là ví dụ đẹp của việc thu hẹp không gian tìm kiếm thay vì đọc toàn bộ lịch sử theo cảm giác.
 
-Google SRE cũng mô tả troubleshooting như một vòng lặp giữa observation, hypothesis và test. Họ recommend thử nguyên nhân có xác suất cao trước, cân nhắc rủi ro của experiment và ghi lại cả kết quả âm tính.
+Google SRE cũng mô tả gỡ lỗi như một vòng lặp giữa quan sát, giả thuyết và test. Họ khuyên thử nguyên nhân có xác suất cao trước, cân nhắc rủi ro của phép thử và ghi lại cả kết quả âm tính.
 
 Kết quả âm tính không phải phí thời gian.
 
-Nếu một experiment đủ rõ để loại một hypothesis, không gian điều tra đã nhỏ đi. Đó là progress.
+Nếu một phép thử đủ rõ để loại một giả thuyết, không gian điều tra đã nhỏ đi. Đó là tiến triển.
 
-{/* IMAGE PROMPT:
-Create a 16:9 editorial technical process diagram on warm off-white paper. Show five ascending stepping stones from scattered observation cards to a single focused repair station, with a friendly navy coding agent carrying a magnifying glass. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only the exact short labels "FACTS", "ASSUMPTIONS", "HYPOTHESES", "EXPERIMENT", and "FIX". Make the sequence left to right and visually show uncertainty narrowing at each step. No logos, fake application UI, gradients, watermark, tiny text, or decorative clutter.
-*/}
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784097436/guagzavvbice1n3uzb95.webp"
-  alt="Quy trình thu hẹp từ facts, assumptions, hypotheses và experiment tới một fix có căn cứ"
-  caption="Fix nên nằm sau facts, assumptions, hypotheses và một experiment đủ rõ để thu hẹp nguyên nhân."
+  alt="Quy trình thu hẹp từ điều đã biết, giả định, giả thuyết và phép thử tới một cách sửa có căn cứ"
+  caption="Cách sửa nên nằm sau điều đã biết, giả định, giả thuyết và một phép thử đủ rõ để thu hẹp nguyên nhân."
 />
 
-## Recovery loop mình thường dùng
+## Vòng gỡ rối mình thường dùng
 
 Sau khi dừng vòng lặp cũ, mình đi theo bảy bước.
 
-**Bước 1: Freeze.**
+**Bước 1: Chốt trạng thái.**
 
-Dừng sửa. Giữ working tree, exact failure và command reproduce. Nếu failure có thể làm hỏng dữ liệu hoặc state dùng chung, chặn side effect trước rồi mới điều tra.
+Dừng sửa. Giữ thư mục làm việc, lỗi chính xác và câu lệnh tái hiện. Nếu lỗi có thể làm hỏng dữ liệu hoặc trạng thái dùng chung, chặn tác động phụ trước rồi mới điều tra.
 
-**Bước 2: Frame.**
+**Bước 2: Mô tả vấn đề.**
 
-Viết expected, actual, reproduction và scope. Nếu chưa reproduce được, đánh dấu rõ thay vì để agent giả vờ đã có case ổn định.
+Viết điều mong đợi, thực tế, cách tái hiện và phạm vi. Nếu chưa tái hiện được, đánh dấu rõ thay vì để agent giả vờ đã có trường hợp ổn định.
 
-**Bước 3: Classify.**
+**Bước 3: Phân loại.**
 
-Xác định vấn đề nghiêng về requirement, context, reproduction, environment hay implementation. Ghi nhiều nhóm nếu evidence đang chỉ về nhiều phía.
+Xác định vấn đề nghiêng về yêu cầu, ngữ cảnh, cách tái hiện, môi trường hay phần code. Ghi nhiều nhóm nếu bằng chứng đang chỉ về nhiều phía.
 
-**Bước 4: Separate.**
+**Bước 4: Tách riêng.**
 
-Tách fact, assumption và unknown. Bỏ các kết luận không còn trỏ tới trạng thái hiện tại.
+Tách điều đã biết, giả định và điều chưa biết. Bỏ các kết luận không còn trỏ tới trạng thái hiện tại.
 
-**Bước 5: Hypothesize.**
+**Bước 5: Dựng giả thuyết.**
 
-Tạo từ hai tới bốn hypothesis có xác suất hợp lý. Mỗi hypothesis phải có một cách kiểm tra có thể làm nó mạnh hơn hoặc yếu đi.
+Tạo từ hai tới bốn giả thuyết có xác suất hợp lý. Mỗi giả thuyết phải có một cách kiểm tra có thể làm nó mạnh hơn hoặc yếu đi.
 
-**Bước 6: Experiment.**
+**Bước 6: Chạy phép thử.**
 
-Chạy experiment rẻ, read-only và ít side effect trước. Mỗi lượt chỉ nên thay một biến chính. Ghi command, result và hypothesis nào đã bị loại.
+Chạy phép thử rẻ, chỉ đọc và ít tác động phụ trước. Mỗi lượt chỉ nên thay một biến chính. Ghi câu lệnh, kết quả và giả thuyết nào đã bị loại.
 
-**Bước 7: Decide.**
+**Bước 7: Quyết định.**
 
-Khi evidence đủ rõ, chọn một trong bốn outcome:
+Khi bằng chứng đủ rõ, chọn một trong bốn hướng:
 
 ```text
 RESUME
-Tiếp tục implementation với một fix có scope.
+Tiếp tục làm với một cách sửa có phạm vi rõ.
 
 HANDOFF
-Mở session mới với snapshot, evidence và hypotheses còn lại.
+Mở session mới với ảnh chụp trạng thái, bằng chứng và giả thuyết còn lại.
 
 HUMAN DECISION
-Dừng code vì thiếu product, architecture, security hoặc risk decision.
+Dừng code vì thiếu quyết định về sản phẩm, kiến trúc, bảo mật hoặc rủi ro.
 
 BLOCKED
-Ghi rõ dependency, quyền truy cập hoặc external state đang chặn reproduction.
+Ghi rõ phần phụ thuộc, quyền truy cập hoặc trạng thái bên ngoài đang chặn việc tái hiện.
 ```
 
-Sau một fix, mình chạy lại reproduction ban đầu rồi chạy regression check gần vùng bị ảnh hưởng.
+Sau một lần sửa, mình chạy lại cách tái hiện ban đầu rồi chạy regression test gần vùng bị ảnh hưởng.
 
-Nếu failure đổi hình dạng, quay lại `Frame`. Đừng mang nguyên hypothesis cũ sang một problem mới chỉ vì chúng nằm trong cùng session.
+Nếu lỗi đổi hình dạng, quay lại bước mô tả vấn đề. Đừng mang nguyên giả thuyết cũ sang một vấn đề mới chỉ vì chúng nằm trong cùng session.
 
-## Prompt để chuyển agent sang diagnosis mode
+## Prompt để chuyển agent sang chế độ chẩn đoán
 
-Khi agent bắt đầu thử lung tung, prompt dài thêm về implementation thường không giúp nhiều.
+Khi agent bắt đầu thử lung tung, prompt dài thêm về cách làm thường không giúp nhiều.
 
-Mình chuyển mode thật rõ:
+Mình chuyển chế độ thật rõ:
 
 ```text
-Dừng sửa file. Chuyển sang read-only diagnosis.
+Dừng sửa file. Chuyển sang chẩn đoán chỉ đọc.
 
-Problem:
-- Expected: [behavior mong muốn]
-- Actual: [behavior quan sát được]
-- Reproduction: [command hoặc các bước]
-- Current failure: [error hoặc state sai]
+Vấn đề:
+- Mong đợi: [cách hoạt động mong muốn]
+- Thực tế: [điều quan sát được]
+- Cách tái hiện: [câu lệnh hoặc các bước]
+- Lỗi hiện tại: [thông báo lỗi hoặc trạng thái sai]
 
 Làm theo thứ tự:
 1. Chụp git status, diff stat và file list liên quan.
-2. Tách facts, assumptions và unknowns.
-3. Phân loại lỗi: requirement, context, reproduction,
-   environment/tooling hoặc implementation.
-4. Đưa ra tối đa 4 hypotheses, xếp theo xác suất.
-5. Với mỗi hypothesis, đề xuất experiment rẻ nhất có thể bác bỏ nó.
-6. Chạy read-only checks an toàn. Chưa sửa implementation.
+2. Tách điều đã biết, giả định và điều chưa biết.
+3. Phân loại lỗi: yêu cầu, ngữ cảnh, cách tái hiện,
+   môi trường/công cụ hoặc phần code.
+4. Đưa ra tối đa 4 giả thuyết, xếp theo xác suất.
+5. Với mỗi giả thuyết, đề xuất phép thử rẻ nhất có thể bác bỏ nó.
+6. Chạy các bước kiểm tra chỉ đọc và an toàn. Chưa sửa code.
 
 Trả về:
-- Evidence mới
-- Hypothesis đã bị loại và vì sao
-- Hypothesis còn lại
-- Decision hoặc quyền truy cập còn thiếu
+- Bằng chứng mới
+- Giả thuyết đã bị loại và vì sao
+- Giả thuyết còn lại
+- Quyết định hoặc quyền truy cập còn thiếu
 - Đề xuất RESUME, HANDOFF, HUMAN DECISION hoặc BLOCKED
 ```
 
-Giới hạn bốn hypothesis khá hữu ích. Nếu không giới hạn, agent dễ tạo một catalogue nguyên nhân dài nhưng không ưu tiên experiment nào.
+Giới hạn bốn giả thuyết khá hữu ích. Nếu không, agent dễ tạo cả cuốn catalogue nguyên nhân mà chẳng ưu tiên phép thử nào.
 
-Mình cũng nói rõ **experiment phải có mục đích bác bỏ**. Nếu agent chỉ chạy thêm test suite mà không nói kết quả sẽ thay đổi hypothesis nào, command đó có thể chỉ tạo thêm log.
+Mình cũng nói rõ **phép thử phải có mục đích bác bỏ**. Nếu agent chỉ chạy thêm cả bộ test mà không nói kết quả sẽ thay đổi giả thuyết nào, câu lệnh đó có thể chỉ tạo thêm log.
 
 ## Khi nào giữ session hiện tại
 
-Không phải thấy agent kẹt là reset context ngay.
+Không phải thấy agent kẹt là xoá ngữ cảnh ngay.
 
 Mình tiếp tục session hiện tại khi:
 
-- Agent vẫn phân biệt được fact và assumption
-- Reproduction đã ổn định
-- Context đang có còn đúng với repository
-- Mỗi experiment vẫn loại được hypothesis
-- Working tree và scope chưa trở nên hỗn loạn
-- Decision cần thiết đã có
+- Agent vẫn phân biệt được điều đã biết và giả định
+- Cách tái hiện đã ổn định
+- Ngữ cảnh đang có còn đúng với repository
+- Mỗi phép thử vẫn loại được một giả thuyết
+- Thư mục làm việc và phạm vi chưa trở nên hỗn loạn
+- Quyết định cần thiết đã có
 
 Session hiện tại có một lợi thế: nó giữ lịch sử thí nghiệm vừa chạy. Nếu lịch sử đó sạch và có ghi chép, bỏ đi ngay cũng lãng phí.
 
 Nhưng mình mở session mới khi:
 
-- Agent lặp lại assumption đã bị evidence bác bỏ
-- Summary bắt đầu mâu thuẫn với file hoặc command hiện tại
-- Quá nhiều patch tạm, log và nhánh điều tra làm context nhiễu
-- Agent không còn nhớ trạng thái nào tạo ra failure nào
-- Cùng một hướng fix đã quay lại nhiều lần
-- Có thể tạo một handoff ngắn, độc lập và đáng tin
+- Agent lặp lại giả định đã bị bằng chứng bác bỏ
+- Bản tóm tắt bắt đầu mâu thuẫn với file hoặc câu lệnh hiện tại
+- Quá nhiều patch tạm, log và nhánh điều tra làm ngữ cảnh nhiễu
+- Agent không còn nhớ trạng thái nào tạo ra lỗi nào
+- Cùng một hướng sửa đã quay lại nhiều lần
+- Có thể tạo một bản bàn giao ngắn, độc lập và đáng tin
 
-New session không nên nhận toàn bộ transcript cũ.
+Session mới không nên nhận toàn bộ đoạn chat cũ.
 
-Nó cần một **recovery handoff**:
+Nó cần một **bản bàn giao để tiếp tục gỡ lỗi**:
 
 ```text
-Goal:
-[Outcome cần đạt]
+Mục tiêu:
+[Kết quả cần đạt]
 
-Current snapshot:
-- Branch/worktree: [state]
-- Changed files: [scope]
-- Reproduction: [exact command]
-- Failure: [exact result]
+Trạng thái hiện tại:
+- Nhánh/worktree: [trạng thái]
+- File đã đổi: [phạm vi]
+- Cách tái hiện: [câu lệnh chính xác]
+- Lỗi: [kết quả chính xác]
 
-Known facts:
-- [Fact có evidence]
+Điều đã biết:
+- [Điều đã biết có bằng chứng]
 
-Ruled out:
-- [Hypothesis] -> [experiment và kết quả]
+Đã loại:
+- [Giả thuyết] -> [phép thử và kết quả]
 
-Open hypotheses:
-- [Hypothesis] -> [experiment tiếp theo]
+Giả thuyết còn mở:
+- [Giả thuyết] -> [phép thử tiếp theo]
 
-Constraints:
-- Không sửa ngoài [scope]
-- Không lặp lại [experiment đã chạy]
+Giới hạn:
+- Không sửa ngoài [phạm vi]
+- Không lặp lại [phép thử đã chạy]
 
-First action:
-Read-only. Xác nhận reproduction và kiểm tra hypothesis ưu tiên số 1.
+Việc đầu tiên:
+Chỉ đọc. Xác nhận cách tái hiện và kiểm tra giả thuyết ưu tiên số 1.
 ```
 
-Handoff tốt không kể lại drama của session cũ.
+Bản bàn giao tốt không kể lại drama của session cũ.
 
-Nó giữ những thứ có giá trị: final state, evidence, negative result, unknown và next experiment.
+Nó giữ những thứ có giá trị: trạng thái cuối, bằng chứng, kết quả âm tính, điều chưa biết và phép thử tiếp theo.
 
-## Khi nào phải đưa decision về cho con người
+## Khi nào phải đưa quyết định về cho con người
 
 Có những lúc agent không bị kẹt về kỹ thuật. Nó bị kẹt vì chưa ai quyết định sản phẩm phải hoạt động thế nào.
 
@@ -394,189 +388,189 @@ Ví dụ invitation trùng nên:
 - Trả conflict
 - Hay âm thầm thành công để API có tính idempotent
 
-Đây không phải câu hỏi có thể giải bằng cách đọc thêm code nếu repository chưa có contract.
+Đây không phải câu hỏi có thể giải bằng cách đọc thêm code nếu repository chưa có thoả thuận.
 
-Mình dừng và yêu cầu human decision khi:
+Mình dừng và hỏi con người khi:
 
-- Hai behavior đều hợp lý nhưng có impact khác nhau tới user
-- Cần thay public API, schema hoặc migration strategy
-- Fix phải chấp nhận data loss, security risk hoặc backward incompatibility
-- Thiếu credential, quyền truy cập hoặc approval để kiểm tra môi trường thật
-- Scope mới lớn hơn task đã được duyệt
-- Evidence cho thấy source of truth hiện tại tự mâu thuẫn
+- Hai cách hoạt động đều hợp lý nhưng ảnh hưởng người dùng khác nhau
+- Cần thay API công khai, schema hoặc chiến lược migration
+- Cách sửa phải chấp nhận mất dữ liệu, rủi ro bảo mật hoặc mất tương thích ngược
+- Thiếu thông tin đăng nhập, quyền truy cập hoặc sự đồng ý để kiểm tra môi trường thật
+- Phạm vi mới lớn hơn task đã được duyệt
+- Bằng chứng cho thấy nguồn chuẩn hiện tại tự mâu thuẫn
 
-Agent nên trả một decision brief ngắn:
+Agent nên trả một bản tóm tắt quyết định ngắn:
 
 ```text
-Decision needed:
+Cần quyết định:
 [Câu hỏi cần chốt]
 
-Option A:
-- Behavior
-- Tradeoff
-- Evidence liên quan
+Phương án A:
+- Cách hoạt động
+- Đánh đổi
+- Bằng chứng liên quan
 
-Option B:
-- Behavior
-- Tradeoff
-- Evidence liên quan
+Phương án B:
+- Cách hoạt động
+- Đánh đổi
+- Bằng chứng liên quan
 
-Recommendation:
-[Một option cùng lý do]
+Đề xuất:
+[Một phương án cùng lý do]
 
-Blocked work:
-[Phần chưa nên implement trước khi chốt]
+Phần đang chờ:
+[Phần chưa nên làm trước khi chốt]
 ```
 
 Đề xuất vẫn có giá trị. Nhưng quyền quyết định phải nằm đúng chỗ.
 
-## Ví dụ: agent cứ thêm retry cho invitation duplicate
+## Ví dụ: agent cứ thêm retry cho lời mời trùng
 
 Quay lại workspace invitation.
 
-Concurrent test cho thấy hai request cùng email có thể tạo hai pending invitation. Agent nhìn failure rồi thêm một lần query lại sau insert. Test vẫn flaky. Nó thêm retry với delay. Test pass một lần, fail lần sau.
+Test đồng thời cho thấy hai yêu cầu cùng email có thể tạo hai lời mời đang chờ. Agent nhìn lỗi rồi thêm một lần truy vấn lại sau khi ghi. Test vẫn lúc xanh lúc đỏ. Nó thêm `retry` với `delay`. Test qua một lần, đỏ lần sau.
 
-Nếu tiếp tục prompt "fix flaky test", agent có thể thêm nhiều timing hơn cho tới khi CI tình cờ xanh.
+Nếu tiếp tục bảo “sửa cái test chập chờn này”, agent có thể thêm nhiều mẹo thời gian hơn cho tới khi CI tình cờ xanh.
 
-Mình dừng lại và chụp problem:
+Mình dừng lại và chụp vấn đề:
 
 ```text
-Expected:
-Tối đa một pending invitation cho mỗi workspace và normalized email.
+Mong đợi:
+Tối đa một lời mời đang chờ cho mỗi workspace và email đã chuẩn hoá.
 
-Actual:
-Hai request đồng thời đôi lúc tạo hai record.
+Thực tế:
+Hai yêu cầu đồng thời đôi lúc tạo hai bản ghi.
 
-Reproduction:
-Targeted concurrent integration test trên cùng test database.
+Cách tái hiện:
+Test tích hợp cho hai yêu cầu đồng thời trên cùng database test.
 
-Fact:
-Cả hai request đều vượt qua duplicate check trước khi insert.
+Điều đã biết:
+Cả hai yêu cầu đều vượt qua bước kiểm tra trùng trước khi ghi.
 
-Fact:
-Schema hiện tại chưa enforce uniqueness cho pending invitation.
+Điều đã biết:
+Schema hiện tại chưa ép buộc tính duy nhất cho lời mời đang chờ.
 
-Assumption:
-Retry ở application layer có thể đóng race window.
+Giả định:
+`Retry` ở tầng ứng dụng có thể khép khoảng tranh chấp.
 
-Unknown:
-Database nào là source of truth cho invariant này?
+Điều chưa biết:
+Phần nào trong database phải giữ quy tắc này?
 ```
 
-Từ đây có ba hypothesis gần nhất:
+Từ đây có ba giả thuyết gần nhất:
 
-1. Test không thật sự chạy hai request trên cùng database state.
-2. Duplicate check và insert không atomic.
-3. Database schema không enforce invariant mà service đang hứa.
+1. Test không thật sự chạy hai yêu cầu trên cùng trạng thái database.
+2. Bước kiểm tra trùng và ghi dữ liệu không phải một thao tác nguyên tử.
+3. Schema database không ép buộc quy tắc mà service đang hứa.
 
-Experiment rẻ nhất không phải thêm delay.
+Phép thử rẻ nhất không phải thêm `delay`.
 
-Mình inspect test fixture để xác nhận shared database, trace transaction boundary và đọc migration hiện tại. Nếu evidence xác nhận hai request cùng check rồi insert ngoài một constraint đủ mạnh, timing retry không giải quyết invariant.
+Mình xem dữ liệu test để xác nhận database dùng chung, lần theo ranh giới transaction và đọc migration hiện tại. Nếu bằng chứng cho thấy hai yêu cầu cùng kiểm tra rồi ghi ngoài một ràng buộc đủ mạnh, `retry` theo thời gian không giải quyết được quy tắc dữ liệu.
 
-Lúc đó còn một decision thật: invariant nên được enforce bằng unique constraint nào, và API nên trả behavior gì khi hai request đụng nhau.
+Lúc đó còn một quyết định thật: quy tắc nên được giữ bằng ràng buộc duy nhất nào, và API nên trả gì khi hai yêu cầu đụng nhau.
 
-Sau khi chốt decision, agent mới có một fix có scope:
+Sau khi chốt quyết định, agent mới có một cách sửa trong phạm vi rõ:
 
-- Thêm hoặc chỉnh database constraint phù hợp
-- Bắt conflict theo contract đã chọn
-- Giữ concurrent integration test làm regression evidence
-- Chạy lại permission và email side-effect test liên quan
+- Thêm hoặc chỉnh ràng buộc database phù hợp
+- Bắt `conflict` theo thoả thuận đã chọn
+- Giữ test tích hợp đồng thời làm bằng chứng chống lỗi tái xuất hiện
+- Chạy lại test phân quyền và tác động phụ của email
 
 Điểm khác biệt không nằm ở việc agent thông minh hơn sau prompt mới.
 
-Điểm khác biệt là recovery loop đã biến một symptom mơ hồ thành fact, hypothesis, experiment và decision cụ thể.
+Điểm khác biệt là vòng phục hồi đã biến một triệu chứng mơ hồ thành điều đã biết, giả thuyết, phép thử và quyết định cụ thể.
 
 ## Khi nhiều agent cùng debug
 
-Ở bài 06, mình có nói nhiều worker read-only có thể kiểm tra các hypothesis độc lập.
+Ở bài 06, mình có nói nhiều agent chỉ đọc có thể kiểm tra các giả thuyết độc lập.
 
-Cách đó hữu ích khi không gian điều tra đủ rộng. Một worker kiểm tra environment, một worker trace data flow, một worker đọc regression history.
+Cách đó hữu ích khi không gian điều tra đủ rộng. Một agent kiểm tra môi trường, một agent lần theo luồng dữ liệu, một agent đọc lịch sử lỗi tái xuất hiện.
 
-Nhưng main agent vẫn phải giữ một hypothesis table chung.
+Nhưng agent chính vẫn phải giữ một bảng giả thuyết chung.
 
-Nếu mỗi worker tự sửa theo hypothesis riêng, final state sẽ không còn là một experiment có kiểm soát. Hai thay đổi cùng lúc có thể làm test pass mà mình không biết thay đổi nào thật sự liên quan.
+Nếu mỗi agent tự sửa theo giả thuyết riêng, trạng thái cuối sẽ không còn là một phép thử có kiểm soát. Hai thay đổi cùng lúc có thể làm test xanh mà mình không biết thay đổi nào thật sự liên quan.
 
-Vì vậy khi debug song song, mình giữ rule:
+Vì vậy khi gỡ lỗi song song, mình giữ quy tắc:
 
-- Worker ưu tiên read-only
-- Mỗi worker nhận một hypothesis và output contract riêng
-- Finding phải có evidence và file reference
-- Negative result được ghi lại, không chạy lại ở worker khác
-- Chỉ một owner được sửa write surface tại một thời điểm
-- Main agent chọn experiment hoặc fix tiếp theo trên integrated state
+- Agent phụ ưu tiên chỉ đọc
+- Mỗi agent nhận một giả thuyết và đầu ra riêng
+- Phát hiện phải có bằng chứng và file tham chiếu
+- Kết quả âm tính được ghi lại, không chạy lại ở agent khác
+- Chỉ một người được sửa vùng file tại một thời điểm
+- Agent chính chọn phép thử hoặc cách sửa tiếp theo trên trạng thái đã ghép
 
-Nhiều agent giúp giảm thời gian tìm evidence.
+Nhiều agent giúp giảm thời gian tìm bằng chứng.
 
-Chúng không thay thế scientific discipline của việc chỉ thay một biến chính và quan sát kết quả.
+Chúng không thay thế kỷ luật của việc chỉ thay một biến chính rồi quan sát kết quả.
 
 ## Với Knowns, đừng để cùng một ngõ cụt lặp qua nhiều session
 
-Khi dùng Knowns, mình ghi expected, actual, reproduction, facts và open hypotheses vào task notes.
+Khi dùng Knowns, mình ghi điều mong đợi, thực tế, cách tái hiện, điều đã biết và giả thuyết còn mở vào ghi chú task.
 
-Mỗi experiment có command, result và kết luận ngắn. Nếu một hypothesis đã bị loại, session sau không cần đốt token để phát minh lại nó.
+Mỗi phép thử có câu lệnh, kết quả và kết luận ngắn. Nếu một giả thuyết đã bị loại, session sau không cần đốt token để phát minh lại nó.
 
-Decision thật sự ảnh hưởng behavior thì nằm trong doc hoặc decision record phù hợp. Task chỉ link tới source đó.
+Quyết định thật sự ảnh hưởng cách hệ thống hoạt động thì nằm trong tài liệu hoặc bản ghi quyết định phù hợp. Task chỉ liên kết tới nguồn đó.
 
-Memory chỉ nên giữ pattern có thể tái sử dụng, không giữ mọi log debug của một failure cụ thể.
+Memory chỉ nên giữ cách làm có thể tái sử dụng, không giữ mọi log gỡ lỗi của một lỗi cụ thể.
 
-Mình thích boundary này:
+Mình thích ranh giới này:
 
 ```text
-Task notes:
-Evidence và tiến trình điều tra của issue hiện tại.
+Ghi chú task:
+Bằng chứng và tiến trình điều tra của vấn đề hiện tại.
 
-Docs / decisions:
-Contract hoặc lựa chọn cần tồn tại sau khi task kết thúc.
+Tài liệu / quyết định:
+Thoả thuận hoặc lựa chọn cần tồn tại sau khi task kết thúc.
 
 Memory:
-Pattern đã được kiểm chứng và có thể dùng lại ở task khác.
+Cách làm đã được kiểm chứng và có thể dùng lại ở task khác.
 ```
 
-Knowns không tự tìm root cause.
+Knowns không tự tìm nguyên nhân gốc.
 
-Nó giúp evidence, negative result và decision không biến mất khi mình đổi agent hoặc context bị compact.
+Nó giúp bằng chứng, kết quả âm tính và quyết định không biến mất khi mình đổi agent hoặc ngữ cảnh bị rút gọn.
 
-## Checklist recovery nhanh
+## Checklist gỡ rối nhanh
 
 Khi thấy coding agent bắt đầu đi vòng, mình dùng checklist này:
 
-- Cùng một failure đã lặp lại mà không có evidence mới chưa?
-- Agent đã dừng sửa và giữ nguyên snapshot chưa?
-- Expected, actual và reproduction có đủ cụ thể không?
-- Failure thuộc requirement, context, reproduction, environment hay implementation?
-- Fact có trỏ tới evidence không?
-- Assumption nào đang bị nói như fact?
-- Có từ hai tới bốn hypothesis được ưu tiên không?
-- Experiment tiếp theo sẽ bác bỏ hypothesis nào?
-- Experiment có side effect hoặc làm mất evidence không?
-- Negative result đã được ghi lại chưa?
+- Cùng một lỗi đã lặp lại mà không có bằng chứng mới chưa?
+- Agent đã dừng sửa và giữ nguyên trạng thái chưa?
+- Điều mong đợi, thực tế và cách tái hiện có đủ cụ thể không?
+- Lỗi thuộc yêu cầu, ngữ cảnh, cách tái hiện, môi trường hay phần code?
+- Điều đã biết có trỏ tới bằng chứng không?
+- Giả định nào đang được nói như điều đã biết?
+- Có từ hai tới bốn giả thuyết được ưu tiên không?
+- Phép thử tiếp theo sẽ bác bỏ giả thuyết nào?
+- Phép thử có tác động phụ hoặc làm mất bằng chứng không?
+- Kết quả âm tính đã được ghi lại chưa?
 - Session hiện tại còn đáng tin không?
-- Handoff có đủ snapshot, facts, ruled-out hypotheses và next action không?
-- Có decision nào agent không có quyền tự chốt không?
-- Fix cuối có scope và được verify lại bằng reproduction ban đầu không?
+- Bản bàn giao có đủ trạng thái, điều đã biết, giả thuyết đã loại và việc tiếp theo không?
+- Có quyết định nào agent không có quyền tự chốt không?
+- Cách sửa cuối có phạm vi rõ và được kiểm tra lại bằng cách tái hiện ban đầu không?
 
 Không phải lần nào mình cũng viết đầy đủ bảng.
 
-Với bug nhỏ, vài dòng notes là đủ. Nhưng nguyên tắc vẫn giữ nguyên: **đừng sửa nhanh hơn tốc độ mình hiểu failure**.
+Với bug nhỏ, vài dòng ghi chú là đủ. Nhưng nguyên tắc vẫn giữ nguyên: **đừng sửa nhanh hơn tốc độ mình hiểu lỗi**.
 
 ## Kết
 
 Coding agent bị kẹt không đáng sợ bằng việc nó đi rất nhanh mà mình không nhận ra nó đang đi vòng.
 
-Khi một loop không tạo evidence mới, mình dừng implementation. Mình giữ snapshot, viết lại problem, tách fact khỏi assumption, lập vài hypothesis có thể bị bác bỏ và chạy experiment rẻ nhất trước.
+Khi một vòng không tạo bằng chứng mới, mình dừng sửa. Mình giữ trạng thái, viết lại vấn đề, tách điều đã biết khỏi giả định, lập vài giả thuyết có thể bị bác bỏ và chạy phép thử rẻ nhất trước.
 
-Từ đó outcome trở nên rõ hơn:
+Từ đó hướng đi trở nên rõ hơn:
 
-- Có evidence thì resume với một fix có scope
-- Context đã nhiễu thì handoff sang session mới
-- Thiếu product hoặc architecture decision thì hỏi con người
-- Thiếu dependency hoặc quyền truy cập thì ghi blocker trung thực
+- Có bằng chứng thì tiếp tục với một cách sửa trong phạm vi rõ
+- Ngữ cảnh đã nhiễu thì bàn giao sang session mới
+- Thiếu quyết định về sản phẩm hoặc kiến trúc thì hỏi con người
+- Thiếu phần phụ thuộc hoặc quyền truy cập thì ghi chỗ đang chặn thật trung thực
 
-Reset context không phải phép chữa mọi lỗi. Prompt dài hơn cũng vậy.
+Xoá ngữ cảnh không phải phép chữa mọi lỗi. Prompt dài hơn cũng vậy.
 
-Thứ giúp agent thoát kẹt là một feedback loop tốt hơn, nơi mỗi vòng phải làm giảm uncertainty.
+Thứ giúp agent thoát kẹt là một vòng phản hồi tốt hơn, nơi mỗi lượt phải làm giảm phần chưa chắc chắn.
 
-Bài tiếp theo mình sẽ đi thêm một bước: đặt guardrail nào trước khi agent chạy command, sửa file hoặc chạm vào dữ liệu có rủi ro, để recovery không bắt đầu sau khi thiệt hại đã xảy ra.
+Bài tiếp theo mình sẽ đi thêm một bước: đặt hàng rào nào trước khi agent chạy câu lệnh, sửa file hoặc chạm vào dữ liệu có rủi ro, để việc phục hồi không chỉ bắt đầu sau khi thiệt hại đã xảy ra.
 
 See yah.
 
@@ -585,7 +579,7 @@ See yah.
 <Bookmark
   url="https://sre.google/sre-book/effective-troubleshooting/"
   title="Effective Troubleshooting"
-  description="Chương trong Google SRE Book về problem report, preservation of evidence, hypothesis testing, reproducible cases và troubleshooting có hệ thống."
+  description="Chương trong Google SRE Book về báo cáo lỗi, giữ bằng chứng, kiểm tra giả thuyết, tái hiện lỗi và gỡ rối có hệ thống."
 />
 
 <Bookmark

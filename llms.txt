@@ -17,6 +17,7 @@ This file follows the [llms.txt](https://llmstxt.org/) convention. Instructions 
 posts/                       Blog posts (.mdx)
 projects/                    Project showcases (.mdx)
 series/                      Series (subdirectories with _meta.mdx + chapters)
+glossary/                    One Markdown file per shared contextual term note
 assets/                      Optional committed images
 README.md
 AGENTS.md
@@ -174,6 +175,14 @@ Languages: `typescript`, `ts`, `javascript`, `js`, `tsx`, `jsx`, `python`, `py`,
 ## Custom components
 
 Auto-injected in every MDX file. Do NOT `import` them.
+
+### `<TermNote>`
+```mdx
+<TermNote id="context-window">context window</TermNote>
+```
+Resolves a localized contextual note from `glossary/<id>.md`. Each file uses
+`# vi`, `# en`, or another supported locale heading. Use the optional
+`explanation` prop only for a one-off note or draft preview.
 
 ### `<Callout>`
 ```mdx

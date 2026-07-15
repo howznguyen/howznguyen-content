@@ -5,7 +5,7 @@ author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780543732/02-first-agent-session-cover_as3a8w.png"
 ---
 
-Ở bài trước mình nói về mấy thuật ngữ cơ bản: LLM, Agent, Prompt, Token, Context Window, Memory.
+Ở bài trước mình nói về mấy thuật ngữ cơ bản: <TermNote id="llm">LLM</TermNote>, <TermNote id="agent">Agent</TermNote>, <TermNote id="prompt">Prompt</TermNote>, <TermNote id="token">Token</TermNote>, <TermNote id="context-window">Context Window</TermNote>, <TermNote id="memory">Memory</TermNote>.
 
 Nhưng hiểu thuật ngữ xong thì câu hỏi tiếp theo thường là: **vậy mở tool lên rồi làm gì?**
 
@@ -45,10 +45,10 @@ Feature càng lớn thì agent càng phải tự đoán nhiều thứ:
 - Có subscription chưa hay phải tạo mới?
 - UI theo style nào?
 - API contract nằm ở đâu?
-- Error state xử lý ra sao?
-- Test cần cover tới mức nào?
+- Trạng thái lỗi xử lý ra sao?
+- Test cần kiểm tra tới mức nào?
 
-Nếu mình không nói, agent sẽ assume. Và khi agent assume sai, nó vẫn viết code rất tự tin.
+Nếu mình không nói, agent sẽ tự điền phần còn thiếu. Và khi đoán sai, nó vẫn viết code rất tự tin. Đây mới là khúc dễ làm mình chủ quan.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780542580/big_feature_dzsij5.png"
@@ -121,11 +121,11 @@ Với agent, prompt là cái khung để nó biết đang làm trong phạm vi n
 
 Với mình, prompt là cách buộc bản thân suy nghĩ rõ hơn.
 
-Khi phải viết ra instruction, context, constraint, done condition, mình tự phát hiện rất nhiều chỗ mơ hồ trong đầu. Nhiều khi chưa cần agent trả lời, chỉ cần ngồi viết prompt tử tế là mình đã nhận ra: "ủa thật ra mình chưa biết behavior mong muốn là gì", hoặc "mình đang yêu cầu refactor nhưng chưa nói phần nào không được đụng".
+Khi phải viết ra việc cần làm, bối cảnh, giới hạn và điều kiện hoàn thành, mình tự phát hiện rất nhiều chỗ mơ hồ trong đầu. Nhiều khi chưa cần agent trả lời, chỉ cần ngồi viết prompt tử tế là mình đã nhận ra: "ủa, thật ra mình chưa biết hệ thống phải hoạt động ra sao", hoặc "mình đang yêu cầu <TermNote id="refactor">refactor</TermNote> nhưng chưa nói phần nào không được đụng".
 
 Đó là phần mình thấy khá thú vị. Viết prompt tốt không chỉ làm agent hiểu mình hơn. Nó làm mình hiểu vấn đề của chính mình hơn.
 
-Nói hơi vui: prompt giống một cách tập suy nghĩ có logic như máy. Không phải máy móc theo nghĩa cứng nhắc, mà là rõ đầu vào, rõ ràng buộc, rõ output mong muốn.
+Nói hơi vui, viết prompt cũng là lúc mình tập suy nghĩ có đầu có đuôi hơn. Rõ đầu vào, rõ giới hạn, rõ kết quả mong muốn. Nhiều khi agent chưa làm gì mà mình đã tự bắt được bug trong yêu cầu của chính mình.
 
 <Callout type="note">
   Model càng giỏi thì prompt càng không cần dài dòng. Nhưng prompt vẫn cần rõ.
@@ -239,7 +239,7 @@ Mình biết có lúc chỉ muốn bảo agent "làm luôn đi". Đặc biệt v
 
 Nhưng nếu đang ở buổi đầu tiên, hoặc đang thử một repo mới, cứ bắt nó đọc trước. Bạn sẽ học được cách agent nhìn codebase. Nó đọc đúng chỗ không. Nó có bỏ qua test không. Nó có hiểu convention không.
 
-Đó cũng là cách mình kiểm tra agent, chứ không chỉ kiểm tra output cuối cùng.
+Đó cũng là cách mình kiểm tra agent, chứ không chỉ nhìn đầu ra cuối cùng rồi cầu may.
 
 ## Review diff như review code của người khác
 
@@ -247,7 +247,7 @@ Một bẫy rất dễ dính là thấy agent chạy xong, test xanh, rồi tin 
 
 Mình cũng từng vậy.
 
-Nhưng agent viết code rất trôi. Chính vì trôi nên nhiều lỗi nhìn qua không thấy. Naming hơi lệch. Edge case thiếu. Abstraction hơi quá. Một đoạn logic nhìn hợp lý nhưng thực ra đổi behavior cũ.
+Nhưng agent viết code rất trôi. Chính vì trôi nên nhiều lỗi nhìn qua không thấy. Tên hơi lệch. Trường hợp biên còn thiếu. Abstraction hơi quá tay. Một đoạn logic nhìn hợp lý nhưng thực ra đổi cách hoạt động cũ. Đó là lý do mình vẫn đọc <TermNote id="diff">diff</TermNote>, dù nút “Done” nhìn rất có sức thuyết phục.
 
 Vậy nên sau khi agent sửa xong, mình thường review theo vài câu hỏi:
 
@@ -280,7 +280,7 @@ Nói file nào nên đọc trước. Nếu không biết file nào, bảo agent 
 
 Ba là nói constraint.
 
-Không đổi public API. Không thêm package. Không refactor ngoài scope. Không commit. Không sửa file không liên quan.
+Không đổi API công khai. Không thêm package. Không refactor ngoài phạm vi. Không commit. Không sửa file không liên quan.
 
 Bốn là yêu cầu plan ngắn.
 
@@ -298,7 +298,7 @@ Năm là review diff.
 
 Đây không phải quy trình thần thánh gì. Nó chỉ là cách để buổi đầu tiên đỡ loạn.
 
-Khi quen hơn, bạn có thể bỏ bớt bước. Có task nhỏ thì cho agent làm luôn. Có task lớn thì tách thành research, plan, implement, review. Nhưng lúc mới bắt đầu, một vòng lặp chậm hơn một chút thường đáng tiền.
+Khi quen hơn, bạn có thể bỏ bớt bước. Task nhỏ thì cho agent làm luôn. Task lớn thì tách thành tìm hiểu, lên kế hoạch, làm và review. Nhưng lúc mới bắt đầu, chậm hơn một nhịp thường rẻ hơn dọn một diff đi lạc.
 
 ## Một prompt mẫu để copy
 
@@ -337,7 +337,7 @@ Buổi đầu tiên với coding agent không cần prompt cao siêu.
 
 Mình nghĩ thứ quan trọng hơn là học cách giao việc rõ hơn một chút. Task nhỏ hơn một chút. Constraint cụ thể hơn một chút. Review kỹ hơn một chút.
 
-Agent coding không phải bấm nút rồi ngồi chờ phép màu. Nó giống làm việc với một người rất nhanh, rất giỏi pattern, nhưng không tự hiểu hết context ngầm trong đầu mình.
+Coding agent không phải nút bấm gọi phép màu. Nó giống làm việc với một người rất nhanh, nhìn ra mẫu rất giỏi, nhưng không tự hiểu hết những thứ đang nằm trong đầu mình.
 
 Mình giao việc càng rõ, agent càng ít phải đoán.
 

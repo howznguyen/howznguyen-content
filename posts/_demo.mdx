@@ -251,6 +251,16 @@ Body text under h4.
 
 Internal links to other posts on the site: [another post example](/blog/hello-world). External links: [MDX docs](https://mdxjs.com).
 
+## Contextual term notes
+
+The note is stored once in `glossary/context-window.md` and reused anywhere the term appears:
+
+An agent can only work with the information currently available in its <TermNote id="context-window">context window</TermNote>.
+
+For a one-off note that should not enter the shared glossary, provide the explanation inline:
+
+This is a <TermNote explanation="A note written directly in the MDX file and used only in this location.">local annotation</TermNote> inside a sentence.
+
 ## Horizontal rule
 
 Use `---` on its own line to insert a horizontal rule:

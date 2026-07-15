@@ -1,21 +1,21 @@
 ---
-title: "Capstone: từ một ý tưởng tới pull request"
-description: "Ghép toàn bộ workflow Agent Coding 101 vào một feature thật, từ problem framing, spec và task tới evidence package sẵn sàng review."
+title: "Bài tổng kết: từ một ý tưởng tới pull request"
+description: "Ghép toàn bộ Agent Coding 101 vào một tính năng thật, từ lúc yêu cầu còn mơ hồ tới một pull request có thể review đàng hoàng."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784099817/yg6e6xcl1tb0boyjystv.webp"
 ---
 
 Đây là bài cuối của Agent Coding 101.
 
-Mình không muốn kết series bằng một checklist tóm tắt chín bài trước. Checklist thì dễ đọc, nhưng tới lúc mở coding agent lên mình vẫn có thể không biết bắt đầu từ đâu.
+Mình không muốn kết series bằng một checklist tóm tắt chín bài trước. Checklist thì dễ đọc, dễ gật gù, nhưng tới lúc mở coding agent lên mình vẫn có thể ngồi nhìn con trỏ nhấp nháy và không biết bắt đầu từ đâu.
 
-Vì vậy bài này là một capstone.
+Vì vậy bài này là một bài tổng kết thực hành. Gọi là bài cuối khoá cũng được, miễn là đừng bắt mình đứng lên thuyết trình.
 
-Mình sẽ lấy feature **workspace invitation** đã xuất hiện nhiều lần trong series rồi đi hết một vòng thật: từ một ý tưởng còn mơ hồ, tạo source of truth, research codebase, chốt decision, chia task, giao agent implement, xử lý một failure, review final state và chuẩn bị pull request.
+Mình sẽ lấy tính năng **mời thành viên vào workspace** đã xuất hiện nhiều lần trong series rồi đi hết một vòng: làm rõ ý tưởng, tạo nguồn chuẩn, nhìn codebase, chốt quyết định, chia task, giao agent làm, xử lý một lỗi, review trạng thái cuối và chuẩn bị <TermNote id="pull-request">pull request</TermNote>.
 
 Mục tiêu cuối không phải "agent đã viết code".
 
-Mục tiêu là một change package đủ nhỏ, có evidence, biết rõ risk và sẵn sàng để reviewer quyết định.
+Mục tiêu là một gói thay đổi đủ nhỏ, có bằng chứng, nói rõ rủi ro và sẵn sàng để người review quyết định.
 
 ## Đề bài ban đầu cố tình mơ hồ
 
@@ -27,375 +27,372 @@ Thêm tính năng mời thành viên vào workspace bằng email.
 
 Nếu đưa thẳng câu này cho agent, nó vẫn có thể tạo được code.
 
-Nó có thể tự chọn ai được mời, invitation hết hạn bao lâu, duplicate xử lý ra sao, email gửi lúc nào và token lưu thế nào. Diff nhìn đầy đủ, nhưng phần lớn behavior đến từ assumption mà chưa ai chốt.
+Nó có thể tự chọn ai được mời, lời mời hết hạn bao lâu, lời mời trùng xử lý ra sao, email gửi lúc nào và token lưu thế nào. Diff nhìn đầy đủ, nhưng phần lớn cách hoạt động đến từ những điều chưa ai chốt.
 
-Trước khi mở write access, mình cần biến ý tưởng thành một contract có thể quan sát.
+Trước khi cho phép sửa file, mình cần biến ý tưởng thành một bản mô tả có thể kiểm tra.
 
-Mình bắt đầu bằng problem framing:
+Mình bắt đầu bằng cách viết rõ vấn đề:
 
 ```text
-Problem:
-Workspace admin đang phải nhờ operator thêm member thủ công.
+Vấn đề:
+Admin của workspace đang phải nhờ người vận hành thêm thành viên thủ công.
 
-User:
-Workspace admin cần mời một người chưa có account qua email.
+Người dùng:
+Admin của workspace cần mời một người chưa có tài khoản qua email.
 
-Desired outcome:
-Admin tạo được một pending invitation và hệ thống enqueue một email chứa link chấp nhận.
+Kết quả mong muốn:
+Admin tạo được một lời mời đang chờ và hệ thống đưa email chứa liên kết chấp nhận vào hàng đợi.
 
-Not decided yet:
-- Invitation hết hạn bao lâu?
-- Duplicate pending invitation trả behavior gì?
-- User đã là member thì sao?
+Chưa quyết định:
+- Lời mời hết hạn bao lâu?
+- Lời mời đang chờ bị trùng thì trả kết quả gì?
+- Người dùng đã là thành viên thì sao?
 - Token được lưu và log thế nào?
 - Ai ngoài admin có quyền mời?
 
-Success signal:
-Một vertical slice từ API tới database và fake email adapter hoạt động trên test environment.
+Dấu hiệu thành công:
+Một lát cắt từ API tới database và email adapter giả hoạt động trên môi trường test.
 ```
 
-`Not decided yet` quan trọng không kém `Desired outcome`.
+Phần “chưa quyết định” quan trọng không kém “kết quả mong muốn”.
 
-Nó nói rõ vùng nào agent được research, nhưng chưa được tự chọn behavior.
+Nó nói rõ vùng nào agent được tìm hiểu, nhưng chưa được tự chọn cách hoạt động.
 
-## Chốt một vertical slice đủ để review
+## Chốt một lát cắt đủ nhỏ để review
 
-Feature invitation hoàn chỉnh có thể gồm form UI, API, database, email template, accept flow, expiration, resend, revoke, audit log và admin page.
+Tính năng lời mời hoàn chỉnh có thể gồm form, API, database, mẫu email, luồng chấp nhận, hết hạn, gửi lại, thu hồi, audit log và trang quản trị.
 
 Làm tất cả trong một pull request sẽ rất khó review.
 
-Google Engineering Practices recommend một change nên là một thay đổi self-contained, tập trung vào một việc và đi cùng test liên quan. Small change dễ review kỹ hơn, ít bug hơn và dễ rollback hơn.
+Google Engineering Practices khuyên mỗi thay đổi nên tự đứng được, tập trung vào một việc và đi cùng test liên quan. Thay đổi nhỏ dễ review kỹ hơn, ít bug hơn và cũng dễ quay lại hơn nếu có chuyện.
 
-Vertical slice của capstone này chỉ là:
+Lát cắt của bài tổng kết này chỉ là:
 
 ```text
-Admin tạo một pending workspace invitation qua API.
-Hệ thống lưu token hash và enqueue email bằng fake adapter.
+Admin tạo một lời mời vào workspace đang chờ qua API.
+Hệ thống lưu mã băm của token và đưa email vào hàng đợi bằng adapter giả.
 ```
 
-Trong scope:
+Trong phạm vi:
 
-- Permission cho workspace admin
-- Normalize email
-- Không tạo invitation nếu email đã là member
-- Tối đa một pending invitation cho cùng workspace và email
-- Raw token không lưu database và không xuất hiện trong log
-- Email job chỉ enqueue sau khi invitation hợp lệ được tạo
+- Phân quyền cho admin của workspace
+- Chuẩn hoá email
+- Không tạo lời mời nếu email đã là thành viên
+- Tối đa một lời mời đang chờ cho cùng workspace và email
+- Token thô không lưu trong database và không xuất hiện trong log
+- Email chỉ được đưa vào hàng đợi sau khi lời mời hợp lệ được tạo
 - Service, route, migration và test liên quan
 
-Out of scope:
+Không làm trong vòng này:
 
-- UI form
-- Accept invitation
-- Resend, revoke và expiration cleanup
-- Production email delivery
-- Deploy và production migration
+- Form giao diện
+- Chấp nhận lời mời
+- Gửi lại, thu hồi và dọn lời mời hết hạn
+- Gửi email thật
+- Deploy và chạy migration trên môi trường thật
 
-Out of scope không phải phần bị quên.
+Phần chưa làm không phải phần bị quên.
 
-Nó là boundary để pull request này kể đúng một câu chuyện.
+Nó là ranh giới để pull request này kể đúng một câu chuyện, thay vì đang kể invitation rồi tiện đường rẽ sang sửa luôn hệ thống email.
 
-## Artifact stack thay cho một prompt khổng lồ
+## Năm mảnh tài liệu thay cho một prompt khổng lồ
 
 Mình không nhồi toàn bộ dự án vào một prompt.
 
-Capstone này có năm artifact chính:
+Bài tổng kết này có năm mảnh tài liệu chính:
 
-| Artifact | Chứa gì | Ai dùng |
+| Tài liệu | Chứa gì | Ai dùng |
 | --- | --- | --- |
-| **Project instructions** | Command, convention, boundary, source of truth | Mọi agent |
-| **Feature spec** | Goal, behavior, AC, constraint, out of scope | Researcher, writer, reviewer |
-| **Decision notes** | Những lựa chọn không được phép tự đoán | Writer và reviewer |
-| **Task** | Một unit of work có ownership, input, output, verification | Writer |
-| **Evidence package** | Diff, command, result, risk, phần chưa verify | Reviewer và PR |
+| **Sổ tay project** | Câu lệnh, quy ước, giới hạn và nguồn chuẩn | Mọi agent |
+| **Đặc tả tính năng** | Mục tiêu, cách hoạt động, tiêu chí và phần chưa làm | Agent tìm hiểu, agent thực thi, người review |
+| **Ghi chú quyết định** | Những lựa chọn không được phép tự đoán | Agent thực thi và người review |
+| **Task** | Một phần việc có người chịu trách nhiệm, đầu vào, đầu ra và cách kiểm tra | Agent thực thi |
+| **Gói bằng chứng** | Diff, câu lệnh, kết quả, rủi ro và phần chưa kiểm tra | Người review và PR |
 
 Chat là nơi mình trao đổi.
 
-Artifact mới là nơi giữ state qua session.
+Các tài liệu này mới là nơi giữ trạng thái qua nhiều session.
 
-Nếu session bị compact, writer mới vẫn có thể đọc spec và task. Nếu reviewer không thấy transcript, nó vẫn hiểu outcome cùng decision cần kiểm tra.
+Nếu session bị rút gọn, agent thực thi mới vẫn có thể đọc đặc tả và task. Nếu người review không thấy đoạn chat cũ, họ vẫn hiểu kết quả và quyết định cần kiểm tra.
 
-{/* IMAGE PROMPT:
-Create a 16:9 horizontal editorial technical workflow on warm off-white textured paper. Show one friendly navy coding agent transforming a small glowing idea seed through six clear workstations into a compact pull-request package ready for a human reviewer. The stations should visually represent discovery, project context, a concise spec, focused implementation, evidence-based review, and a final proposal envelope. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only these exact six uppercase labels, spelled exactly once each: IDEA, CONTEXT, SPEC, IMPLEMENT, REVIEW, PR. No other words, letters, numbers, pseudo-text, title, series name, logo, watermark, fake UI, gradients, or decorative clutter. Keep the left-to-right flow and labels unambiguous.
-*/}
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784099817/yascvju8urfomohr6kbb.webp"
-  alt="Workflow từ idea qua context, spec, implement và review tới pull request"
-  caption="Capstone không đi thẳng từ idea tới code. Mỗi phase tạo một artifact nhỏ cho phase tiếp theo."
+  alt="Quy trình từ ý tưởng qua ngữ cảnh, đặc tả, thực thi và review tới pull request"
+  caption="Bài tổng kết không đi thẳng từ ý tưởng tới code. Mỗi giai đoạn để lại một mảnh thông tin cho giai đoạn tiếp theo."
 />
 
-## Phase 1: Research read-only
+## Giai đoạn 1: Chỉ đọc và tìm hiểu
 
-Task research chưa được phép sửa file.
+Task tìm hiểu chưa được phép sửa file.
 
 Nó cần trả lời những câu hỏi có thể tìm thấy từ repository hiện tại:
 
 - Project lưu membership ở đâu?
-- Permission pattern nào đang được dùng?
-- Database transaction được mở ở layer nào?
-- Email adapter có interface hoặc fake sẵn không?
-- API error và validation theo convention nào?
-- Test integration khởi tạo database ra sao?
-- Có unique constraint hoặc normalization helper tương tự không?
+- Project đang kiểm tra quyền theo cách nào?
+- Database transaction được mở ở lớp nào?
+- Email adapter có interface hoặc bản giả sẵn không?
+- Lỗi API và validation theo quy ước nào?
+- Test tích hợp khởi tạo database ra sao?
+- Có ràng buộc duy nhất hoặc helper chuẩn hoá nào tương tự không?
 
-Prompt research có thể là:
+Prompt tìm hiểu có thể là:
 
 ```text
-Research read-only cho workspace invitation vertical slice.
-Chưa sửa file và chưa đề xuất refactor ngoài scope.
+Chỉ đọc để tìm hiểu lát cắt mời thành viên vào workspace.
+Chưa sửa file và chưa đề xuất refactor ngoài phạm vi.
 
-Source of truth:
-- project instructions
-- invitation feature spec
+Nguồn chuẩn:
+- sổ tay project
+- đặc tả tính năng lời mời
 
 Tìm và trả về:
-1. Membership và permission flow có file reference
-2. Transaction và database constraint pattern nên reuse
-3. Email adapter cùng fake/test pattern hiện tại
-4. API validation và error convention
-5. Test commands liên quan
-6. Open question chưa thể trả lời từ code
+1. Luồng thành viên và phân quyền, kèm file tham chiếu
+2. Cách dùng transaction và ràng buộc database nên tái sử dụng
+3. Email adapter cùng cách làm bản giả cho test hiện tại
+4. Quy ước validation và lỗi API
+5. Các câu lệnh test liên quan
+6. Câu hỏi còn mở chưa thể trả lời từ code
 
-Mỗi finding phải có evidence.
-Không paste log dài hoặc toàn bộ file.
+Mỗi phát hiện phải có bằng chứng.
+Không dán log dài hoặc toàn bộ file.
 ```
 
-Output research tốt không phải một essay.
+Đầu ra tốt không phải một bài luận.
 
-Nó là context pack ngắn:
+Nó là một gói ngữ cảnh ngắn:
 
 ```text
-Permission:
-- Workspace actions dùng requireWorkspaceRole(...) tại [file].
+Phân quyền:
+- Các thao tác với workspace dùng requireWorkspaceRole(...) tại [file].
 
-Persistence:
+Lưu dữ liệu:
 - Service mở transaction qua db.transaction(...) tại [file].
-- Membership uniqueness pattern nằm trong migration [file].
+- Cách giữ thành viên không trùng nằm trong migration [file].
 
 Email:
 - Adapter interface tại [file].
-- Fake adapter trong test support tại [file].
+- Adapter giả dùng cho test tại [file].
 
-Verification:
-- Targeted integration command: [command]
+Kiểm tra:
+- Câu lệnh test tích hợp liên quan: [câu lệnh]
 
-Open questions:
-- Duplicate invitation chưa có contract trong code.
-- Token lifetime chưa có decision.
+Câu hỏi còn mở:
+- Lời mời trùng chưa có thoả thuận trong code.
+- Thời hạn token chưa có quyết định.
 ```
 
-Research không được tự biến open question thành implementation detail.
+Agent tìm hiểu không được tự biến câu hỏi còn mở thành quyết định triển khai.
 
-## Phase 2: Chốt decision trước khi chia task
+## Giai đoạn 2: Chốt quyết định trước khi chia task
 
-Từ research, mình chốt những decision ảnh hưởng behavior của slice.
+Từ phần tìm hiểu, mình chốt những quyết định ảnh hưởng tới cách lát cắt này hoạt động.
 
 Ví dụ:
 
 ```text
-Permission:
-Chỉ workspace admin được tạo invitation.
+Phân quyền:
+Chỉ admin của workspace được tạo lời mời.
 
-Duplicate pending invitation:
-API trả conflict. Không rotate token và không enqueue email mới.
+Lời mời đang chờ bị trùng:
+API trả conflict. Không đổi token và không đưa email mới vào hàng đợi.
 
-Existing member:
-API trả validation error chung, không tạo record.
+Đã là thành viên:
+API trả lỗi validation chung, không tạo bản ghi.
 
-Email normalization:
-Trim và lowercase trước membership lookup lẫn uniqueness check.
+Chuẩn hoá email:
+Bỏ khoảng trắng thừa và chuyển về chữ thường trước khi tra thành viên lẫn kiểm tra trùng.
 
 Token:
-Raw token chỉ tồn tại trong request flow để tạo link.
-Database chỉ lưu hash. Log phải redact.
+Token thô chỉ tồn tại trong lúc xử lý yêu cầu để tạo liên kết.
+Database chỉ lưu mã băm. Log phải che token.
 
-Side effect:
-Fake email adapter được gọi sau khi transaction tạo invitation thành công.
+Tác động phụ:
+Email adapter giả được gọi sau khi transaction tạo lời mời thành công.
 ```
 
-Mỗi decision cần lý do ngắn nếu có tradeoff.
+Mỗi quyết định cần lý do ngắn nếu có đánh đổi.
 
-Ví dụ chọn conflict cho duplicate làm API kém idempotent hơn một chút, nhưng giữ slice nhỏ và không cần tự định nghĩa resend behavior trong pull request này.
+Ví dụ chọn `conflict` cho lời mời trùng làm API kém idempotent hơn một chút, nhưng giữ lát cắt nhỏ và không phải tự định nghĩa chuyện gửi lại trong pull request này.
 
-Điểm quan trọng là reviewer có một contract để đối chiếu.
+Điểm quan trọng là người review có một thoả thuận để đối chiếu.
 
-Nếu writer tự chọn conflict nhưng test cũng do writer viết theo conflict, test xanh chỉ chứng minh code khớp assumption của chính nó.
+Nếu agent thực thi tự chọn `conflict` rồi cũng tự viết test theo lựa chọn đó, test xanh chỉ chứng minh code khớp với giả định của chính nó.
 
-## Phase 3: Viết acceptance criteria có evidence dự kiến
+## Giai đoạn 3: Viết tiêu chí cùng bằng chứng dự kiến
 
-Mình viết AC cùng loại evidence sẽ dùng.
+Mình viết tiêu chí hoàn thành cùng loại bằng chứng sẽ dùng.
 
-| Acceptance criterion | Evidence dự kiến |
+| Tiêu chí hoàn thành | Bằng chứng dự kiến |
 | --- | --- |
-| Admin tạo được pending invitation | Integration test và database assertion |
-| Member thường bị từ chối | Permission test, record count không đổi |
-| Existing member không tạo invitation | Integration test, không enqueue email |
-| Duplicate pending trả conflict | Concurrent test, database chỉ có một record |
-| Email được normalize nhất quán | Test casing và whitespace |
-| Database chỉ lưu token hash | Database assertion và diff review |
-| Raw token không vào log | Captured log assertion |
-| Email chỉ enqueue sau create thành công | Fake adapter assertion |
+| Admin tạo được lời mời đang chờ | Test tích hợp và kiểm tra database |
+| Thành viên thường bị từ chối | Test phân quyền, số bản ghi không đổi |
+| Người đã là thành viên không tạo lời mời | Test tích hợp, không đưa email vào hàng đợi |
+| Lời mời đang chờ bị trùng trả `conflict` | Test đồng thời, database chỉ có một bản ghi |
+| Email được chuẩn hoá nhất quán | Test chữ hoa, chữ thường và khoảng trắng |
+| Database chỉ lưu mã băm của token | Kiểm tra database và review diff |
+| Token thô không vào log | Kiểm tra log đã thu lại |
+| Email chỉ vào hàng đợi sau khi tạo thành công | Kiểm tra adapter giả |
 
-AC mô tả outcome. Evidence dự kiến giúp writer biết cần chứng minh bằng gì.
+Tiêu chí mô tả kết quả. Bằng chứng dự kiến giúp agent thực thi biết cần chứng minh bằng gì.
 
-Mình chưa viết implementation vào AC. "Dùng unique partial index tên X" là design decision, không phải user outcome, trừ khi project đã chốt constraint đó là requirement.
+Mình chưa viết cách triển khai vào tiêu chí. “Dùng unique partial index tên X” là quyết định thiết kế, không phải kết quả người dùng nhận được, trừ khi project đã chốt ràng buộc đó thành yêu cầu.
 
-## Phase 4: Tạo task contract cho writer
+## Giai đoạn 4: Viết bản giao việc cho agent thực thi
 
 Một task đủ giao cho agent có thể viết như sau:
 
 ```text
-Goal:
-Implement API vertical slice để workspace admin tạo pending invitation.
+Mục tiêu:
+Làm lát cắt API để admin của workspace tạo lời mời đang chờ.
 
-Read first:
-- project instructions
-- invitation spec
-- research context pack
-- decision notes
+Đọc trước:
+- sổ tay project
+- đặc tả lời mời
+- gói ngữ cảnh từ bước tìm hiểu
+- ghi chú quyết định
 
-Ownership:
+Phạm vi được giao:
 - invitation service và route
-- one migration
+- một migration
 - invitation tests
-- fake email adapter usage nếu cần
+- cách dùng email adapter giả nếu cần
 
-Do not:
-- không làm UI hoặc accept flow
-- không thêm production provider
+Không làm:
+- không làm giao diện hoặc luồng chấp nhận
+- không thêm nhà cung cấp dùng cho môi trường thật
 - không refactor membership module
-- không đổi dependency nếu chưa approval
+- không đổi dependency nếu chưa được duyệt
 - không commit, push, open PR, merge hoặc deploy
 
-Guardrails:
-- local disposable test database
-- không production data hoặc credential
-- raw token không được in ra log/final message
-- dừng trước scope expansion hoặc destructive command
+Hàng rào an toàn:
+- database test local có thể xoá bỏ
+- không dùng dữ liệu thật hoặc thông tin đăng nhập
+- token thô không được in ra log hoặc lời nhắn cuối
+- dừng trước khi mở rộng phạm vi hoặc chạy câu lệnh phá huỷ dữ liệu
 
-Verification:
-- targeted invitation tests
+Kiểm tra:
+- các test liên quan tới lời mời
 - typecheck
-- migration check trên disposable DB
+- kiểm tra migration trên database dùng xong có thể bỏ
 - git diff --check
 
-Done when:
-- mỗi AC có PASS, FAIL hoặc NOT VERIFIED cùng evidence
-- final diff được freeze để review
+Hoàn thành khi:
+- mỗi tiêu chí có PASS, FAIL hoặc NOT VERIFIED cùng bằng chứng
+- diff cuối được chốt để review
 ```
 
-Task này dài hơn một câu prompt, nhưng ngắn hơn rất nhiều so với một session debug khi agent tự mở rộng feature.
+Task này dài hơn một câu prompt, nhưng vẫn ngắn hơn nhiều so với một session gỡ lỗi sau khi agent tự mở rộng tính năng. Viết sớm vài dòng thường rẻ hơn đọc muộn vài trăm dòng diff.
 
-## Phase 5: Pre-flight trước khi sửa
+## Giai đoạn 5: Kiểm tra đường đi trước khi sửa
 
-Writer chưa code ngay.
+Agent thực thi chưa code ngay.
 
-Nó trả pre-flight summary:
+Nó trả một bản tóm tắt ngắn trước khi bắt đầu:
 
 ```text
-Understanding:
-[Outcome và behavior writer hiểu]
+Phần đã hiểu:
+[Kết quả và cách hoạt động agent thực thi đang hiểu]
 
-Planned changes:
+Thay đổi dự kiến:
 - [file hoặc vùng code] -> [lý do]
 
-Commands:
-- [command] -> [evidence]
+Câu lệnh:
+- [câu lệnh] -> [bằng chứng]
 
-Risks:
+Rủi ro:
 - migration
-- concurrency invariant
-- raw token handling
+- quy tắc cần giữ khi có nhiều yêu cầu đồng thời
+- cách xử lý token thô
 
-Open questions:
-- none / [decision cần chốt]
+Câu hỏi còn mở:
+- không có / [quyết định cần chốt]
 
-Scope check:
-- no UI, accept flow, provider or deploy changes
+Kiểm tra phạm vi:
+- không đổi giao diện, luồng chấp nhận, nhà cung cấp hoặc deploy
 ```
 
-Mình review plan ở mức boundary, không micro-manage từng function.
+Mình review kế hoạch ở mức ranh giới, không cầm tay chỉ từng hàm.
 
-Nếu writer dự định refactor toàn bộ membership module để reuse một helper, đây là lúc cắt scope trước khi diff xuất hiện.
+Nếu agent thực thi định refactor toàn bộ module thành viên chỉ để dùng lại một helper, đây là lúc cắt phạm vi trước khi diff xuất hiện.
 
-Nếu writer nói cần package mới cho hashing trong khi project đã có helper, mình quay lại evidence từ research.
+Nếu nó nói cần package mới để băm token trong khi project đã có helper, mình quay lại bằng chứng từ bước tìm hiểu.
 
-Nếu mọi thứ hợp lý, task chuyển từ plan sang implementation.
+Nếu mọi thứ hợp lý, task chuyển từ lập kế hoạch sang thực thi.
 
-## Phase 6: Implement theo checkpoint
+## Giai đoạn 6: Làm theo từng điểm kiểm tra
 
-Writer vẫn là một agent, nhưng công việc không cần chạy thành một khối đen tới `done`.
+Agent thực thi vẫn là một agent, nhưng công việc không cần chạy thành một khối đen tới `done`.
 
-Mình đặt checkpoint theo nơi risk thay đổi:
+Mình đặt điểm kiểm tra ở nơi mức rủi ro thay đổi:
 
-**Checkpoint A: data contract.**
+**Điểm A: thoả thuận dữ liệu.**
 
-Writer xác nhận schema, uniqueness invariant và migration plan. Chưa cần chạy migration ngoài disposable database.
+Agent thực thi xác nhận schema, quy tắc không trùng và kế hoạch migration. Chưa cần chạy migration ngoài database dùng xong có thể bỏ.
 
-**Checkpoint B: service behavior.**
+**Điểm B: cách service hoạt động.**
 
-Permission, normalization, membership check, duplicate behavior, token hash và transaction boundary đã nằm trong diff.
+Phân quyền, chuẩn hoá email, kiểm tra thành viên, xử lý lời mời trùng, mã băm token và ranh giới transaction đã nằm trong diff.
 
-**Checkpoint C: route và side effect.**
+**Điểm C: route và tác động phụ.**
 
-Validation/error mapping rõ. Fake email adapter chỉ nhận payload hợp lệ ở thời điểm đã chốt.
+Cách ánh xạ validation và lỗi đã rõ. Email adapter giả chỉ nhận dữ liệu hợp lệ ở thời điểm đã chốt.
 
-**Checkpoint D: evidence.**
+**Điểm D: bằng chứng.**
 
-Targeted tests, typecheck, migration check và final diff đều chạy trên cùng state.
+Test liên quan, typecheck, kiểm tra migration và diff cuối đều chạy trên cùng một trạng thái.
 
-Không phải checkpoint nào cũng cần mình approve thủ công.
+Không phải điểm nào cũng cần mình tự tay duyệt.
 
-Agent có thể tự đi qua các bước local, reversible đã nằm trong contract. Nó chỉ dừng nếu scope, permission hoặc risk thay đổi.
+Agent có thể tự đi qua các bước local, quay lại được và đã nằm trong thoả thuận. Nó chỉ dừng nếu phạm vi, quyền hoặc rủi ro thay đổi.
 
-## Khi concurrent test làm task trật đường
+## Khi test đồng thời làm task trật đường
 
-Giả sử targeted test happy path pass, nhưng concurrent test tạo ra hai pending invitation.
+Giả sử test luồng thuận đã qua, nhưng test hai yêu cầu đồng thời lại tạo ra hai lời mời đang chờ.
 
-Writer thử thêm query check trước insert. Test vẫn flaky. Đây là stop condition từ bài 08.
+Agent thực thi thử thêm câu truy vấn kiểm tra trước khi ghi. Test vẫn lúc xanh lúc đỏ. Đây là điều kiện dừng từ bài 08.
 
-Mình freeze state và chuyển read-only diagnosis:
+Mình chốt trạng thái và chuyển sang chẩn đoán chỉ đọc:
 
 ```text
-Expected:
-Hai request đồng thời chỉ tạo một pending invitation.
+Mong đợi:
+Hai yêu cầu đồng thời chỉ tạo một lời mời đang chờ.
 
-Actual:
-Database có hai record.
+Thực tế:
+Database có hai bản ghi.
 
-Reproduction:
-[exact targeted concurrent test]
+Cách tái hiện:
+[test đồng thời chính xác]
 
-Facts:
-- cả hai request dùng cùng test database
-- cả hai vượt qua service check
-- schema chưa enforce invariant tương ứng
+Điều đã biết:
+- cả hai yêu cầu dùng cùng database test
+- cả hai vượt qua bước kiểm tra của service
+- schema chưa ép buộc quy tắc tương ứng
 
-Open hypotheses:
-- check và insert không atomic
-- constraint hiện tại không khớp normalized key
+Giả thuyết còn mở:
+- kiểm tra và ghi dữ liệu không phải một thao tác nguyên tử
+- ràng buộc hiện tại không khớp khoá đã chuẩn hoá
 ```
 
-Experiment là inspect transaction boundary và schema thật, không thêm delay.
+Phép thử tiếp theo là xem ranh giới transaction và schema thật, không thêm `delay` để cầu may.
 
-Nếu evidence xác nhận application check không đủ chống race, writer đề xuất constraint phù hợp với decision đã chốt. Migration plan quay lại checkpoint A để review.
+Nếu bằng chứng xác nhận kiểm tra ở tầng ứng dụng không đủ chống tranh chấp dữ liệu, agent thực thi đề xuất ràng buộc phù hợp với quyết định đã chốt. Kế hoạch migration quay lại điểm A để review.
 
-Sau fix:
+Sau khi sửa:
 
-- Chạy lại concurrent test
-- Chạy permission và existing-member regression tests
-- Inspect database state
-- Review error mapping khi constraint conflict
+- Chạy lại test đồng thời
+- Chạy test phân quyền và regression test cho người đã là thành viên
+- Xem trạng thái database
+- Review cách ánh xạ lỗi khi ràng buộc bị xung đột
 
-Recovery loop này không tạo một task mới khổng lồ.
+Vòng phục hồi này không tạo thêm một task khổng lồ.
 
-Nó làm rõ một invariant vốn đã nằm trong acceptance criteria.
+Nó làm rõ một quy tắc vốn đã nằm trong tiêu chí hoàn thành.
 
-## Phase 7: Freeze final state và review wide-to-narrow
+## Giai đoạn 7: Chốt trạng thái rồi review từ rộng tới hẹp
 
-Khi writer báo xong, mình yêu cầu dừng sửa.
+Khi agent thực thi báo xong, mình yêu cầu dừng sửa.
 
-Snapshot:
+Chụp trạng thái:
 
 ```bash
 git status --short
@@ -405,101 +402,98 @@ git diff
 git diff --check
 ```
 
-Review bắt đầu từ task chứ không bắt đầu từ naming.
+Review bắt đầu từ task chứ không bắt đầu từ chuyện đặt tên.
 
-**Scope review:**
+**Review phạm vi:**
 
-- Chỉ service, route, migration, test và adapter usage liên quan?
-- Có lockfile, config, generated file hoặc module ngoài ownership không?
-- Out of scope có bị kéo vào vì "tiện làm luôn" không?
+- Chỉ có service, route, migration, test và cách dùng adapter liên quan?
+- Có lockfile, cấu hình, file sinh tự động hoặc module ngoài phần được giao không?
+- Phần không làm có bị kéo vào vì “tiện làm luôn” không?
 
-**Behavior review:**
+**Review cách hoạt động:**
 
-- Permission check xảy ra trước side effect?
-- Normalized email dùng nhất quán cho lookup và uniqueness?
-- Transaction boundary có giữ invariant?
-- Constraint conflict map về API behavior đã chốt?
-- Email enqueue ở state nào?
-- Raw token có đường nào đi vào log, exception hoặc database?
+- Việc kiểm tra quyền xảy ra trước tác động phụ?
+- Email đã chuẩn hoá được dùng nhất quán khi tra cứu và kiểm tra trùng?
+- Ranh giới transaction có giữ đúng quy tắc?
+- Xung đột ràng buộc được ánh xạ về kết quả API đã chốt?
+- Email được đưa vào hàng đợi ở trạng thái nào?
+- Token thô có đường nào đi vào log, exception hoặc database?
 
 **Test review:**
 
-- Test fail nếu bỏ implementation tương ứng?
-- Concurrent test thật sự dùng shared state?
-- Mock có che mất transaction hoặc adapter boundary?
-- Assertion kiểm tra database và side effect, không chỉ status code?
+- Test có đỏ nếu bỏ phần code tương ứng?
+- Test đồng thời có thật sự dùng chung trạng thái?
+- Mock có che mất ranh giới transaction hoặc adapter?
+- Assertion có kiểm tra database và tác động phụ, không chỉ mã trạng thái?
 
-**Complexity review:**
+**Review độ phức tạp:**
 
 - Có abstraction mới cho tương lai chưa tồn tại không?
-- Pattern project có được reuse không?
-- Comment giải thích decision hay kể lại code?
+- Cách làm sẵn có của project có được dùng lại không?
+- Comment giải thích quyết định hay chỉ kể lại code?
 
-Finding được triage trước khi fix. Sau mỗi fix, final state đổi nên affected checks phải chạy lại.
+Vấn đề được phân loại trước khi sửa. Sau mỗi lần sửa, trạng thái cuối đổi nên các bước kiểm tra bị ảnh hưởng phải chạy lại.
 
-## Phase 8: Tạo evidence package
+## Giai đoạn 8: Gom gói bằng chứng
 
-Một PR description tốt không nên buộc reviewer đọc transcript để biết agent đã làm gì.
+Phần mô tả PR tốt không nên bắt người review đọc lại cả đoạn chat để biết agent đã làm gì.
 
-Mình yêu cầu evidence package trước:
+Mình yêu cầu gói bằng chứng trước:
 
 ```text
-Goal:
-Workspace admin tạo pending invitation qua API.
+Mục tiêu:
+Admin của workspace tạo lời mời đang chờ qua API.
 
-Changed:
-- [file] -> [reason]
+Đã thay đổi:
+- [file] -> [lý do]
 
-Decisions implemented:
-- admin-only
-- duplicate pending -> conflict
-- normalized email
-- token hash at rest
-- enqueue after successful create
+Quyết định đã làm theo:
+- chỉ admin
+- lời mời đang chờ bị trùng -> conflict
+- email đã chuẩn hoá
+- chỉ lưu mã băm của token
+- chỉ đưa email vào hàng đợi sau khi tạo thành công
 
-Acceptance criteria:
-- PASS [criterion] -> [evidence]
-- PASS [criterion] -> [evidence]
-- NOT VERIFIED [criterion] -> [reason]
+Tiêu chí hoàn thành:
+- PASS [tiêu chí] -> [bằng chứng]
+- PASS [tiêu chí] -> [bằng chứng]
+- NOT VERIFIED [tiêu chí] -> [lý do]
 
-Commands:
-- [exact command] -> pass/fail summary
+Câu lệnh:
+- [câu lệnh chính xác] -> tóm tắt pass/fail
 
-Manual checks:
-- [flow and observed result]
+Kiểm tra thủ công:
+- [luồng và kết quả quan sát được]
 
-Risks:
-- [remaining risk]
+Rủi ro:
+- [rủi ro còn lại]
 
-Out of scope:
-- UI, accept flow, production provider, deploy
+Không làm trong vòng này:
+- giao diện, luồng chấp nhận, nhà cung cấp thật, deploy
 
-Rollback:
-- [migration/change recovery note]
+Cách quay lại:
+- [ghi chú phục hồi migration hoặc thay đổi]
 ```
 
-Evidence package không cần paste full test log.
+Gói bằng chứng không cần dán toàn bộ log test.
 
-Nó cần đủ để reviewer trace từ claim tới command, diff hoặc state quan sát được.
+Nó chỉ cần đủ để người review lần từ lời báo tới câu lệnh, diff hoặc trạng thái quan sát được.
 
-{/* IMAGE PROMPT:
-Create a 16:9 horizontal editorial technical evidence-package diagram on warm off-white textured paper. Show a friendly navy coding agent assembling five distinct verified cards into one compact pull-request folder handed to a human reviewer. The cards should visually represent the task contract, code diff, automated tests, residual risk, and final proposal. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only these exact five uppercase labels, spelled exactly once each: TASK, DIFF, TESTS, RISKS, PR. No other words, letters, numbers, pseudo-text, title, series name, logo, watermark, fake UI, gradients, or decorative clutter. Make the assembly flow left to right and all labels large and readable.
-*/}
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784099817/n4uoyg1s6xg5aktyz0n5.webp"
-  alt="Task, diff, tests và risks được đóng gói thành một pull request có thể review"
-  caption="Pull request là proposal kèm context và evidence, không chỉ là nơi chứa diff."
+  alt="Task, diff, test và rủi ro được đóng gói thành một pull request có thể review"
+  caption="Pull request là một đề xuất kèm ngữ cảnh và bằng chứng, không chỉ là nơi chứa diff."
 />
 
-## Phase 9: Chuẩn bị pull request, chưa merge
+## Giai đoạn 9: Chuẩn bị pull request, chưa merge
 
-GitHub mô tả pull request là một proposal để merge code change. Reviewer có thể xem description, commits và files changed trước khi approve hoặc request changes.
+GitHub mô tả pull request là một đề xuất để ghép thay đổi code. Người review có thể xem phần mô tả, commit và các file đã đổi trước khi đồng ý hoặc yêu cầu sửa.
 
-Từ "proposal" khá đúng với boundary mình muốn.
+Từ “đề xuất” khá đúng với ranh giới mình muốn.
 
-Agent có thể chuẩn bị title và body. Việc push hoặc mở PR là external side effect, nên vẫn đi qua approval gate từ bài 09.
+Agent có thể chuẩn bị tiêu đề và nội dung. Việc push hoặc mở PR tạo tác động ra bên ngoài, nên vẫn phải đi qua điểm xin phép từ bài 09.
 
-PR draft có thể là:
+Bản nháp PR có thể là:
 
 ```text
 Title:
@@ -535,201 +529,201 @@ Review focus:
 - raw token handling
 ```
 
-Nếu repository có issue tương ứng, PR có thể link issue để reviewer thấy problem và progress ở cùng một chỗ. Việc dùng closing keyword phải đúng target branch và ý định của team, không nên để agent tự thêm `Closes` nếu PR chưa thật sự hoàn thành toàn bộ issue.
+Nếu repository có issue tương ứng, PR có thể gắn liên kết để người review thấy vấn đề và tiến độ ở cùng một chỗ. Từ khoá đóng issue phải đúng nhánh đích và ý định của team; đừng để agent tự thêm `Closes` khi PR chưa thật sự giải quyết toàn bộ issue.
 
-Trước approval để push/open PR, mình preview:
+Trước khi cho phép push hoặc mở PR, mình xem trước:
 
-- Target repository và branch
+- Repository và nhánh đích
 - Commit hoặc diff sẽ được gửi
-- PR title/body
-- Reviewer dự kiến
+- Tiêu đề và nội dung PR
+- Người review dự kiến
 - Không bao gồm merge/deploy
 
-Một approval chỉ có hiệu lực với payload đó.
+Lần đồng ý này chỉ có hiệu lực với đúng nội dung đó.
 
-## Phase 10: Review feedback quay về task
+## Giai đoạn 10: Đưa phản hồi từ review về lại task
 
-PR không phải nơi workflow mất source of truth.
+PR không phải nơi quy trình làm rơi mất nguồn chuẩn.
 
-Reviewer có thể `Comment`, `Approve` hoặc `Request changes`. Với actionable finding, mình đưa nó về task hoặc notes cùng severity, file reference, evidence và owner.
+Người review có thể `Comment`, `Approve` hoặc `Request changes`. Với nhận xét cần xử lý, mình đưa nó về task hoặc ghi chú cùng mức độ nghiêm trọng, file, vị trí, bằng chứng và người phụ trách.
 
-Writer nhận một fix scope cụ thể:
+Agent thực thi nhận một phạm vi sửa cụ thể:
 
 ```text
-Finding:
-[Behavior hoặc risk]
+Vấn đề:
+[Cách hoạt động hoặc rủi ro]
 
-Evidence:
-[File, line, reproduction]
+Bằng chứng:
+[File, dòng, cách tái hiện]
 
-Required outcome:
-[State sau fix]
+Kết quả cần có:
+[Trạng thái sau khi sửa]
 
-Allowed writes:
-[Scope]
+Được phép sửa:
+[Phạm vi]
 
-Verification:
-[Affected check và regression check]
+Kiểm tra:
+[Bước bị ảnh hưởng và regression test]
 ```
 
-Không prompt "fix mọi comment trong PR" nếu comment còn lẫn question, preference và blocker.
+Đừng bảo “sửa mọi comment trong PR” khi các comment còn lẫn câu hỏi, góp ý theo sở thích và lỗi thật sự chặn việc merge.
 
-Sau fix, writer cập nhật evidence package. Reviewer được re-request nếu change đáng kể làm approval cũ không còn phản ánh final state.
+Sau khi sửa, agent thực thi cập nhật gói bằng chứng. Người review được mời lại nếu thay đổi đáng kể khiến lần đồng ý cũ không còn phản ánh trạng thái cuối.
 
 PR sẵn sàng merge khi:
 
-- Finding blocking đã xử lý
-- Required checks chạy trên commit hiện tại
-- Conversation quan trọng đã resolve
-- AC có evidence hoặc uncertainty được chấp nhận rõ
-- Branch protection và owner approval đạt
+- Vấn đề chặn merge đã xử lý
+- Các bước kiểm tra bắt buộc chạy trên commit hiện tại
+- Trao đổi quan trọng đã được giải quyết
+- Tiêu chí hoàn thành có bằng chứng hoặc phần chưa chắc chắn được chấp nhận rõ
+- Quy tắc bảo vệ nhánh và người có thẩm quyền đã đồng ý
 
-Capstone dừng ở trạng thái **ready to merge**.
+Bài tổng kết dừng ở trạng thái **sẵn sàng để merge**.
 
-Merge và deploy vẫn là decision khác.
+Merge và deploy vẫn là hai quyết định khác.
 
-## Một timeline thực tế của capstone
+## Một vòng làm việc thực tế
 
-Nếu gom lại theo event, workflow sẽ giống vầy:
+Nếu gom lại theo từng chặng, vòng làm việc sẽ giống vầy:
 
 ```text
-Idea
--> Problem framing
--> Research read-only
--> Decisions
--> Spec + acceptance criteria
--> Task + guardrails
--> Pre-flight
--> Scoped implementation
--> Targeted verification
--> Diagnose one failure
--> Scoped fix
--> Freeze final state
+Ý tưởng
+-> Viết rõ vấn đề
+-> Tìm hiểu ở chế độ chỉ đọc
+-> Chốt quyết định
+-> Đặc tả + tiêu chí hoàn thành
+-> Task + hàng rào an toàn
+-> Kiểm tra đường đi
+-> Thực thi trong phạm vi
+-> Kiểm tra đúng vùng thay đổi
+-> Chẩn đoán một lỗi
+-> Sửa trong phạm vi
+-> Chốt trạng thái cuối
 -> Review
--> Evidence package
--> Approval to push/open PR
--> Human review
--> Re-verify current commit
--> Ready to merge
+-> Gói bằng chứng
+-> Xin phép push/mở PR
+-> Người thật review
+-> Kiểm tra lại commit hiện tại
+-> Sẵn sàng để merge
 ```
 
-Không phải mọi feature cần đủ từng dòng thành ceremony.
+Không phải tính năng nào cũng cần biến từng dòng thành nghi lễ.
 
-Với task nhỏ, research, spec và task có thể nằm trong một note ngắn. Với task nhiều risk, mỗi decision cần owner và audit trail rõ hơn.
+Với task nhỏ, phần tìm hiểu, đặc tả và task có thể nằm trong một ghi chú ngắn. Với task nhiều rủi ro, mỗi quyết định cần người phụ trách và dấu vết rõ hơn.
 
-Điểm không đổi là state phải đi qua artifact và evidence, không chỉ qua ký ức của chat.
+Điểm không đổi là trạng thái phải đi qua tài liệu và bằng chứng, không chỉ qua ký ức của đoạn chat.
 
-## Prompt orchestration cho toàn capstone
+## Prompt điều phối cho cả vòng
 
-Nếu tool hỗ trợ workflow dài, mình vẫn chia prompt theo phase thay vì một prompt "làm từ A tới Z".
+Nếu công cụ hỗ trợ vòng làm việc dài, mình vẫn chia prompt theo giai đoạn thay vì một prompt “làm từ A tới Z”.
 
-Main prompt có thể là:
+Prompt chính có thể là:
 
 ```text
-Goal:
-Đưa workspace invitation vertical slice từ spec tới review-ready change package.
+Mục tiêu:
+Đưa lát cắt mời thành viên vào workspace từ đặc tả tới một gói thay đổi sẵn sàng để review.
 
-Source of truth:
-- project instructions
-- feature spec
-- decision notes
-- task acceptance criteria
+Nguồn chuẩn:
+- sổ tay project
+- đặc tả tính năng
+- ghi chú quyết định
+- tiêu chí hoàn thành của task
 
-Phases:
-1. Research read-only, trả finding có evidence.
-2. Dừng ở open decisions.
-3. Sau khi decision được chốt, trả implementation pre-flight.
-4. Implement trong allowed write scope.
-5. Verify theo AC và freeze final state.
-6. Tạo evidence package và PR draft.
+Các giai đoạn:
+1. Tìm hiểu ở chế độ chỉ đọc, trả phát hiện có bằng chứng.
+2. Dừng ở những quyết định còn mở.
+3. Sau khi quyết định được chốt, trả bản kiểm tra đường đi trước khi sửa.
+4. Thực thi trong phạm vi file được phép sửa.
+5. Kiểm tra theo tiêu chí và chốt trạng thái cuối.
+6. Tạo gói bằng chứng và bản nháp PR.
 
-Approval gates:
-- scope expansion
-- dependency or migration outside plan
-- network or credential use
-- commit, push or open PR
-- merge or deploy
+Điểm xin phép:
+- mở rộng phạm vi
+- dependency hoặc migration ngoài kế hoạch
+- dùng mạng hoặc thông tin đăng nhập
+- commit, push hoặc mở PR
+- merge hoặc deploy
 
-Stop rules:
-- same failure repeats without new evidence
-- source of truth conflicts
-- production data or secret appears
-- destructive or irreversible action is needed
+Điều kiện dừng:
+- cùng một lỗi lặp lại mà không có bằng chứng mới
+- các nguồn chuẩn mâu thuẫn
+- xuất hiện dữ liệu thật hoặc secret
+- cần thao tác phá huỷ hoặc khó quay lại
 
-Do not:
-- tự chốt product decision
+Không làm:
+- tự chốt quyết định sản phẩm
 - tự reset user changes
-- gộp merge/deploy vào approval mở PR
+- gộp merge/deploy vào lần cho phép mở PR
 ```
 
-Main agent có thể tự đi qua phase local đã được duyệt.
+Agent chính có thể tự đi qua các giai đoạn local đã được duyệt.
 
-Nhưng nó phải dừng ở decision và capability boundary, không chỉ dừng khi token gần hết.
+Nhưng nó phải dừng ở ranh giới quyết định và quyền hạn, không chỉ dừng khi token gần hết.
 
-## Với Knowns, capstone trở thành một audit trail nhỏ
+## Với Knowns, công việc để lại dấu vết rõ ràng
 
 Trong Knowns, mình có thể giữ:
 
-- Spec cho outcome và acceptance criteria
-- Decision note cho duplicate behavior, token và side effect
-- Task cho ownership, guardrails, plan và progress
-- Task notes cho research finding, experiment, command và evidence
-- Memory cho pattern đã được kiểm chứng và tái sử dụng
+- Đặc tả cho kết quả và tiêu chí hoàn thành
+- Ghi chú quyết định cho lời mời trùng, token và tác động phụ
+- Task cho người phụ trách, hàng rào, kế hoạch và tiến độ
+- Ghi chú task cho phát hiện từ bước tìm hiểu, phép thử, câu lệnh và bằng chứng
+- Memory cho cách làm đã được kiểm chứng và có thể dùng lại
 
-Session writer không cần ôm toàn bộ history.
+Session của agent thực thi không cần ôm toàn bộ lịch sử.
 
-Reviewer cũng không cần tin một summary không còn source.
+Người review cũng không cần tin một bản tóm tắt đã mất nguồn.
 
-Nếu concurrent test loại một hypothesis, kết quả âm tính nằm trong task notes. Nếu duplicate contract thay đổi, decision note là source of truth mới. Nếu project rút ra pattern "external side effect luôn sau transaction", pattern đó mới xứng đáng thành memory sau khi được kiểm chứng.
+Nếu test đồng thời loại một giả thuyết, kết quả âm tính nằm trong ghi chú task. Nếu cách xử lý lời mời trùng thay đổi, ghi chú quyết định trở thành nguồn chuẩn mới. Nếu project rút ra quy tắc “tác động ra bên ngoài luôn xảy ra sau transaction”, quy tắc đó chỉ xứng đáng thành memory sau khi được kiểm chứng.
 
 Knowns ở đây không thay Git, test hoặc PR review.
 
-Nó nối những artifact đó bằng một contract mà cả người lẫn agent đều có thể đọc lại.
+Nó nối những tài liệu đó bằng một thoả thuận mà cả người lẫn agent đều có thể đọc lại.
 
-## Definition of done cho bài capstone
+## Khi nào bài tổng kết này được xem là xong
 
-Mình xem capstone hoàn thành khi:
+Mình xem vòng này hoàn thành khi:
 
-- Problem và user outcome được viết rõ
-- Vertical slice đủ nhỏ để review độc lập
-- Open decision đã có owner và được chốt
-- Project instructions, spec và task không mâu thuẫn
-- Writer biết allowed reads, writes, commands và stop conditions
-- Implementation không vượt out of scope
-- Failure được chẩn đoán bằng evidence, không che bằng retry hoặc test nới lỏng
-- Final diff đã freeze và review trên integrated state
-- Mỗi acceptance criterion có evidence hoặc `NOT VERIFIED`
-- Risk, rollback và phần chưa verify được ghi rõ
-- PR draft giải thích why, what, verification và review focus
-- Push/open PR có approval riêng
-- Merge và deploy chưa bị coi là phần phụ của implementation
+- Vấn đề và kết quả người dùng được viết rõ
+- Lát cắt đủ nhỏ để review độc lập
+- Quyết định còn mở đã có người phụ trách và được chốt
+- Sổ tay project, đặc tả và task không mâu thuẫn
+- Agent thực thi biết được đọc gì, sửa gì, chạy câu lệnh nào và dừng khi nào
+- Phần thực thi không vượt phạm vi
+- Lỗi được chẩn đoán bằng bằng chứng, không che bằng `retry` hoặc test nới lỏng
+- Diff cuối đã được chốt và review trên trạng thái đã ghép
+- Mỗi tiêu chí hoàn thành có bằng chứng hoặc `NOT VERIFIED`
+- Rủi ro, cách quay lại và phần chưa kiểm tra được ghi rõ
+- Bản nháp PR giải thích vì sao đổi, đổi gì, kiểm tra thế nào và cần tập trung review ở đâu
+- Push hoặc mở PR có lần xin phép riêng
+- Merge và deploy chưa bị coi là phần phụ của việc viết code
 
 `Done` ở đây không có nghĩa code sẽ không bao giờ có bug.
 
-Nó có nghĩa uncertainty còn lại đã được nhìn thấy, change đủ nhỏ để người khác hiểu và decision cuối không bị giấu trong sự tự tin của agent.
+Nó có nghĩa phần chưa chắc chắn còn lại đã được nhìn thấy, thay đổi đủ nhỏ để người khác hiểu và quyết định cuối không bị giấu trong sự tự tin của agent.
 
 ## Kết series
 
 Mở một coding agent lên rất dễ.
 
-Phần khó hơn là tạo một môi trường nơi agent biết project, nhận task đủ rõ, có feedback loop tốt, dừng đúng lúc và đưa cho mình evidence thay vì chỉ đưa một câu trả lời trôi chảy.
+Phần khó hơn là tạo một môi trường nơi agent biết project, nhận task đủ rõ, có vòng phản hồi tốt, dừng đúng lúc và đưa cho mình bằng chứng thay vì chỉ đưa một câu trả lời trôi chảy.
 
-Qua capstone này, mình muốn giữ một ý chính:
+Qua bài tổng kết này, mình muốn giữ một ý chính:
 
 ```text
-Context giúp agent hiểu.
-Contract giúp agent không tự đoán.
-Guardrail giới hạn hậu quả.
-Evidence giúp mình quyết định.
+Ngữ cảnh giúp agent hiểu.
+Thoả thuận rõ giúp agent không tự đoán.
+Hàng rào giới hạn hậu quả.
+Bằng chứng giúp mình quyết định.
 ```
 
-Agent coding không loại bỏ công việc engineering.
+Coding agent không loại bỏ công việc kỹ thuật.
 
-Nó đẩy công việc lên một tầng khác: mình dành ít thời gian gõ từng dòng hơn, nhưng phải rõ hơn về intent, boundary, state và verification.
+Nó đẩy công việc lên một tầng khác: mình dành ít thời gian gõ từng dòng hơn, nhưng phải rõ hơn về ý định, giới hạn, trạng thái và cách kiểm tra.
 
 Và thật ra mình thấy đây là phần khá thú vị.
 
-Code có thể đến nhanh hơn. Nhưng quyết định tốt, feedback loop tốt và một pull request dễ review vẫn là thứ phải được thiết kế.
+Code có thể đến nhanh hơn. Nhưng quyết định tốt, vòng phản hồi tốt và một pull request dễ review vẫn là thứ phải được thiết kế.
 
 Cảm ơn các bạn đã đi hết Agent Coding 101 cùng mình.
 

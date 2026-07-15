@@ -14,6 +14,7 @@ If asked to write code (components, utilities, config), **stop and confirm** —
 - Creating series folders in `series/` with `_meta.mdx` + chapter files
 - Editing frontmatter or body of existing `.mdx` files
 - Adding images to `assets/`
+- Adding or editing one shared term per `glossary/<term-id>.md`
 - Updating `README.md` / `AGENTS.md` / `llms.txt`
 
 Not acceptable here:
@@ -171,6 +172,13 @@ Chapter rules:
 ## Available MDX components
 
 Globally available inside any MDX file. **Do not add import statements.**
+
+### `<TermNote>`
+- Wraps a word or phrase with a contextual note from `glossary/<id>.md`
+- `id` (recommended): filename without `.md`
+- `explanation`: optional inline fallback for a one-off note or draft preview
+- `title`: optional heading override
+- Example: `<TermNote id="context-window">context window</TermNote>`
 
 ### `<Callout>`
 - `type`: `info` (default) | `warning` | `error` | `success` | `note` | `tip`

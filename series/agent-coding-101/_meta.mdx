@@ -1,8 +1,8 @@
 ---
 title: "Agent Coding 101"
-description: "Series dành cho người mới bắt đầu dùng AI để code - từ thuật ngữ cơ bản tới workflow thực tế."
+description: "Series cho người mới dùng AI để code, từ mấy thuật ngữ dễ gây ngợp tới cách giao việc và kiểm tra agent ngoài đời thật."
 date: "2026-05-19"
-updatedAt: "2026-07-15"
+updatedAt: "2026-07-16"
 tags: ["AI", "Agent", "Programming"]
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1779202507/agent_coding_101_sofzpc.png"
 featured: true
@@ -10,23 +10,25 @@ status: "complete"
 author: howznguyen
 ---
 
-Mở một coding agent lên thì khá dễ. Nhưng để agent hiểu đúng project, nhận đúng task, sửa đúng chỗ và không kéo mình vào một buổi debug dài hơn tự code thì lại là câu chuyện khác.
+Mở một coding agent lên thì khá dễ. Giao cho nó một câu ngắn, nhìn mấy dòng chữ chạy ào ào rồi thấy code xuất hiện cũng vui mắt lắm.
 
-**Agent Coding 101** là series mình viết cho những bạn mới bắt đầu dùng AI để code. Không quan trọng bạn đang dùng Claude Code, Codex, Cursor hay Copilot. Mục tiêu của series không phải là dạy một bộ prompt thần kỳ, mà là giúp bạn xây được một workflow đủ rõ để làm việc với coding agent mỗi ngày.
+Khó hơn là để agent hiểu đúng project, nhận đúng task, sửa đúng chỗ và không kéo mình vào một buổi debug còn dài hơn lúc tự code. Chỗ này mới bắt đầu bớt vui.
 
-Series bắt đầu từ những khái niệm cơ bản, sau đó đi dần vào cách giao việc, cách giúp agent hiểu project, cách biến một feature mơ hồ thành spec và các task có thể verify. Những bài sau sẽ nói về context, memory và multi-agent, khi một session hoặc một agent không còn đủ cho công việc.
+**Agent Coding 101** là series mình viết cho những bạn mới bắt đầu dùng AI để code. Bạn dùng Claude Code, Codex, Cursor hay Copilot đều được. Mục tiêu không phải tìm ra một prompt thần kỳ, mà là xây một cách làm đủ rõ để mình biết agent đang làm gì và kiểm tra nó ra sao.
+
+Series bắt đầu từ mấy khái niệm cơ bản, rồi đi dần vào cách giao việc, giúp agent hiểu project, biến một feature mơ hồ thành spec và chia thành các task nhỏ. Những bài sau nói về context, memory, nhiều agent cùng làm việc, cách review kết quả và lúc nào nên giành tay lái lại.
 
 ## Series này dành cho ai
 
-Series này phù hợp nếu bạn đã biết code nhưng vẫn chưa thật sự thoải mái khi giao việc cho agent. Có thể bạn từng đưa cho agent một prompt khá dài nhưng kết quả vẫn sai. Hoặc agent làm đúng ở vài file đầu, rồi bắt đầu quên constraint, sửa quá scope và tạo ra một diff khó review.
+Series này phù hợp nếu bạn đã biết code nhưng vẫn chưa thật sự thoải mái khi giao việc cho agent. Có thể bạn từng viết một prompt rất dài mà kết quả vẫn sai. Hoặc agent làm đúng ở vài file đầu, rồi bắt đầu quên giới hạn, sửa lan sang chỗ khác và để lại một diff nhìn thôi đã muốn đi pha cà phê.
 
 Bạn không cần biết quá sâu về LLM hay phải dùng đúng một tool nào đó. Chỉ cần có một project thật và sẵn sàng bắt đầu bằng những task nhỏ.
 
 ## Bạn sẽ học được gì
 
-Mình sẽ đi từ những tình huống thường gặp khi dùng coding agent, giải thích vì sao chúng xảy ra và đưa ra một workflow có thể áp dụng ngay vào project thật.
+Mình sẽ đi từ những tình huống thường gặp, giải thích vì sao chúng xảy ra và đưa ra cách xử lý có thể thử ngay trên project thật.
 
-Sau series này, bạn sẽ biết cách giao một task có scope rõ, cung cấp đúng context, viết project instructions vừa đủ và review kết quả của agent thay vì chỉ nhìn xem code có chạy hay không. Khi feature lớn hơn, bạn cũng sẽ biết cách đi từ idea tới spec, chia thành các task nhỏ và quyết định lúc nào một session hoặc một agent không còn đủ.
+Sau series này, bạn sẽ biết cách giao một task có phạm vi rõ, cung cấp đủ context, viết sổ tay project vừa đủ và review kết quả thay vì chỉ nhìn xem code có chạy hay không. Khi feature lớn hơn, bạn cũng sẽ biết cách đi từ ý tưởng tới spec, chia thành các task nhỏ và nhận ra lúc nào một session hoặc một agent không còn đủ.
 
 Mục tiêu cuối cùng không phải là để agent viết được nhiều code hơn. Mà là để bạn kiểm soát được agent đang làm gì, vì sao nó làm như vậy và cách kiểm tra kết quả trước khi merge.
 
@@ -34,8 +36,10 @@ Mục tiêu cuối cùng không phải là để agent viết được nhiều c
 
 Bạn nên đọc theo thứ tự nếu mới bắt đầu. Nếu đã dùng coding agent một thời gian, bạn có thể nhảy thẳng tới bài đang đúng với vấn đề mình gặp.
 
-Mỗi bài tập trung vào một vấn đề và có thể đọc riêng. Danh sách chapter bên dưới cũng chính là thứ tự mình recommend cho người mới, nên không cần một roadmap riêng.
+Mỗi bài tập trung vào một vấn đề và có thể đọc riêng. Nếu chưa biết bắt đầu ở đâu, cứ đi theo thứ tự các chương bên dưới. Mình đã xếp đường rồi, các bạn không cần tự vẽ thêm roadmap cho mệt.
 
 <Callout type="tip" title="Không cần học hết rồi mới bắt đầu">
-  Chọn một task nhỏ trong project đang làm, đọc bài tương ứng và thử ngay. Làm việc với coding agent cũng giống học một tool mới: đọc giúp mình hiểu, nhưng vài lần giao task sai mới giúp mình biết rule nào thật sự quan trọng.
+  Chọn một task nhỏ trong project đang làm, đọc bài tương ứng và thử ngay. Đọc
+  giúp mình hiểu, nhưng vài lần giao việc sai mới cho biết quy tắc nào thật sự
+  đáng giữ. Hơi đau một chút, nhưng nhớ lâu.
 </Callout>
