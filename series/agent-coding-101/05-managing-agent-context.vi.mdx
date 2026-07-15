@@ -1,0 +1,446 @@
+---
+title: "Giữ context cho coding agent qua nhiều session"
+description: "Cách nhận ra agent đang mất context, viết handoff, dùng memory đúng chỗ và chuyển session mà không phải giải thích lại từ đầu."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784089131/c9707fd7-35c7-4228-a683-d184f195524f.png"
+---
+
+Ở bài trước, mình đã đi từ một feature còn mơ hồ tới spec và các task nhỏ có thể verify riêng.
+
+Nhưng task nhỏ không có nghĩa là lúc nào cũng làm xong trong một session.
+
+Có task mình phải dừng để chờ API. Có task research buổi sáng, implement buổi chiều, hôm sau mới chạy được integration test. Cũng có lúc đang sửa auth thì một bug production chen ngang, vài tiếng sau quay lại mình còn không nhớ chính mình đã chốt decision gì.
+
+Coding agent cũng gặp đúng vấn đề đó, chỉ nhanh hơn mình một chút.
+
+Đầu session nó đọc đúng file, nhắc lại đúng constraint và đưa ra plan khá ổn. Sau một loạt command, log dài, diff, feedback và vài lần đổi hướng, nó bắt đầu hỏi lại những thứ đã nói. Tệ hơn là nó không hỏi. Nó âm thầm dùng assumption cũ và tiếp tục code.
+
+Lúc này viết prompt dài hơn thường không cứu được nhiều.
+
+Thứ mình cần là đặt đúng loại thông tin vào đúng chỗ, biết khi nào context đang xuống chất lượng, và có cách chuyển việc sang session tiếp theo mà không dựa vào trí nhớ của đoạn chat.
+
+## Task nhỏ vẫn có thể tạo ra context rất lớn
+
+Ở bài đầu tiên của series, mình đã giải thích **context window** là gì. Bài này mình không lặp lại định nghĩa đó nữa.
+
+Điểm quan trọng cần nhớ là context của coding agent không chỉ có prompt mình vừa gõ.
+
+Nó còn có system instructions, `AGENTS.md` hoặc `CLAUDE.md`, lịch sử hội thoại, file agent đã đọc, output của command, error log, diff, nội dung từ tool và cả câu trả lời do chính agent tạo ra.
+
+Mỗi thứ nhìn riêng có vẻ không nhiều. Cộng lại qua một session dài thì khác.
+
+Ví dụ một task sửa login redirect có thể bắt đầu rất gọn:
+
+```text
+Sửa lỗi người dùng bị redirect về /login sau khi đăng nhập thành công.
+Không đổi public API.
+Chạy test integration của auth sau khi sửa.
+```
+
+Sau đó agent đọc middleware, route handler, session service, test cũ và config cookie. Nó chạy test ba lần, mỗi lần trả về vài trăm dòng log. Mình sửa lại requirement. Agent thử một hướng rồi revert. Cuối cùng task chỉ đổi mười dòng code, nhưng context đã chứa cả một buổi làm việc.
+
+Độ lớn của diff và độ lớn của context là hai chuyện khác nhau.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784088632/426abee3-56c7-4558-bfcb-cba8b1025b2e.png"
+  alt="Bốn lớp context gồm project rules, task, file và log, cùng lịch sử hội thoại"
+  caption="Context của agent không chỉ có prompt. Rules, task, file, command output và lịch sử chat đều cùng chiếm chỗ."
+/>
+
+## Nhiều context hơn chưa chắc tốt hơn
+
+Mình từng nghĩ context càng nhiều thì agent càng ít đoán.
+
+Điều đó chỉ đúng khi phần lớn context còn liên quan và không mâu thuẫn nhau.
+
+Một session dài thường giữ lại cả những thứ đã hết hạn:
+
+- Requirement cũ trước khi mình đổi ý
+- Error log của hướng triển khai đã bỏ
+- File agent đọc trong lúc research nhưng cuối cùng không liên quan
+- Một plan cũ không còn khớp với diff hiện tại
+- Feedback tạm thời chỉ đúng ở một bước
+- Những câu trả lời dài do agent tự tạo ra
+
+Agent không nhìn context như mình nhìn một folder đã được sắp xếp. Nó nhận một khối thông tin và phải suy ra phần nào còn quan trọng cho token tiếp theo.
+
+Nếu trong đó có ba phiên bản của cùng một decision, mình đang bắt model tự đoán phiên bản nào là mới nhất.
+
+<Quote color="blue">
+  Context tốt không phải context chứa nhiều nhất. Nó là context có đủ thông tin
+  đúng, ít mâu thuẫn và có source of truth rõ ràng.
+</Quote>
+
+## Dấu hiệu agent đang mất context
+
+Context đầy không phải lúc nào cũng hiện ra bằng một thông báo rõ ràng.
+
+Mình thường nhìn vào chất lượng hành vi của agent hơn là chỉ nhìn số token.
+
+Một vài dấu hiệu khá dễ thấy:
+
+- Agent hỏi lại constraint vừa được xác nhận
+- Nó mở lại cùng một file nhiều lần nhưng vẫn hiểu sai flow
+- Plan ở đầu session nói một kiểu, diff cuối session đi theo kiểu khác
+- Nó sửa ra ngoài scope dù boundary đã được nhắc rõ
+- Một bug vừa fix xong lại xuất hiện ở bước sau
+- Agent bắt đầu trả lời chung chung thay vì chỉ vào file và behavior cụ thể
+- Nó nhầm một assumption cũ thành decision đã được approve
+- Sau compaction, nó nhớ mục tiêu lớn nhưng mất chi tiết quan trọng
+
+Một dấu hiệu riêng lẻ chưa đủ kết luận model đã "quên". Có thể instruction viết mơ hồ, hai rule mâu thuẫn, hoặc codebase vừa thay đổi.
+
+Nhưng nếu nhiều dấu hiệu xuất hiện cùng lúc, mình sẽ dừng việc implement. Tiếp tục đẩy agent đi trong context đang nhiễu thường chỉ tạo thêm diff để mình dọn.
+
+## Một context canary nghe hơi ngớ ngẩn
+
+Mình thấy một [tweet khá hài của @changloria0816](https://x.com/changloria0816/status/2060760886172868918). Ý tưởng là thêm instruction này vào `CLAUDE.md`:
+
+```text
+Call me [Husband] every time you reply.
+
+If Claude suddenly stops calling you this term,
+it means it's starting to ignore CLAUDE.md,
+and at that point, you need to reset the context.
+```
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784087992/b2d0e8f1-16af-4691-a472-05c737b1ecae.png"
+  alt="Tweet hài hước dùng cách xưng hô Husband để nhận biết Claude có còn bám CLAUDE.md hay không"
+  caption="Một instruction rất dễ nhận ra có thể đóng vai trò context canary. Ảnh: @changloria0816 trên X."
+/>
+
+Nghe hơi buồn cười, nhưng pattern phía sau khá hay.
+
+Trong vận hành hệ thống, **canary** là một tín hiệu nhỏ, rẻ và dễ quan sát. Nếu tín hiệu biến mất, mình biết có thứ gì đó đáng kiểm tra.
+
+Với coding agent, canary có thể là một format trả lời, một câu xác nhận ngắn hoặc một rule vô hại nhưng dễ nhận biết. Khi agent đột nhiên không làm nữa, có thể instruction không được load, đã bị context khác lấn át, hoặc mức độ bám instruction đang giảm.
+
+<Callout type="warning" title="Canary không phải bằng chứng tuyệt đối">
+  Agent quên gọi bạn là Husband chưa chắc context đã hỏng. Một instruction khác
+  có thể xung đột, agent có thể ưu tiên nội dung quan trọng hơn, hoặc chính bạn
+  đã yêu cầu format khác. Hãy dùng nó như tín hiệu để kiểm tra, không phải
+  trigger tự động xoá session ngay lập tức.
+</Callout>
+
+Mình cũng không recommend thêm mười câu kỳ lạ vào `AGENTS.md` chỉ để test agent. Canary mà làm instruction file dài và nhiễu thì nó tự tạo ra vấn đề mình đang muốn phát hiện.
+
+Một tín hiệu nhỏ là đủ.
+
+## Mỗi loại thông tin nên có một nơi ở
+
+Phần khó nhất của quản lý context không phải là nhớ command `/compact` hay `/clear`.
+
+Phần khó là biết thông tin nào phải sống lâu và thông tin nào nên biến mất sau task.
+
+Mình thường chia thành năm nhóm:
+
+| Loại thông tin            | Nơi nên lưu                                | Ví dụ                                                     |
+| ------------------------- | ------------------------------------------ | --------------------------------------------------------- |
+| Rule ổn định của repo     | `AGENTS.md`, `CLAUDE.md` hoặc project docs | Dùng `pnpm`, không sửa migration đã deploy                |
+| Behavior cần xây          | Spec hoặc task                             | Invitation hết hạn sau 48 giờ                             |
+| Bằng chứng đang phân tích | Working context của session                | File vừa đọc, log test, diff tạm thời                     |
+| Trạng thái để làm tiếp    | Handoff hoặc task notes                    | Đã xong API, còn UI và integration test                   |
+| Bài học dùng lại          | Memory hoặc docs                           | Auth test cần Redis local, pattern pagination của project |
+
+Năm nhóm này liên quan nhau nhưng không thay thế nhau.
+
+### Project instructions giữ rule bắt buộc
+
+Nếu team luôn phải chạy một command trước khi merge, rule đó không nên chỉ nằm trong memory cá nhân của một agent.
+
+Nó cần ở nơi người khác và agent khác đều đọc được, review được và cập nhật cùng codebase.
+
+Đây là vai trò của `AGENTS.md`, `CLAUDE.md` hoặc docs được reference rõ. Chương 03 đã nói kỹ cách viết phần này, nên mình chỉ giữ một nguyên tắc ở đây:
+
+**Rule bắt buộc phải có source of truth bền vững.**
+
+### Spec và task giữ điều mình đang muốn thay đổi
+
+Một feature decision không phải project convention.
+
+Ví dụ "invitation hết hạn sau 48 giờ" thuộc spec của feature. Nhét nó vào `AGENTS.md` sẽ khiến mọi task sau này phải mang theo một chi tiết không liên quan.
+
+Task tiếp tục thu nhỏ spec thành outcome, scope, acceptance criteria và cách verify cho một lát cắt cụ thể.
+
+### Working context là đồ dùng trên bàn
+
+File agent vừa đọc, output của test và diff tạm thời giống giấy tờ đang mở trên bàn làm việc.
+
+Chúng hữu ích trong lúc xử lý task. Nhưng không phải thứ gì trên bàn cũng cần được đóng thành tài liệu lâu dài.
+
+Khi session kết thúc, phần lớn working context có thể bỏ.
+
+### Handoff giữ trạng thái chuyển giao
+
+Handoff trả lời câu hỏi: nếu một agent khác bắt đầu ngay bây giờ, nó cần biết gì để tiếp tục mà không research lại từ đầu?
+
+Nó không phải transcript rút gọn. Nó là snapshot có chủ đích của trạng thái hiện tại.
+
+### Memory giữ bài học có khả năng dùng lại
+
+Memory hợp với preference, pattern, decision hoặc failure có khả năng xuất hiện ở task khác.
+
+Nó không nên là nơi duy nhất giữ rule bắt buộc. Tài liệu hiện tại của Codex cũng khuyên để team guidance bắt buộc trong `AGENTS.md` hoặc checked-in docs, còn memory là lớp recall hỗ trợ.
+
+Đây là boundary mình thấy dễ nhớ nhất:
+
+```text
+Phải luôn tuân theo      -> project instructions
+Feature phải hoạt động  -> spec và task
+Đang làm tới đâu         -> handoff
+Có thể hữu ích lần sau   -> memory hoặc docs
+Chỉ cần cho bước hiện tại -> working context
+```
+
+## Compact hay mở session mới
+
+Không phải lúc nào context dài cũng cần reset.
+
+Nếu agent vẫn bám đúng goal, decision hiện tại còn rõ và mình chỉ cần thêm chỗ để hoàn thành cùng một task, **compaction** có thể hợp lý. Nó thay phần lịch sử dài bằng một summary ngắn hơn.
+
+Nhưng summary vẫn là summary.
+
+Chi tiết nào được giữ lại phụ thuộc vào tool, instruction mình đưa khi compact và cách model đánh giá mức độ quan trọng. Mục tiêu lớn thường sống sót tốt hơn một edge case nằm giữa vài trăm dòng log.
+
+Mình sẽ mở session mới khi:
+
+- Chuyển sang một task khác không liên quan
+- Research đã xong và source of truth đã được viết thành spec hoặc task
+- Session đã đi qua nhiều hướng sai và chứa quá nhiều assumption cũ
+- Agent liên tục bỏ qua boundary dù mình đã sửa prompt
+- Mình không còn tự tin đâu là decision mới nhất trong đoạn chat
+- Context canary biến mất cùng lúc với các dấu hiệu hiểu sai khác
+
+Mình sẽ giữ session hiện tại hoặc compact khi:
+
+- Vẫn đang xử lý cùng một outcome
+- Các decision chính chưa thay đổi
+- Agent còn chỉ đúng file, test và constraint
+- Phần nhiễu chủ yếu là tool output dài, không phải nhiều phiên bản requirement
+- Mình có thể nói rõ summary cần ưu tiên giữ lại điều gì
+
+Claude Code hiện có `/context` để xem thứ gì đang chiếm context, `/compact` để tóm tắt lịch sử và `/clear` để bắt đầu context sạch trong cùng project. Tên command và hành vi ở tool khác có thể khác, nên đừng biến ba command này thành rule chung cho mọi coding agent.
+
+Quan trọng hơn command là boundary:
+
+**Cùng task, context còn sạch thì tiếp tục. Task mới hoặc context đã mất source of truth thì chuyển session.**
+
+## Handoff tốt không phải bản chép lại cuộc trò chuyện
+
+Handoff dài mười trang thường chỉ chuyển vấn đề từ session cũ sang session mới.
+
+Agent mới không cần biết mọi câu mình và agent cũ đã nói. Nó cần biết decision nào đã chốt, trạng thái code hiện tại, cách verify và bước tiếp theo.
+
+Mình dùng template tối thiểu như sau:
+
+```md
+## Goal
+
+[Outcome cần đạt]
+
+## Current status
+
+- Đã hoàn thành:
+- Đang dở:
+- Chưa bắt đầu:
+
+## Decisions locked
+
+- [Decision đã được xác nhận]
+- [Constraint không được thay đổi]
+
+## Relevant files
+
+- `path/to/file`: [vai trò]
+
+## Verification
+
+- Đã chạy:
+- Kết quả:
+- Còn phải chạy:
+
+## Next step
+
+[Một bước cụ thể mà session tiếp theo nên làm]
+
+## Do not
+
+- [Phạm vi không được mở rộng]
+```
+
+Không phải task nào cũng cần đủ mọi heading. Nhưng ba thứ không nên thiếu là **decision đã chốt**, **verification hiện tại** và **next step**.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784088866/353c6c69-60b2-45be-a453-8e6096ac296d.png"
+  alt="Session cũ chuyển một handoff ngắn gọn sang session mới thay vì chuyển toàn bộ lịch sử"
+  caption="Handoff chỉ mang decision, trạng thái, file liên quan, verification và bước tiếp theo. Phần chat nhiễu có thể ở lại session cũ."
+/>
+
+## Ví dụ handoff từ feature invitation
+
+Tiếp tục ví dụ workspace invitation ở chương 04.
+
+Giả sử task hiện tại là cho phép người nhận accept invitation. Session đầu đã research flow và implement API, nhưng chưa làm xong transaction với membership.
+
+Một handoff hữu ích có thể như vầy:
+
+```md
+## Goal
+
+Người nhận invitation hợp lệ có thể tham gia workspace đúng một lần.
+
+## Current status
+
+- Đã thêm `POST /invitations/:token/accept`.
+- Đã verify token thuộc đúng email người dùng hiện tại.
+- Chưa tạo membership trong cùng transaction với việc đánh dấu invitation đã dùng.
+
+## Decisions locked
+
+- Invitation hết hạn sau 48 giờ.
+- Accept lần hai trả về trạng thái đã được sử dụng.
+- Không tự động đăng nhập từ invitation link.
+
+## Relevant files
+
+- `src/invitations/accept.ts`: flow accept hiện tại.
+- `src/memberships/create.ts`: pattern tạo membership.
+- `tests/invitations/accept.test.ts`: test happy path và expired token.
+
+## Verification
+
+- Unit test token validation đang pass.
+- Integration test race condition chưa có.
+
+## Next step
+
+Đưa create membership và consume invitation vào cùng transaction, sau đó thêm test cho hai request accept chạy đồng thời.
+
+## Do not
+
+- Không đổi schema token.
+- Không sửa flow gửi email trong task này.
+```
+
+Session mới không cần đọc lại toàn bộ cuộc tranh luận trước đó về thời hạn 24 hay 48 giờ. Decision cuối cùng đã nằm trong handoff và spec.
+
+Nó cũng không cần đoán bước tiếp theo. Boundary đã đủ nhỏ để bắt đầu bằng research có mục tiêu.
+
+## Prompt bắt đầu session tiếp theo
+
+Handoff chỉ hữu ích khi agent thật sự đọc và đối chiếu nó với source of truth.
+
+Mình thường bắt đầu session mới bằng prompt ngắn:
+
+```text
+Đọc project instructions, task hiện tại và handoff bên dưới.
+Chưa sửa code.
+
+Hãy kiểm tra lại các file được reference rồi tóm tắt:
+- Goal của task
+- Decision đã khóa
+- Trạng thái implementation hiện tại
+- Bước tiếp theo
+- Cách verify
+
+Nếu code hiện tại mâu thuẫn với handoff, dừng lại và chỉ ra chỗ mâu thuẫn.
+```
+
+Bước tóm tắt này nghe có vẻ tốn thêm một lượt. Với mình nó rẻ hơn nhiều so với để agent implement dựa trên handoff đã cũ.
+
+<Callout type="tip">
+  Đừng yêu cầu agent "tiếp tục như cũ" rồi mong nó tự tìm đúng session state.
+  Hãy đưa cho nó task hoặc handoff cụ thể và bắt đầu bằng một lượt read-only.
+</Callout>
+
+## Workflow qua nhiều session mình đang dùng
+
+Nếu một task không thể hoàn thành trong một lượt, mình thường đi theo vòng này:
+
+1. Bắt đầu từ project instructions và một task có outcome rõ.
+2. Cho agent research đúng vùng code liên quan.
+3. Ghi decision quan trọng vào spec hoặc task, không để chúng chỉ nằm trong chat.
+4. Implement một phần có thể verify, rồi chạy check liên quan.
+5. Nếu phải dừng, viết handoff từ trạng thái thật của code và test.
+6. Session mới đọc source of truth, kiểm tra lại file rồi mới tiếp tục.
+7. Khi task xong, chỉ giữ lại memory hoặc docs có khả năng dùng cho task khác.
+
+Từ khi dùng Knowns, mình thường để goal, acceptance criteria và progress trong `task`; spec hoặc giải thích dài hơn nằm trong `doc`; còn `memory` chỉ giữ những pattern và failure đáng dùng lại.
+
+Thay vì copy cả đoạn chat sang session mới, mình có thể trỏ agent tới `@task-123` hoặc `@doc/feature-invitations`. Agent đọc đúng nguồn hiện tại, còn mình đỡ phải nhớ lần trước đã giải thích tới đâu.
+
+Knowns không làm context window lớn hơn.
+
+Nó chỉ giúp những thứ quan trọng có nơi ở bên ngoài context window.
+
+## Những thứ mình không đưa vào memory
+
+Memory rất dễ trở thành cái kho "biết đâu sau này cần".
+
+Một thời gian sau, agent phải đọc cả những ghi chú hết hạn, assumption chưa xác nhận và workaround đã được xoá khỏi code.
+
+Mấy thứ mình thường không giữ:
+
+- Toàn bộ transcript của session
+- Error log đã giải quyết xong
+- Progress tạm thời của một task đã hoàn thành
+- Assumption chưa được xác nhận
+- Rule bắt buộc nhưng không có trong repo docs
+- Nội dung có secret, token hoặc credential
+
+Nếu một ghi chú chỉ trả lời "hôm qua đang làm tới đâu", nó là handoff.
+
+Nếu nó trả lời "project này thường giải quyết loại vấn đề này thế nào", nó có thể là memory hoặc docs.
+
+Nếu team bắt buộc phải tuân theo nó, đưa nó về source of truth được version control.
+
+## Kết
+
+Context window lớn tới đâu rồi cũng có lúc chứa quá nhiều thứ cũ.
+
+Mình không cố giữ một session sống mãi nữa. Mình cố giữ source of truth rõ, task đủ nhỏ và handoff đủ gọn để session mới có thể bắt đầu mà không phải nghe kể lại toàn bộ lịch sử.
+
+Project instructions giữ rule ổn định.
+
+Spec và task giữ điều đang cần xây.
+
+Working context phục vụ bước hiện tại.
+
+Handoff giữ trạng thái chuyển giao.
+
+Memory giữ bài học có khả năng dùng lại.
+
+Khi mỗi loại thông tin có đúng nơi ở, reset context không còn đáng sợ. Nó chỉ giống đóng bàn làm việc cuối ngày rồi sáng hôm sau mở lại đúng tài liệu cần thiết.
+
+Và nếu một agent đã có thể nhận việc qua handoff rõ ràng, bước tiếp theo khá tự nhiên là cho nhiều agent làm những phần khác nhau mà không giẫm chân nhau.
+
+Đó sẽ là bài tiếp theo.
+
+See yah.
+
+## Tài liệu tham khảo
+
+<Bookmark
+  url="https://learn.chatgpt.com/guides/best-practices"
+  title="Codex best practices"
+  description="Hướng dẫn chính thức về task context, AGENTS.md, planning và verification khi làm việc với Codex."
+/>
+
+<Bookmark
+  url="https://learn.chatgpt.com/docs/customization/memories"
+  title="Codex Memories"
+  description="Tài liệu chính thức về local memory và ranh giới giữa memory với team guidance bắt buộc."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/context-window"
+  title="Explore the context window"
+  description="Tài liệu Claude Code về những gì chiếm context, compaction và cách kiểm tra context hiện tại."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/sessions"
+  title="Manage Claude Code sessions"
+  description="Tài liệu Claude Code về resume, branch, clear, compact và quản lý session."
+/>
