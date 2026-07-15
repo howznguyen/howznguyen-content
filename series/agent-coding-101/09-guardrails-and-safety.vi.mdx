@@ -1,0 +1,645 @@
+---
+title: "Guardrails cho coding agent: cho quyền tới đâu là đủ?"
+description: "Cách giới hạn quyền, dữ liệu và side effect của coding agent bằng risk tier, approval gate và verification trước khi quá muộn."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784098573/nqjgdsz4abc798gr0mwt.webp"
+---
+
+Ở bài trước, mình nói về cách dừng một coding agent đang đi vòng rồi chuyển sang diagnosis mode.
+
+Nhưng có những failure mà tới lúc debug thì đã hơi muộn.
+
+Agent xoá nhầm file chưa commit. Migration chạy vào database thật. Một token bị paste vào log rồi đi vào commit. Script gửi email tới user thật. Hay đơn giản hơn, agent tự push một diff mình chưa review.
+
+Mấy chuyện này không nhất thiết xảy ra vì agent "xấu" hoặc cố tình bỏ qua instruction.
+
+Nó xảy ra vì agent có capability lớn hơn thứ task cần, trong khi boundary chỉ tồn tại dưới dạng một câu nhắc trong prompt.
+
+Bài này sẽ nói về **guardrails**: cách giới hạn agent được đọc gì, viết ở đâu, chạy command nào, dùng dữ liệu nào và tại bước nào phải dừng để xin approval.
+
+Mục tiêu không phải làm agent sợ tới mức không dám làm gì.
+
+Mục tiêu là để tốc độ của agent nằm trong một vùng mà mình còn quan sát, review và recover được.
+
+## Instruction không phải permission boundary
+
+Trong `AGENTS.md` hoặc prompt, mình có thể viết:
+
+```text
+Không được sửa production database.
+Không được push nếu chưa được phép.
+Không được đọc file chứa secret.
+```
+
+Đây là instruction tốt. Agent nên đọc và làm theo.
+
+Nhưng nếu process vẫn có credential production, filesystem access toàn máy và token đủ quyền push vào `main`, ba câu đó chưa phải boundary.
+
+Mình tách bốn lớp ra như vầy:
+
+| Lớp | Vai trò | Ví dụ |
+| --- | --- | --- |
+| **Instruction** | Nói agent nên và không nên làm gì | Project rules, scope, out of scope |
+| **Permission boundary** | Khiến hành động ngoài quyền không thể tự chạy | Filesystem scope, read-only token, sandbox, account riêng |
+| **Approval gate** | Buộc agent dừng trước action có rủi ro | Push, deploy, migration, gửi message, xoá dữ liệu |
+| **Verification** | Kiểm tra state sau action có đúng không | Diff, test, audit log, database assertion, deployment check |
+
+Instruction giúp agent chọn đúng.
+
+Permission boundary giới hạn hậu quả khi nó chọn sai.
+
+Approval gate giữ decision quan trọng ở lại với con người.
+
+Verification phát hiện khoảng cách giữa điều được phép và điều thật sự xảy ra.
+
+Thiếu một lớp chưa chắc workflow mất an toàn ngay. Nhưng đừng dùng instruction để giả vờ mình đã có cả bốn.
+
+<Callout type="note" title="Guardrail tốt không phụ thuộc vào trí nhớ của agent">
+  Nếu boundary chỉ hoạt động khi agent nhớ một dòng ở đầu context, boundary đó sẽ
+  yếu dần khi session dài, context bị compact hoặc task chuyển qua worker khác.
+</Callout>
+
+## Risk không chỉ nằm trong command
+
+Cùng một command có thể rất bình thường ở local và rất nguy hiểm ở production.
+
+Một migration trên database test dùng fixture giả có blast radius nhỏ. Cùng migration đó chạy bằng credential production lại là câu chuyện khác.
+
+Mình nhìn risk qua ba biến:
+
+```text
+Risk ≈ Capability × Blast radius × Độ khó recover
+```
+
+**Capability** là agent có thể làm loại hành động nào: đọc, viết, execute, gọi network, push hay xoá.
+
+**Blast radius** là hành động có thể ảnh hưởng tới bao nhiêu file, dữ liệu, user hoặc hệ thống.
+
+**Độ khó recover** là mình có thể undo bằng một patch nhỏ, hay phải rotate secret, restore backup và xin lỗi user.
+
+Vì vậy, mình không có một setting "an toàn" dùng cho mọi task.
+
+Mình nâng quyền theo risk tier.
+
+| Tier | Capability | Ví dụ | Gate mặc định |
+| --- | --- | --- | --- |
+| 0 | **Read** | Search code, đọc docs, xem diff, inspect log đã redact | Cho chạy trong scope |
+| 1 | **Write** | Sửa file trong working tree hoặc worktree riêng | Giới hạn path, review diff |
+| 2 | **Execute** | Chạy test, build, formatter, local migration | Allowlist command hoặc xin approval theo command |
+| 3 | **External** | Push branch, mở PR, gửi email test, ghi ticket | Preview payload và explicit approval |
+| 4 | **Destructive** | Xoá dữ liệu, force push, production migration, rotate credential | Human owner thực hiện hoặc approval đặc biệt |
+
+Tier cao hơn không mặc định chứa toàn bộ quyền của tier trước.
+
+Ví dụ agent có quyền gọi một API staging không có nghĩa nó cần đọc mọi file trong home directory. Agent được phép push branch cũng không có nghĩa nó được merge.
+
+{/* IMAGE PROMPT:
+Create a 16:9 horizontal editorial technical risk ladder on warm off-white textured paper. Show a friendly navy coding agent climbing five clearly separated steps from a calm document-reading desk to a red guarded production control, with protection increasing at every step through fences, keys, approval cards, and a human checkpoint. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only these exact five uppercase labels, spelled exactly once each: READ, WRITE, EXECUTE, EXTERNAL, DESTRUCTIVE. Make risk and blast radius visibly grow from left to right. No other words, letters, numbers, pseudo-text, title, series name, logo, watermark, fake UI, gradients, or decorative clutter.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784098576/sfqpqp9yfhuo0jn65thp.webp"
+  alt="Năm tầng quyền từ read, write, execute tới external và destructive"
+  caption="Quyền nên tăng theo capability, blast radius và độ khó recover, không tăng theo độ tự tin của agent."
+/>
+
+## Bắt đầu bằng least privilege
+
+NIST định nghĩa **least privilege** là giới hạn quyền của user hoặc process ở mức tối thiểu cần để hoàn thành task được giao.
+
+Áp vào coding agent, câu hỏi không phải "agent có thể dùng tool này không?".
+
+Câu hỏi là "task hiện tại cần đúng capability nào, trên đúng resource nào, trong bao lâu?".
+
+Một task sửa copy trong form có thể chỉ cần:
+
+- Đọc repository hiện tại
+- Viết một component và test liên quan
+- Chạy formatter cùng targeted test
+- Không cần network
+- Không cần credential
+- Không cần push
+
+Một task làm integration với email provider có thể cần network, nhưng chưa chắc cần production key. Fake adapter hoặc sandbox account thường đủ cho implementation và phần lớn verification.
+
+Mình cố gắng giới hạn theo bốn chiều:
+
+**Resource.** Agent được chạm repository, folder, database, account hoặc service nào?
+
+**Action.** Read, write, execute hay external side effect?
+
+**Time.** Quyền tồn tại cho một command, một session hay lâu dài?
+
+**Identity.** Agent đang dùng account cá nhân của mình, service account riêng hay credential tạm?
+
+Nếu một quyền chỉ cần cho đúng một bước, mình không để nó nằm sẵn trong environment từ đầu tới cuối task.
+
+Đặc biệt, đừng nhầm "agent chạy trên máy mình" với "agent chỉ thấy project mình".
+
+Home directory còn có SSH key, shell history, cloud config, browser profile và repository khác. Filesystem boundary phải được cấu hình ở runtime hoặc bằng workspace riêng, không chỉ bằng lời dặn.
+
+## Viết pre-flight contract trước khi bật quyền
+
+Trước một task có write hoặc execute, mình thích có một pre-flight contract ngắn.
+
+Không cần tài liệu dài. Một block như sau đã đủ:
+
+```text
+Goal:
+[Outcome cụ thể]
+
+Allowed reads:
+- [Path, docs hoặc service được đọc]
+
+Allowed writes:
+- [Path hoặc worktree được sửa]
+
+Allowed commands:
+- [Command verification đã biết]
+
+Network:
+- [Disabled hoặc domain/service được phép]
+
+Data:
+- [Fixture giả, local DB, staging account]
+
+Secrets:
+- [Không cần / secret nào được inject mà không hiển thị value]
+
+Approval required before:
+- [Push, deploy, migration, external message, destructive action]
+
+Stop conditions:
+- [Scope phải mở rộng, command khác allowlist, gặp dữ liệu thật, failure lặp]
+
+Recovery:
+- [Snapshot, rollback hoặc restore plan]
+```
+
+Contract này làm hai việc.
+
+Nó giúp mình phát hiện task đang xin quá nhiều quyền trước khi bắt đầu. Và nó tạo một interface rõ giữa planning với execution.
+
+Nếu agent đang implement mà phát hiện phải sửa file ngoài `Allowed writes`, nó không tự mở rộng scope. Nó dừng và giải thích dependency mới.
+
+Nếu command verification khác dự kiến, agent preview command, lý do và side effect trước khi chạy.
+
+## File boundary phải đi cùng state boundary
+
+Giới hạn path là một guardrail tốt, nhưng chưa đủ nếu nhiều task cùng dùng một working tree.
+
+Agent A chỉ sửa backend và agent B chỉ sửa frontend vẫn có thể cùng làm thay đổi lockfile, generated client hoặc shared schema.
+
+Mình thường dùng:
+
+- Một branch hoặc worktree riêng cho writer có diff lớn
+- Một owner duy nhất cho shared write surface
+- `git status` và `git diff` trước lẫn sau action
+- Checkpoint trước migration, generator hoặc bulk rewrite
+- Review file list trước line-by-line diff
+
+Checkpoint không nhất thiết là commit nếu repository còn thay đổi chưa sẵn sàng.
+
+Nó có thể là một worktree tách riêng, một patch được lưu an toàn hoặc một backup có thể kiểm chứng. Điều quan trọng là recovery path có thật, không phải câu "có gì undo sau".
+
+<Callout type="warning" title="Không dùng cleanup để tạo cảm giác an toàn">
+  Agent không được tự reset, restore hoặc xoá thay đổi có sẵn chỉ để làm working
+  tree sạch. Guardrail phải bảo vệ state của user, kể cả khi state đó đang dang dở.
+</Callout>
+
+## Command boundary cần nói cả side effect
+
+Tên command không nói hết rủi ro.
+
+`test` có thể ghi snapshot. `build` có thể chạy plugin tải code. `install` có thể chạy lifecycle script. `migration` có thể đổi schema. Một CLI "preview" có thể vẫn tạo resource tạm ở cloud.
+
+Trước command chưa nằm trong workflow đã biết, mình muốn agent trả lời:
+
+```text
+Command:
+[Exact command]
+
+Purpose:
+[Evidence cần lấy hoặc output cần tạo]
+
+Reads:
+[File, config, environment]
+
+Writes:
+[File, database, cache, remote state]
+
+Network:
+[Service sẽ gọi]
+
+Credentials:
+[Loại credential cần, không in value]
+
+Rollback:
+[Cách quay lại state trước]
+```
+
+Với command read-only, local và quen thuộc, mình không cần approval từng lần.
+
+Với command tạo side effect bên ngoài, preview này là minimum để mình biết mình đang approve cái gì.
+
+Approval kiểu "cho phép terminal" quá rộng.
+
+Approval tốt gắn với exact action, resource và khoảng thời gian.
+
+## Secret không nên đi qua context nếu không cần
+
+Một lỗi khá dễ gặp là paste API key vào chat để agent "dùng tạm".
+
+Từ đó secret có thể xuất hiện trong transcript, shell history, log, screenshot, patch hoặc final summary.
+
+Mình giữ vài rule đơn giản:
+
+- Secret được inject qua secret manager hoặc environment, không paste literal vào prompt
+- Agent biết **tên biến**, không cần biết **giá trị**
+- Không cho agent chạy command in toàn bộ environment
+- Log và error phải redact token, cookie, email nhạy cảm hoặc payload riêng tư
+- Dùng credential ngắn hạn, scope hẹp và account riêng nếu có thể
+- Không dùng production credential cho task chỉ cần fixture hoặc sandbox
+- Nếu secret đã lộ, rotate trước rồi mới dọn repository hoặc history
+
+GitHub push protection có thể chặn một số secret được phát hiện trước khi chúng tới repository. Đây là lớp phòng ngừa rất đáng dùng.
+
+Nhưng secret scanning không thay secret hygiene.
+
+Nó không đảm bảo nhận ra mọi loại credential, mọi custom token hoặc secret đã bị biến đổi. Và tới lúc push protection chặn, secret có thể đã nằm trong local commit, log hoặc context.
+
+Guardrail tốt nhất vẫn là không đưa secret vào write surface ngay từ đầu.
+
+## Dữ liệu production là một quyền riêng
+
+Nhiều workflow chỉ tách local và production theo URL.
+
+Với coding agent, mình tách rõ hơn:
+
+| Môi trường | Dữ liệu | Quyền hợp lý |
+| --- | --- | --- |
+| Local | Fixture giả | Read/write tự động trong scope |
+| Test/CI | Dataset tạo lại được | Execute qua command đã biết |
+| Staging | Dữ liệu giả nhưng service thật | Network có scope, approval cho side effect lớn |
+| Production read replica | Dữ liệu thật | Read tối thiểu, redact, audit và thường cần approval |
+| Production primary | Dữ liệu thật, thay đổi trực tiếp | Không mặc định giao cho agent |
+
+Read production cũng có risk.
+
+Query có thể quét dữ liệu nhạy cảm, gây load hoặc đưa PII vào log. Vì vậy "chỉ đọc thôi" không tự động an toàn.
+
+Nếu cần điều tra production, mình ưu tiên metric, trace hoặc query đã aggregate và redact. Agent chỉ thấy dữ liệu đủ để trả lời câu hỏi hiện tại.
+
+Nếu task cần một sample record, mình không dump cả table.
+
+## External side effect luôn cần preview
+
+External side effect là bất kỳ thứ gì rời khỏi working tree:
+
+- Push branch hoặc tag
+- Mở, sửa hay đóng PR
+- Gửi email, Slack message hoặc notification
+- Tạo issue hoặc ticket
+- Upload asset
+- Deploy
+- Tạo cloud resource
+- Thay DNS, secret hoặc environment variable
+
+Không phải side effect nào cũng nguy hiểm ngang nhau. Upload một ảnh blog có thể recover dễ hơn gửi email cho toàn bộ user.
+
+Nhưng mình vẫn muốn một preview contract:
+
+```text
+Destination:
+[Repository, account, channel, bucket hoặc environment]
+
+Payload:
+[Nội dung hoặc diff sẽ được gửi]
+
+Identity:
+[Account/token nào thực hiện]
+
+Audience:
+[Ai sẽ thấy hoặc bị ảnh hưởng]
+
+Reversible:
+[Có thể undo thế nào]
+
+Approval:
+[Ai phải xác nhận]
+```
+
+Sau approval, agent chỉ thực hiện action đã preview. Nếu payload thay đổi đáng kể, approval cũ hết hiệu lực.
+
+Đây cũng là lý do mình tách `commit`, `push`, `open PR` và `merge` thành bốn capability khác nhau.
+
+Agent được commit không mặc định được push. Được mở PR không mặc định được merge.
+
+{/* IMAGE PROMPT:
+Create a 16:9 horizontal editorial technical safeguards diagram on warm off-white textured paper. Show one friendly navy coding agent carrying a change package through four sequential protective gates before reaching a small verified repository destination. Each gate must have a distinct visual metaphor: a boundary map, a permission key, a human approval hand, and a final magnifying-glass check. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 visual language. Use only these exact four uppercase labels, spelled exactly once each: SCOPE, PERMISSION, APPROVAL, VERIFY. No other words, letters, numbers, pseudo-text, title, series name, logo, watermark, fake UI, gradients, or decorative clutter. Keep the flow left to right and every label large and readable.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784098573/ndfa705bh8mmlnzi4axm.webp"
+  alt="Bốn lớp guardrail gồm scope, permission, approval và verify"
+  caption="Một instruction tốt hơn khi được biến thành scope, permission boundary, approval gate và verification thật."
+/>
+
+## Approval gate nên đặt trước điểm không thể quay lại
+
+Đặt approval sau action chỉ là notification.
+
+Mình đặt gate ngay trước lúc blast radius tăng mạnh:
+
+- Trước khi write ra ngoài ownership đã duyệt
+- Trước command có network hoặc credential mới
+- Trước migration thay schema hoặc dữ liệu
+- Trước khi ghi vào staging có người dùng chung
+- Trước push, deploy, publish hoặc gửi message
+- Trước action khó undo như xoá, rotate hoặc force update
+
+Một approval request tốt phải đủ cụ thể để mình trả lời mà không cần mở lại toàn bộ session.
+
+```text
+Approval requested: push branch
+
+Target:
+origin/feature/workspace-invitation
+
+Changes:
+- 6 files, 214 additions, 32 deletions
+- 1 migration
+- no dependency changes
+
+Verification:
+- bun test test/invitations.test.ts -> pass
+- bun run typecheck -> pass
+
+Risks:
+- migration has only been run on local test database
+
+Not included:
+- merge
+- deploy
+- production migration
+```
+
+Một request kiểu "cho mình quyền push nhé" không cho người duyệt biết push cái gì và quyền đó dừng ở đâu.
+
+## Protected path tốt hơn lời hứa
+
+Ở repository remote, protected branch là ví dụ rõ của guardrail enforce được.
+
+GitHub cho phép yêu cầu pull request review, status check, conversation resolution và giới hạn ai được push vào branch phù hợp. Có thể cấu hình không cho bypass một số rule.
+
+Điểm quan trọng không nằm ở GitHub cụ thể.
+
+Pattern là:
+
+- Writer tạo change ở vùng riêng
+- Automated checks tạo evidence
+- Reviewer có quyền approve
+- Protected destination chỉ nhận change khi policy đạt
+
+Đừng đưa token có quyền bypass vào một automation rồi kỳ vọng instruction "không bypass" sẽ mạnh bằng branch rule.
+
+Nếu agent cần mở PR, token chỉ cần quyền mở PR. Merge vẫn ở một identity hoặc gate khác.
+
+## Recovery phải được thiết kế trước action
+
+Rollback plan viết sau khi lỗi xảy ra thường rất lạc quan.
+
+Trước action có state, mình hỏi:
+
+- State trước action có snapshot không?
+- Có backup và đã từng test restore chưa?
+- Undo có làm mất change hợp lệ khác không?
+- External message có thể retract hay chỉ có thể gửi correction?
+- Credential rotate có ảnh hưởng service nào khác?
+- Ai là owner nếu recovery vượt quá task?
+
+Với migration, "có down migration" chưa chắc đồng nghĩa rollback an toàn. Nếu migration đã transform hoặc xoá data, chạy ngược schema không tự đem dữ liệu quay lại.
+
+Với Git, "có thể revert" cũng không bảo vệ file chưa commit hoặc secret đã push public.
+
+Mình thích phân loại:
+
+```text
+Reversible:
+Có thể undo tự động và kiểm chứng được.
+
+Recoverable:
+Có thể phục hồi nhưng cần backup, owner hoặc downtime.
+
+Irreversible:
+Không thể thu hồi hoàn toàn, chỉ có thể giảm hậu quả.
+```
+
+Action càng gần nhóm cuối, approval càng cần ở đúng owner.
+
+## Ví dụ guardrails cho workspace invitation
+
+Giả sử capstone tiếp theo sẽ implement một vertical slice: admin tạo workspace invitation.
+
+Trước khi giao code, mình chia capability theo phase.
+
+**Research phase:**
+
+- Read repository, project instructions và spec
+- Không write
+- Không network ngoài docs đã cho phép
+- Không cần secret
+
+**Implementation phase:**
+
+- Write service, route, migration và test trong worktree riêng
+- Chạy targeted test, typecheck và local migration trên database tạo lại được
+- Dùng fake email adapter
+- Không push
+- Dừng nếu cần đổi public contract hoặc permission model
+
+**Integration phase:**
+
+- Review migration và generated artifact
+- Chạy concurrent test trên final state
+- Không dùng staging credential trước approval
+
+**External verification phase:**
+
+- Inject sandbox email credential có scope hẹp
+- Chỉ gửi tới test inbox đã chỉ định
+- Preview recipient và payload
+- Không chạm production audience
+
+**Delivery phase:**
+
+- Commit sau review
+- Push branch sau explicit approval
+- Mở PR với evidence package
+- Không merge hoặc deploy trong cùng approval
+
+Pre-flight contract có thể viết:
+
+```text
+Allowed writes:
+- src/invitations/**
+- test/invitations/**
+- one reviewed migration
+
+Allowed execute:
+- targeted tests
+- typecheck
+- local migration against disposable test DB
+
+Data:
+- fixture workspaces and test inbox only
+
+Approval required:
+- dependency change
+- staging credential
+- push
+- open PR
+- any production action
+
+Stop if:
+- permission contract is ambiguous
+- migration needs data deletion
+- raw token appears in log or diff
+- scope expands beyond invitation vertical slice
+```
+
+Guardrail này không làm implementation đúng tự động.
+
+Nó bảo đảm nếu implementation sai, failure vẫn nằm trong một vùng nhỏ và evidence còn đủ để review.
+
+## Prompt cho một lượt execution có guardrail
+
+Mình có thể đưa contract vào prompt theo format sau:
+
+```text
+Implement task này theo source of truth đã cung cấp.
+
+Mode:
+- Scoped write trong worktree hiện tại
+
+Allowed:
+- Read repository instructions và file liên quan
+- Write chỉ trong [paths]
+- Run [commands]
+
+Not allowed:
+- Không đọc file secret ngoài project
+- Không dùng production data hoặc credential
+- Không gọi external service
+- Không commit, push, mở PR, merge hoặc deploy
+- Không chạy destructive command
+
+Approval gate:
+Dừng và preview trước khi cần:
+- mở rộng write scope
+- thêm dependency hoặc migration ngoài plan
+- dùng network hoặc credential
+- tạo external side effect
+
+Before editing:
+Trả một pre-flight summary gồm scope, commands, data, risk và recovery.
+
+After editing:
+Dừng ở final diff. Trả changed files, evidence, risk và phần chưa verify.
+```
+
+Prompt vẫn là instruction.
+
+Mình cần cấu hình runtime, token, account và repository rule để boundary quan trọng không chỉ nằm trong text.
+
+## Khi agent xin thêm quyền
+
+Xin thêm quyền không phải finding xấu.
+
+Một agent tốt nên dừng khi task vượt capability hiện tại.
+
+Mình đánh giá request qua năm câu hỏi:
+
+1. Quyền mới có thật sự cần cho outcome không?
+2. Có cách lấy cùng evidence bằng quyền thấp hơn không?
+3. Resource và thời gian có thể thu hẹp thêm không?
+4. Action có preview và recovery path không?
+5. Ai là owner đúng để approve?
+
+Nếu câu trả lời chưa rõ, mình giữ quyền cũ và chuyển về research.
+
+Không nên thưởng cho một agent đang kẹt bằng cách đưa toàn quyền để nó "tự xử". Uncertainty cao là lúc blast radius nên nhỏ lại.
+
+## Với Knowns, capability nên đi cùng task
+
+Trong Knowns, mình có thể ghi `Allowed`, `Not allowed`, `Approval required` và `Stop conditions` ngay trong task notes hoặc spec.
+
+Worker nhận task mới không cần đoán lại boundary từ transcript cũ.
+
+Khi capability thay đổi, note phải ghi rõ ai approve, action nào được mở và quyền đó kết thúc ở đâu.
+
+Evidence sau execution quay lại task: exact commands, diff scope, URL hoặc artifact đã tạo, cùng phần chưa verify.
+
+Decision bền vững như "production migration luôn cần owner approval" nên nằm trong project docs. Nó không nên biến mất khi task invitation đóng lại.
+
+Knowns không enforce filesystem, token hoặc branch protection.
+
+Nó giữ contract dễ tìm. Runtime và platform mới là nơi enforce quyền thật.
+
+## Checklist trước khi giao quyền cho agent
+
+- Goal và source of truth đã rõ chưa?
+- Task cần read, write, execute, external hay destructive capability?
+- Filesystem đã giới hạn đúng workspace chưa?
+- Write path và shared surface có owner rõ không?
+- Command nào có side effect, network hoặc credential?
+- Có thể dùng fixture, fake adapter hoặc sandbox thay production không?
+- Secret có được inject mà không đi qua prompt và log không?
+- Dữ liệu nhạy cảm có được thu nhỏ và redact không?
+- Approval gate nằm trước push, deploy, publish hoặc migration chưa?
+- Approval request có exact target, payload, risk và recovery không?
+- Branch hoặc destination quan trọng có rule enforce được không?
+- Snapshot và rollback đã tồn tại trước action chưa?
+- Action là reversible, recoverable hay irreversible?
+- Agent biết stop condition khi scope hoặc risk thay đổi chưa?
+- Verification sẽ quan sát final state nào?
+
+Không phải task nào cũng cần mười lăm dòng.
+
+Một typo không cần security ceremony. Nhưng nếu task chạm secret, production data hoặc external audience, vài phút viết guardrail rẻ hơn rất nhiều so với một buổi rotate credential và dọn hậu quả.
+
+## Kết
+
+Mình không đánh giá safety bằng câu agent nói "đã cẩn thận".
+
+Mình nhìn capability nó đang có, blast radius của action và recovery path nếu assumption sai.
+
+Instruction vẫn quan trọng. Nhưng instruction nên đứng cùng permission boundary, approval gate và verification.
+
+Quyền nên tăng dần từ read, scoped write, execute tới external side effect. Destructive hoặc production action không bao giờ trở thành bước phụ chỉ vì agent làm các bước trước nhanh.
+
+Guardrail tốt không làm coding agent chậm đi ở mọi chỗ.
+
+Nó giữ các bước rẻ được tự động, còn decision đắt và khó undo dừng đúng chỗ.
+
+Bài cuối của series sẽ ghép mọi thứ lại thành một capstone: từ một ý tưởng mơ hồ, mình tạo source of truth, chia task, giao agent implement, xử lý failure, review evidence và chuẩn bị một pull request sẵn sàng cho con người quyết định.
+
+See yah.
+
+## Tài liệu tham khảo
+
+<Bookmark
+  url="https://csrc.nist.gov/glossary/term/least_privilege"
+  title="NIST Glossary: Least Privilege"
+  description="Định nghĩa chính thức về việc giới hạn quyền và tài nguyên ở mức tối thiểu cần để hoàn thành chức năng được giao."
+/>
+
+<Bookmark
+  url="https://docs.github.com/en/code-security/concepts/secret-security/push-protection"
+  title="GitHub Push Protection"
+  description="Tài liệu GitHub về chặn secret được phát hiện trước khi chúng được push vào repository."
+/>
+
+<Bookmark
+  url="https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches"
+  title="About protected branches"
+  description="Tài liệu GitHub về required reviews, status checks, push restrictions và các rule bảo vệ branch quan trọng."
+/>
