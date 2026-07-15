@@ -1,0 +1,532 @@
+---
+title: "Khi nào nên dùng nhiều coding agent?"
+description: "Cách chia việc cho subagent, session song song và worktree mà không tạo thêm conflict, context nhiễu hay chi phí coordination."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784092439/tksbw8i2wcrdr4vmf2n2.webp"
+---
+
+Ở cuối bài trước, mình nói rằng một handoff tốt giúp agent mới tiếp tục task mà không cần đọc lại toàn bộ đoạn chat.
+
+Từ đó có một câu hỏi khá tự nhiên: nếu nhiều agent đều có thể nhận việc từ cùng một source of truth, tại sao không cho chúng làm song song?
+
+Một agent research API. Một agent làm UI. Một agent viết test. Thêm một agent review security. Nghe giống như mình vừa có nguyên team chỉ sau một prompt.
+
+Mình cũng từng nghĩ vậy.
+
+Nhưng một kịch bản rất dễ xảy ra là ba agent cùng sửa một file schema, hai agent tự chọn hai API contract khác nhau, và một agent thứ tư review một diff đã hết hạn. Thời gian tiết kiệm được từ chạy song song có thể ít hơn thời gian mình bỏ ra để hiểu xem ai đang đúng.
+
+Nhiều agent có thể giúp công việc nhanh hơn. Nhưng chỉ khi task thật sự có thể tách độc lập, ownership rõ và có một nơi chịu trách nhiệm tổng hợp kết quả.
+
+Bài này không nhằm biến mọi feature thành một đội quân agent. Mục tiêu là biết lúc nào nên dùng một agent, lúc nào nên delegate cho subagent, và lúc nào cần tách hẳn các writer sang worktree riêng.
+
+## Nhiều agent không tạo thành một agent lớn hơn
+
+Khi dùng multi-agent, mình không mở rộng bộ não của agent hiện tại.
+
+Mình tạo thêm những worker có context riêng.
+
+Mỗi worker phải đọc project instructions, hiểu task được giao, mở file liên quan, chạy tool và tự xây working context của nó. Worker không tự biết mọi thứ đã xảy ra trong main session trừ khi phần đó được truyền vào delegation prompt hoặc nằm trong source of truth mà cả hai cùng đọc được.
+
+Vì vậy, multi-agent thường có hai vai trò:
+
+- **Main agent** giữ goal, decision, dependency và kết quả cuối cùng.
+- **Worker agent** nhận một phần việc có boundary rõ rồi trả lại output hoặc summary.
+
+Nếu worker còn phải hỏi main agent sau mỗi vài phút, phần việc đó chưa đủ độc lập để chạy song song.
+
+Mình thường nhìn các cách chạy như sau:
+
+| Cách làm                  | Context                                 | Ai coordination             | Hợp với việc gì                                      |
+| ------------------------- | --------------------------------------- | --------------------------- | ---------------------------------------------------- |
+| Một agent                 | Một context chính                       | Mình và agent               | Task nhỏ, tuần tự, cần trao đổi liên tục              |
+| Subagent                  | Worker có context riêng, trả kết quả về | Main agent                  | Research, review, test, log analysis                  |
+| Session song song         | Mỗi session độc lập                     | Mình hoặc một lead          | Các task độc lập cần theo dõi riêng                   |
+| Agent team                | Mỗi agent độc lập, có cơ chế phối hợp   | Lead và có thể cả teammates | Công việc lớn cần chia sẻ finding và tự coordination  |
+| Worktree cho mỗi writer   | Context và filesystem đều tách          | Main agent hoặc integrator  | Nhiều task ghi code song song nhưng không chung branch |
+
+Tên gọi có thể khác giữa Codex, Claude Code hoặc tool khác. Boundary quan trọng hơn tên sản phẩm: worker thấy context nào, có được write không, ai sở hữu file và kết quả quay về đâu.
+
+{/* IMAGE PROMPT:
+Create a 16:9 editorial technical diagram on warm off-white paper showing a central navy coding agent orchestrating three smaller worker agents in parallel. The workers handle research, review, and tests in separate coral, yellow, and sage lanes, then return three compact blue summary cards to the central agent. Use hand-drawn navy ink outlines, soft watercolor fills, generous whitespace, and a clear fan-out then fan-in flow. Use only the short labels "MAIN", "RESEARCH", "REVIEW", "TEST", and "SUMMARY". No logos, fake application UI, gradients, watermark, or decorative clutter.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784092438/fi7msashun9xiw27r55y.webp"
+  alt="Main agent chia ba nhánh research, review và test rồi nhận summary để tổng hợp"
+  caption="Multi-agent tốt thường có một điểm fan-out để chia việc và một điểm fan-in để tổng hợp bằng chứng, decision và output."
+/>
+
+## Câu hỏi quan trọng không phải là cần bao nhiêu agent
+
+Mình không bắt đầu bằng câu hỏi "task này spawn mấy agent?".
+
+Mình bắt đầu bằng câu hỏi **phần việc nào có thể hoàn thành mà không phải chờ phần còn lại?**
+
+Lợi ích thực tế của parallel work có thể nghĩ đơn giản như vầy:
+
+```text
+Thời gian tiết kiệm
+- thời gian mỗi worker đọc lại context
+- thời gian coordination
+- thời gian xử lý conflict
+- thời gian review và integration
+= lợi ích thật
+```
+
+Nếu một agent có thể làm task trong hai mươi phút, còn mình mất mười lăm phút để chia việc và ghép kết quả, multi-agent không giúp được nhiều.
+
+Một phần việc phù hợp để chạy song song thường có bốn đặc điểm:
+
+1. Output có thể mô tả rõ trước khi bắt đầu.
+2. Nó không phụ thuộc liên tục vào decision của worker khác.
+3. Phạm vi file hoặc tài nguyên nó được phép chạm vào đủ tách biệt.
+4. Main agent có cách verify và tổng hợp kết quả sau cùng.
+
+Thiếu một trong bốn điều này chưa chắc phải dùng một agent. Nhưng càng thiếu nhiều, coordination overhead càng lớn.
+
+## Những việc mình thường delegate trước
+
+Nếu mới bắt đầu, mình recommend chạy nhiều agent cho **read-heavy work** trước.
+
+Đây là những task tạo ra nhiều output trung gian nhưng ít rủi ro làm hỏng working tree.
+
+**Research nhiều vùng codebase** là ví dụ dễ nhất. Một worker tìm auth pattern, một worker đọc flow email, một worker tìm test fixture. Mỗi worker trả về finding có file reference. Main agent không cần chứa toàn bộ log search của cả ba.
+
+**Review theo nhiều góc nhìn** cũng khá hợp. Một worker tìm bug và race condition. Một worker xem test gap. Một worker kiểm tra maintainability. Chúng có thể đọc cùng diff nhưng trả về các loại finding độc lập.
+
+**Debug bằng nhiều hypothesis** có ích khi chưa biết root cause. Thay vì một agent thử lần lượt năm giả thuyết, ba worker có thể kiểm tra ba hướng khác nhau rồi trả evidence về cho main agent.
+
+**Chạy verification độc lập** cũng thường an toàn. Một worker chạy integration test, một worker kiểm tra type error, một worker đọc log của test flaky. Điều kiện là chúng không cùng thay đổi shared state hoặc tự sửa code trong lúc đang verify.
+
+<Callout type="tip" title="Bắt đầu bằng worker read-only">
+  Nếu chưa quen multi-agent, hãy để worker chỉ research và trả summary. Khi flow
+  fan-out/fan-in đã rõ, lúc đó mới cho nhiều worker write code song song.
+</Callout>
+
+## Khi một agent vẫn tốt hơn
+
+Không phải task lớn nào cũng nên chia cho nhiều agent.
+
+Mình sẽ giữ một agent khi công việc có dependency nối tiếp nhau. Ví dụ phải chọn database model trước khi viết API, rồi phải chốt API contract trước khi làm UI. Cho ba agent bắt đầu cùng lúc chỉ khiến hai agent phía sau phải tự đoán decision chưa tồn tại.
+
+Một agent cũng hợp lý hơn khi:
+
+- Task nhỏ và chỉ chạm một vài dòng
+- Nhiều bước phải sửa cùng một file
+- Requirement còn mơ hồ và cần hỏi đáp liên tục
+- Một decision kiến trúc ảnh hưởng tới mọi phần còn lại
+- Các worker phải dùng chung database, port, emulator hoặc generated output
+- Review và merge tốn nhiều thời gian hơn phần implement
+
+Đặc biệt, đừng dùng số đông để thay thế một decision chưa được chốt.
+
+Ba agent cùng vote cho một API design không biến design đó thành đúng. Mình vẫn cần so evidence với requirement, code hiện tại và constraint của project.
+
+## Chia theo output và ownership
+
+Ở bài 04, mình đã nói về cách chia feature thành task có outcome riêng thay vì cắt máy móc theo frontend, backend và test.
+
+Multi-agent vẫn theo nguyên tắc đó.
+
+Một prompt kiểu này nghe có vẻ rõ:
+
+```text
+Agent A làm backend.
+Agent B làm frontend.
+Agent C viết test.
+```
+
+Nhưng boundary thật sự vẫn còn mơ hồ.
+
+Backend chọn response schema nào? Frontend có được tự thêm field không? Agent viết test bám spec hay bám implementation của hai agent kia? Ai sửa shared type? Ai quyết định error code?
+
+Mình thích ownership cụ thể hơn:
+
+| Worker      | Mode      | Output sở hữu                                      | Không được làm                              |
+| ----------- | --------- | -------------------------------------------------- | ------------------------------------------- |
+| Research A  | Read-only | Auth rule và permission pattern có file reference  | Không đề xuất schema mới nếu chưa có evidence |
+| Research B  | Read-only | Flow invitation, email và queue hiện tại           | Không sửa code                              |
+| Reviewer C  | Read-only | Threat model nhỏ và test matrix                    | Không mở rộng feature                       |
+| Writer D    | Write     | Một vertical slice đã được chốt cùng test liên quan | Không sửa file ngoài ownership              |
+| Main agent  | Integrate | Spec, đề xuất decision, integration và verification | Không merge chỉ dựa trên summary            |
+
+Điểm quan trọng nhất là **một write surface chỉ có một owner tại một thời điểm**.
+
+Write surface có thể là một file, một migration chain, một API contract, một generated schema hoặc một vùng code có coupling cao. Hai file khác tên nhưng cùng sinh ra từ một source vẫn là shared surface.
+
+## Prompt cho worker phải có output contract
+
+Đặt tên worker là `researcher`, `reviewer` hay `security-agent` có ích, nhưng chưa đủ.
+
+Worker cần biết khi nào phần việc của nó hoàn thành và phải trả gì về main agent.
+
+Đây là template mình hay dùng:
+
+```text
+Role:
+[Vai trò hẹp của worker]
+
+Mode:
+[Read-only hoặc write]
+
+Goal:
+[Một output cụ thể]
+
+Source of truth:
+- [Spec hoặc task]
+- [Project instructions]
+
+Read first:
+- [File hoặc folder liên quan]
+
+Ownership:
+- [File hoặc output worker được sở hữu]
+
+Do not:
+- [Boundary không được vượt qua]
+- [Decision không được tự chốt]
+
+Verification:
+- [Command hoặc evidence cần có]
+
+Return:
+- Findings có file reference
+- Decision cần main agent xác nhận
+- Rủi ro và phần chưa biết
+- Verification đã chạy
+```
+
+Với worker read-only, mình còn nói rõ không dump toàn bộ log hoặc nội dung file về main thread. Mình cần summary có bằng chứng, không cần một context window mới được copy nguyên vào context window cũ.
+
+Một prompt thực tế có thể ngắn như sau:
+
+```text
+Research flow tạo workspace invitation. Read-only, chưa sửa code.
+
+Đọc project instructions, spec invitation và các module auth, membership, email.
+
+Trả về:
+- Flow hiện tại với file reference
+- Permission pattern nên reuse
+- Shared state hoặc dependency có thể chặn parallel implementation
+- Open question cần mình chốt
+
+Không đề xuất refactor ngoài feature invitation.
+Không paste log dài hoặc toàn bộ nội dung file.
+```
+
+## Fan-out để tìm hiểu, fan-in để quyết định
+
+Một lỗi khá dễ gặp là spawn xong rồi để các agent chạy tới lúc tự báo done.
+
+Multi-agent cần một điểm quay về.
+
+Mình thường chia workflow thành hai pha:
+
+1. **Fan-out**: main agent giao các phần độc lập cho worker.
+2. **Fan-in**: main agent chờ kết quả, so evidence, giải quyết mâu thuẫn và cập nhật source of truth.
+
+Sau fan-in mới quyết định có mở wave tiếp theo hay không.
+
+Workflow đầy đủ trông như vầy:
+
+1. Main agent đọc project instructions, spec và acceptance criteria.
+2. Nó ghi rõ phần nào đã chốt, phần nào còn là open question.
+3. Các worker read-only research những vùng độc lập.
+4. Main agent nhận summary, kiểm tra file reference và đưa open decision về cho người sở hữu xác nhận.
+5. Spec hoặc task được cập nhật với decision đã chốt trước khi writer bắt đầu.
+6. Writer nhận ownership riêng và làm trong workspace phù hợp.
+7. Main agent review từng output, integrate theo dependency order.
+8. Verification cuối chạy trên trạng thái đã tích hợp, không chạy trên từng summary rời rạc.
+
+Fan-in không chỉ là ghép ba câu trả lời thành một danh sách.
+
+Đó là lúc mình loại finding trùng, phát hiện assumption mâu thuẫn, chọn decision và biến kết quả research thành source of truth mà wave sau có thể dùng.
+
+## Worktree tách file, không tách được decision
+
+Nếu nhiều agent cùng write trong một working directory, chúng nhìn thấy thay đổi của nhau ngay lập tức.
+
+Điều này đôi khi tiện, nhưng cũng dễ tạo race. Worker A đang sửa type thì worker B format lại file. Worker C chạy test trên trạng thái nằm giữa hai thay đổi. Tới lúc review, không còn biết diff nào thuộc task nào.
+
+**Git worktree** cho mỗi worker một checkout riêng. Mỗi agent có filesystem và branch độc lập nhưng vẫn dùng chung lịch sử Git của repository.
+
+Worktree giúp:
+
+- Tránh hai agent ghi đè cùng working tree
+- Giữ diff và branch theo từng task
+- Cho phép chạy command hoặc test trong môi trường riêng
+- Review và tích hợp từng phần có chủ đích
+
+Nhưng worktree không giải quyết conflict về logic.
+
+Hai agent ở hai worktree vẫn có thể chọn hai schema không tương thích. Hai branch vẫn có thể tạo migration cùng sequence. Hai worker vẫn có thể thay đổi cùng public contract theo hai hướng khác nhau.
+
+Isolation chỉ an toàn sau khi ownership và decision boundary đã rõ.
+
+{/* IMAGE PROMPT:
+Create a 16:9 editorial split-scene diagram on warm off-white paper. On the left, show three coding agents crowded around one shared desk, reaching for the same files and creating tangled coral conflict lines. On the right, show three agents working in separate clean git worktree lanes, each with its own file set and branch, converging into one navy integration checkpoint. Use hand-drawn navy ink outlines, soft watercolor fills, cream, blue, coral, yellow, and sage, with generous whitespace. Use only the short labels "SHARED", "WORKTREE A", "WORKTREE B", "WORKTREE C", and "INTEGRATE". No logos, fake application UI, gradients, watermark, or decorative clutter.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784092439/fvwf1np9dhijpx3ibhfs.webp"
+  alt="So sánh nhiều agent cùng sửa shared workspace với các agent làm trong worktree riêng rồi tích hợp"
+  caption="Worktree tách filesystem và branch. Ownership cùng điểm integration mới tách được trách nhiệm."
+/>
+
+<Callout type="warning" title="Cẩn thận với shared environment">
+  Worktree không tự tách database local, port, Docker volume, cache hoặc external
+  sandbox. Nếu hai worker dùng chung các tài nguyên này, test vẫn có thể ảnh hưởng
+  lẫn nhau dù file đã nằm ở hai checkout khác nhau.
+</Callout>
+
+## Ví dụ với feature workspace invitation
+
+Tiếp tục feature invitation từ hai bài trước.
+
+Spec hiện có goal, permission, duplicate behavior, expiration và acceptance criteria. Các task cũng đã được chia nhỏ. Đây là lúc mình có thể cân nhắc parallel work.
+
+Mình không bắt đầu bằng ba writer.
+
+Wave đầu tiên chỉ gồm ba worker read-only:
+
+**Worker A - auth và membership**
+
+- Tìm permission check đang được dùng cho workspace admin
+- Xác định flow kiểm tra email đã là member
+- Trả file reference và test fixture có thể reuse
+
+**Worker B - email và background job**
+
+- Tìm pattern enqueue email hiện tại
+- Xác định retry, idempotency và template convention
+- Trả dependency hoặc shared state có thể ảnh hưởng implementation
+
+**Worker C - test và edge case**
+
+- Lập test matrix từ acceptance criteria
+- Tìm test helper và setup database liên quan
+- Chỉ ra case race hoặc duplicate request cần quyết định
+
+Main agent chờ cả ba rồi fan-in.
+
+Từ evidence đó, nó đề xuất các decision để mình xác nhận rồi mới cập nhật spec hoặc task:
+
+- Permission helper nào phải reuse
+- Duplicate invitation trả success hay conflict
+- Email được enqueue trong transaction hay sau transaction
+- Idempotency nằm ở database constraint hay service layer
+- Integration test nào bắt buộc pass
+
+Lúc này write wave mới bắt đầu.
+
+Một task tạo invitation có thể giao cho một writer sở hữu trọn vertical slice gồm behavior, service và test liên quan. Task UI chỉ chạy song song nếu API contract đã khóa và file ownership không giao nhau. Task accept invitation phải chờ schema hoặc behavior mà nó phụ thuộc hoàn thành trước.
+
+Dependency có thể hình dung như sau:
+
+```text
+Research A ─┐
+Research B ─┼─> Fan-in và khóa decision ─> Create invitation slice ─> Accept invitation
+Research C ─┘                            └─> Invitation UI nếu contract đã ổn định
+```
+
+Không phải càng nhiều mũi tên song song càng tốt.
+
+Mục tiêu là chỉ parallel phần thật sự độc lập, còn dependency phải được giữ tuần tự.
+
+## Khi các agent không đồng ý
+
+Hai worker có thể đọc cùng code nhưng đưa ra kết luận khác nhau.
+
+Mình không giải quyết bằng cách lấy ý kiến số đông.
+
+Main agent cần hỏi lại ba thứ:
+
+1. Finding dựa trên file, test hoặc behavior nào?
+2. Nó có khớp source of truth hiện tại không?
+3. Có assumption nào chưa được xác nhận không?
+
+Nếu Worker A nói service đã idempotent còn Worker B nói chưa, yêu cầu cả hai trỏ tới code path và test cụ thể. Có thể một worker chỉ nhìn happy path, còn worker kia thấy race condition ở transaction boundary.
+
+Một reviewer độc lập có thể giúp challenge finding. Nhưng reviewer cũng phải trả evidence. Thêm agent không thay thế việc đọc source.
+
+Decision cuối nên được ghi lại vào spec, task hoặc project docs phù hợp. Đừng để kết luận chỉ nằm trong summary của một worker rồi biến mất sau khi thread đóng.
+
+## Verification cuối phải nằm ở trạng thái đã tích hợp
+
+Mỗi worker báo test pass chưa có nghĩa feature đã pass.
+
+Worker A có thể test branch A. Worker B test branch B. Khi merge hai branch, shared type thay đổi, migration order khác hoặc mock không còn khớp.
+
+Main agent hoặc integrator cần chạy verification cuối sau fan-in:
+
+- Review diff theo từng ownership boundary
+- Kiểm tra acceptance criteria từ source of truth
+- Chạy test cho từng slice đã tích hợp
+- Chạy integration test hoặc build liên quan trên trạng thái cuối
+- Kiểm tra file ngoài scope và thay đổi bị bỏ sót
+- Ghi lại risk hoặc phần chưa verify được
+
+Đây cũng là lý do mình không giao quyền merge cho mọi worker.
+
+Worker chịu trách nhiệm cho output của nó. Integrator chịu trách nhiệm cho behavior của toàn bộ trạng thái sau cùng.
+
+## Codex và Claude Code gọi các phần này thế nào
+
+Nguyên tắc của bài không phụ thuộc tool, nhưng mapping tên gọi giúp đọc docs dễ hơn.
+
+Tài liệu Codex hiện tại mô tả **subagent workflow** là main thread spawn các agent có thread riêng rồi thu kết quả về. Docs recommend bắt đầu với read-heavy work như exploration, test, triage và summarization, đồng thời thận trọng hơn khi nhiều worker cùng write. Trong CLI, có thể dùng `/agent` để xem hoặc chuyển giữa các thread đang chạy.
+
+Codex trong ChatGPT desktop app còn có worktree để chạy task trên checkout riêng rồi handoff về Local khi cần inspect hoặc tiếp tục. Subagent và worktree giải quyết hai vấn đề khác nhau: một bên tách context, một bên tách filesystem.
+
+Claude Code cũng có subagent với context riêng và kết quả quay về main conversation. Worktree được dùng để tách các session hoặc writer song song. Ngoài ra Claude Code có **agent teams**, nơi teammates có context riêng, task list chung và có thể nhắn trực tiếp cho nhau. Tính năng này hiện vẫn được docs đánh dấu experimental và tốn nhiều token hơn một session đơn.
+
+<Callout type="note" title="Tên feature có thể thay đổi">
+  Multi-agent đang phát triển khá nhanh. Hãy xem docs của tool bạn đang dùng để
+  biết availability, permission và cách quản lý thread hiện tại. Workflow về
+  dependency, ownership, fan-in và verification vẫn áp dụng dù UI thay đổi.
+</Callout>
+
+## Multi-agent luôn có giá
+
+Mỗi worker có context riêng nên nó phải đọc lại instruction, task và file liên quan.
+
+Ba agent không chỉ dùng gấp ba tốc độ. Chúng cũng có thể dùng gần gấp ba phần model work, cộng thêm token cho delegation prompt, summary và coordination.
+
+Ngoài token còn có chi phí khó thấy hơn:
+
+- Startup time để mỗi worker hiểu task
+- Attention của mình khi theo dõi nhiều thread
+- Merge conflict và integration failure
+- Finding trùng lặp
+- Review fatigue khi nhiều diff cùng quay về
+
+Mình không xem số agent đang chạy là KPI.
+
+Nếu hai worker đủ để cover hai hướng độc lập, spawn năm worker thường chỉ tạo thêm noise. Nếu một worker hoàn thành research sớm và phần còn lại trở thành tuần tự, mình dừng fan-out thay vì cố giữ cả team bận rộn.
+
+## Checklist trước khi spawn thêm agent
+
+Trước mỗi multi-agent wave, mình kiểm tra nhanh:
+
+- Mỗi worker có một output độc lập và quan sát được không?
+- Source of truth đã đủ rõ để chúng không tự chốt requirement chưa?
+- Dependency nào bắt buộc phải hoàn thành trước?
+- Có một owner duy nhất cho mỗi write surface không?
+- Worker là read-only hay write?
+- Nếu write, chúng có workspace hoặc worktree tách biệt không?
+- Ai fan-in, giải quyết mâu thuẫn và cập nhật decision?
+- Verification cuối chạy ở đâu?
+- Token và coordination overhead có đáng với thời gian tiết kiệm không?
+
+Nếu mình chưa trả lời được ba câu liên tiếp, mình thường quay về một agent và làm rõ task trước.
+
+## Workflow nhỏ mình recommend cho lần đầu
+
+Đừng bắt đầu bằng agent team sáu người cùng sửa code.
+
+Thử một flow nhỏ hơn:
+
+1. Chọn một task đã có goal và acceptance criteria rõ.
+2. Giữ main agent làm lead.
+3. Spawn hai worker read-only cho hai câu hỏi research độc lập.
+4. Yêu cầu mỗi worker trả summary có file reference và open question.
+5. Main agent fan-in, chốt decision và cập nhật task.
+6. Chỉ một writer implement.
+7. Worker thứ hai review diff hoặc chạy verification độc lập.
+8. Main agent kiểm tra acceptance criteria và trạng thái cuối.
+
+Prompt có thể như vầy:
+
+```text
+Hãy dùng hai subagent read-only cho task này.
+
+Worker A research flow hiện tại và các pattern nên reuse.
+Worker B tìm edge case, test gap và risk.
+
+Cả hai phải trả finding có file reference, open question và phần chưa chắc chắn.
+Không worker nào được sửa code.
+
+Chờ cả hai hoàn thành, fan-in kết quả, chỉ ra điểm mâu thuẫn và đề xuất plan.
+Chưa implement cho tới khi mình approve plan.
+```
+
+Flow này chưa tối đa parallelism.
+
+Nhưng nó dạy đủ ba kỹ năng quan trọng: chia boundary, viết output contract và fan-in bằng chứng. Khi ba phần này ổn, thêm writer hoặc worktree chỉ là bước mở rộng.
+
+## Với Knowns, task list là chỗ coordination
+
+Từ khi dùng Knowns, mình không để main agent giữ toàn bộ trạng thái multi-agent trong chat.
+
+Spec dài và decision nằm trong `doc`. Ownership, dependency, acceptance criteria và progress nằm trong `task`. `memory` chỉ giữ pattern có khả năng dùng lại, không giữ trạng thái tạm thời của từng worker.
+
+Một worker có thể nhận `@task-123`, đọc đúng scope rồi trả finding về task notes. Main agent nhìn task list để biết việc nào đang pending, in progress hoặc done thay vì hỏi từng thread.
+
+Nếu đi từ một spec đã approve, mình có thể dùng:
+
+```text
+/kn-flow @doc/specs/2026-07-14/workspace-invitations
+```
+
+Flow chỉ nên delegate khi task thực sự parallel-safe. Task có dependency hoặc write surface giao nhau vẫn phải đi theo thứ tự.
+
+Knowns không làm nhiều agent tự hiểu nhau.
+
+Nó chỉ cho chúng một source of truth và một task state chung để coordination bớt phụ thuộc vào đoạn chat.
+
+## Kết
+
+Multi-agent không phải nút tăng tốc cho mọi task.
+
+Nó là một bài toán coordination.
+
+Một agent với task rõ thường tốt hơn năm agent nhận năm prompt mơ hồ. Hai worker read-only có output độc lập thường hữu ích hơn ba writer cùng lao vào một working tree.
+
+Nếu muốn bắt đầu, hãy giữ flow đơn giản:
+
+- Một main agent giữ goal và decision
+- Fan-out phần research hoặc review độc lập
+- Một owner cho mỗi write surface
+- Worktree khi nhiều writer thật sự cần chạy song song
+- Fan-in và verification trên trạng thái đã tích hợp
+
+Khi dependency, ownership và điểm quay về đều rõ, multi-agent mới thật sự giúp mình làm nhanh hơn mà không biến phần tiết kiệm được thành một buổi dọn conflict.
+
+See yah.
+
+## Tài liệu tham khảo
+
+<Bookmark
+  url="https://learn.chatgpt.com/docs/agent-configuration/subagents.md"
+  title="Codex Subagents"
+  description="Tài liệu chính thức về subagent workflow, delegation, thread, permission và cách chọn loại việc phù hợp để chạy song song."
+/>
+
+<Bookmark
+  url="https://learn.chatgpt.com/docs/environments/git-worktrees.md"
+  title="Codex Worktrees"
+  description="Tài liệu chính thức về chạy task trong checkout riêng và handoff giữa Worktree với Local."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/agents"
+  title="Run agents in parallel with Claude Code"
+  description="So sánh subagent, agent view, agent team và worktree khi chạy nhiều agent."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/sub-agents"
+  title="Claude Code Subagents"
+  description="Tài liệu về context, delegation, foreground/background và output của subagent."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/agent-teams"
+  title="Claude Code Agent Teams"
+  description="Tài liệu experimental về team lead, teammates, shared task list, communication và coordination overhead."
+/>
+
+<Bookmark
+  url="https://code.claude.com/docs/en/worktrees"
+  title="Claude Code Worktrees"
+  description="Tài liệu về cách tách parallel sessions và subagents bằng Git worktree để file edit không va vào nhau."
+/>
