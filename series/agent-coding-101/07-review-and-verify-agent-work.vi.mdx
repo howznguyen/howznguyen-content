@@ -1,0 +1,543 @@
+---
+title: "Khi coding agent nói 'done', kiểm tra thế nào?"
+description: "Một workflow thực tế để review diff, đối chiếu acceptance criteria và kiểm tra evidence trước khi commit hoặc merge."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784095307/g6jv81wun5zlmig1yqow.webp"
+---
+
+Ở cuối bài trước, mình nói rằng verification cuối phải chạy trên trạng thái đã tích hợp, không phải trên từng branch hoặc summary riêng lẻ.
+
+Nhưng tới lúc agent báo `done`, mình phải kiểm tra cụ thể những gì?
+
+Final message thường nhìn khá thuyết phục. Agent liệt kê file đã sửa, nói test đã pass, giải thích vài decision rồi kết thúc bằng một câu kiểu "implementation is complete".
+
+Nếu task nhỏ và diff trông hợp lý, mình rất dễ gật đầu rồi commit luôn. Mình cũng từng làm vậy khá nhiều.
+
+Vấn đề là `done` chỉ là một claim do chính người vừa viết code đưa ra. Nó chưa phải kết luận của người review.
+
+Bài này sẽ không đi lại câu chuyện vì sao test xanh chưa chắc task đúng. Mình đã dành một bài riêng cho chuyện đó rồi. Ở đây, mình muốn tập trung vào một workflow thực tế hơn: agent dừng viết, mình review trạng thái cuối như thế nào, yêu cầu evidence ra sao và khi nào có thể tin rằng thay đổi đã sẵn sàng để commit hoặc merge.
+
+## Done là một claim, không phải trạng thái
+
+Khi agent báo hoàn thành, mình tách ba thứ ra khỏi nhau:
+
+| Phần | Câu hỏi | Ví dụ |
+| --- | --- | --- |
+| **Output** | Agent đã tạo hoặc thay đổi gì? | File, migration, test, config, docs |
+| **Evidence** | Có bằng chứng nào cho thấy thay đổi hoạt động? | Diff, command, test result, screenshot, API response, log |
+| **Outcome** | Hệ thống cuối cùng có hành xử đúng với task không? | Admin tạo được invitation, member thường bị từ chối, duplicate không sinh thêm record |
+
+Output là thứ mình có thể mở ra đọc.
+
+Evidence là thứ giúp giảm uncertainty.
+
+Outcome mới là lý do task tồn tại.
+
+Một agent có thể tạo đúng năm file nhưng chọn sai behavior. Nó có thể chạy một test suite pass nhưng test đó không chạm vào flow vừa sửa. Nó cũng có thể làm đúng code ở branch riêng nhưng sau khi integrate thì migration hoặc shared type lại conflict.
+
+Vì vậy, mình không review dựa trên độ tự tin của câu trả lời cuối. Mình review một chuỗi bằng chứng từ task ban đầu tới trạng thái cuối của repository.
+
+{/* IMAGE PROMPT:
+Create a 16:9 editorial technical diagram on warm off-white paper showing a friendly navy coding agent moving through five clear evidence gates from left to right. The gates are a speech bubble claim, a code diff sheet, automated check cards, a real behavior scene, and a final verified checkpoint. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and a calm technical editorial style consistent with the Agent Coding 101 series. Use only the exact short labels "CLAIM", "DIFF", "CHECKS", "BEHAVIOR", and "VERIFIED". No logos, fake application UI, gradients, watermark, tiny text, or decorative clutter.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784095307/cxzwpztlco8ju8dp52wd.webp"
+  alt="Chuỗi evidence từ lời agent báo done tới diff, checks, behavior thật và trạng thái verified"
+  caption="Lời agent báo done chỉ là điểm bắt đầu. Diff, checks và behavior thật mới đưa task tới trạng thái verified."
+/>
+
+<Callout type="note" title="Không cần nghi ngờ mọi thứ agent nói">
+  Mục tiêu không phải biến mỗi task thành một cuộc điều tra. Mình chỉ cần một
+  quy trình đủ lặp lại để độ tự tin đến từ evidence, không đến từ cách agent viết
+  final message.
+</Callout>
+
+## Đóng băng trạng thái trước khi review
+
+Điều đầu tiên mình làm sau khi agent báo xong là yêu cầu nó **dừng sửa file**.
+
+Nghe hơi thừa, nhưng đây là boundary rất quan trọng.
+
+Nếu agent vừa self-review vừa tự sửa liên tục, diff mình đang đọc trở thành moving target. Mình review xong file A thì agent đổi lại file A để fix một lỗi ở file B. Test vừa pass cũng có thể đã chạy trên trạng thái cũ.
+
+Trước khi review, mình muốn có một snapshot logic của trạng thái hiện tại:
+
+```bash
+git status --short
+git diff --stat
+git diff --name-status
+git diff
+```
+
+Nếu có thay đổi đã stage, mình xem thêm:
+
+```bash
+git diff --cached
+```
+
+Bốn command đầu trả lời bốn câu khác nhau:
+
+- Working tree có file nào bị sửa, xoá hoặc chưa được track?
+- Diff lớn tới mức nào?
+- Loại thay đổi của từng file là gì?
+- Nội dung thay đổi cụ thể ra sao?
+
+`git diff` không hiển thị nội dung của file untracked. Đây là chỗ khá dễ bỏ sót. Nếu `git status --short` có file mới, mình vẫn phải mở file đó hoặc đưa nó vào phạm vi review bằng cách khác.
+
+Mình cũng hay chạy:
+
+```bash
+git diff --check
+```
+
+Command này không chứng minh code đúng. Nó chỉ bắt một số lỗi whitespace trong diff. Nhưng đây là check nhanh, rẻ và phù hợp để chạy trước khi đi sâu hơn.
+
+<Callout type="warning" title="Đừng để agent tự dọn working tree">
+  Nếu repository đã có thay đổi của bạn từ trước, không bảo agent reset, restore
+  hoặc xoá file để làm status sạch. Trạng thái sạch không quan trọng bằng việc
+  xác định đúng thay đổi nào thuộc task và giữ nguyên phần ngoài scope.
+</Callout>
+
+Sau bước này, mình muốn agent trả lời được:
+
+- File nào do task này thay đổi?
+- File nào đã có từ trước?
+- Có generated file, lockfile, snapshot hoặc migration nào xuất hiện không?
+- Có file nào agent không chắc thuộc scope không?
+
+Nếu chưa trả lời được, mình chưa bắt đầu line-by-line review.
+
+## Review từ task trước, không phải từ code trước
+
+Mở diff lên đọc ngay là phản xạ khá tự nhiên.
+
+Nhưng nếu không giữ task bên cạnh, mình rất dễ review xem code có "đẹp" không rồi quên mất nó có giải quyết đúng việc không.
+
+Trước khi đọc implementation, mình mở lại:
+
+- Goal của task
+- Acceptance criteria
+- Constraint
+- Out of scope
+- Decision đã chốt
+- Verification đã dự kiến
+
+Sau đó mình tạo một verification matrix nhỏ.
+
+| Acceptance criterion | Evidence dự kiến | Trạng thái |
+| --- | --- | --- |
+| Admin tạo được invitation | Integration test và API response | Chưa kiểm tra |
+| Member thường bị từ chối | Permission test | Chưa kiểm tra |
+| Duplicate không tạo record mới | Database assertion và test concurrent request | Chưa kiểm tra |
+| Form giữ lại email khi server trả lỗi | Browser flow | Chưa kiểm tra |
+
+Matrix này không cần nằm trong spreadsheet hay tool phức tạp. Một bảng trong task notes là đủ.
+
+Điểm quan trọng là mỗi criterion phải có một loại evidence phù hợp.
+
+Nếu criterion nói về database state, một screenshot UI chưa đủ. Nếu criterion nói về keyboard focus, unit test service chưa đủ. Nếu criterion nói không lộ secret trong log, happy path API response cũng chưa liên quan.
+
+Và nếu có dòng chưa biết kiểm tra bằng gì, mình đánh dấu **Not verified**.
+
+Mình thích một dòng honest như vậy hơn một câu "all checks passed" nhưng không nói checks nào thật sự cover requirement.
+
+## Review diff từ rộng tới hẹp
+
+Sau khi task và evidence đã nằm cạnh nhau, mình mới đi vào diff.
+
+Mình review theo thứ tự từ rộng tới hẹp. Cách này giúp bắt scope problem trước khi tốn thời gian đọc chi tiết implementation.
+
+**Một là review phạm vi.**
+
+Mình nhìn file list và diff stat trước.
+
+Task sửa validation của một form mà diff chạm hai mươi file, đổi formatter config và cập nhật ba package thì cần dừng lại giải thích. Có thể thay đổi đó hợp lý. Nhưng nó không được tự động hợp lý chỉ vì agent nói dependency mới "giúp code clean hơn".
+
+Những file mình để ý đặc biệt gồm:
+
+- Package manifest và lockfile
+- Migration, schema và generated client
+- Config build, deploy hoặc CI
+- Snapshot lớn
+- Public type và shared contract
+- File chứa permission, auth hoặc secret handling
+- File ngoài folder đã ghi trong ownership
+
+Với mỗi file ngoài dự kiến, agent cần giải thích vì sao nó phải thay đổi để đạt outcome.
+
+**Hai là review behavior.**
+
+Mình đọc đường đi chính của dữ liệu thay vì bắt đầu từ naming.
+
+Input vào đâu? Validation xảy ra ở layer nào? Permission được check trước hay sau khi ghi dữ liệu? Error nào quay về caller? Transaction kết thúc ở đâu? Side effect như email hoặc queue xảy ra lúc nào?
+
+Ở đây mình tìm những thứ như:
+
+- Happy path có đúng không?
+- Error path có giữ state hợp lệ không?
+- Empty, null, duplicate và retry được xử lý thế nào?
+- Public API hoặc database behavior có đổi ngoài dự kiến không?
+- Logic mới có bypass permission cũ không?
+- Hai request đồng thời có tạo race không?
+- Failure giữa transaction và side effect để lại trạng thái gì?
+
+Không cần task nào cũng trả lời toàn bộ danh sách. Mức review phải tỷ lệ với rủi ro.
+
+Một đổi copy không cần threat model đầy đủ. Nhưng thay đổi auth, payment, migration hoặc token thì không thể chỉ nhìn happy path.
+
+**Ba là review test như review production code.**
+
+Agent viết test rất nhanh. Nó cũng có thể viết một test pass rất nhanh.
+
+Mình kiểm tra test có thật sự fail nếu implementation bị bỏ đi không. Assertion có chạm đúng behavior không. Mock có che mất integration boundary không. Agent có xoá assertion, nới matcher hoặc update snapshot lớn chỉ để làm suite xanh không.
+
+Test mới nên kể cùng một câu chuyện với acceptance criteria. Nếu task yêu cầu duplicate request không tạo record mới nhưng test chỉ check status code, evidence vẫn còn thiếu.
+
+**Bốn là review consistency và độ phức tạp.**
+
+Sau khi behavior ổn, mình mới nhìn sâu vào naming, abstraction, comment và convention.
+
+Agent thường có xu hướng tạo helper hoặc abstraction để làm diff trông gọn. Nhưng code mới không mặc định tốt hơn pattern cũ của repository.
+
+Mình hỏi:
+
+- Project đã có helper hoặc pattern tương tự chưa?
+- Abstraction mới đang giải quyết requirement hiện tại hay một tương lai tưởng tượng?
+- Comment có giải thích decision khó hiểu hay chỉ kể lại code?
+- Docs hoặc project instructions có cần cập nhật vì behavior hoặc command đã đổi không?
+
+Google Engineering Practices cũng recommend review design, functionality, complexity, tests, naming, comments, style và docs, đồng thời nhìn thay đổi trong context của cả hệ thống. Với coding agent, danh sách đó vẫn giữ nguyên. Chỉ có tốc độ tạo diff tăng lên.
+
+## Verification nên đi từ nhanh tới gần behavior thật
+
+Sau khi đọc diff, mình chạy verification theo một ladder nhỏ.
+
+Không phải lúc nào cũng cần chạy toàn bộ CI local. Mình bắt đầu từ check nhanh, gần vùng thay đổi, rồi mở rộng theo rủi ro.
+
+**Bậc 1: static checks liên quan.**
+
+Syntax, format, lint, typecheck hoặc schema validation. Chúng bắt lỗi cơ học với chi phí thấp.
+
+**Bậc 2: targeted tests.**
+
+Chạy test gần module vừa sửa. Nếu task thay đổi behavior cũ, chạy thêm regression test của flow đó.
+
+**Bậc 3: integration state.**
+
+Chạy test hoặc build trên trạng thái cuối sau khi tất cả phần đã được tích hợp. Đây là bậc rất dễ bị bỏ qua khi nhiều agent làm trên nhiều branch.
+
+**Bậc 4: behavior thật.**
+
+Mở UI, gọi API, nhìn database, log, screenshot hoặc artifact cuối. Chọn thứ gần nhất với outcome mà user sẽ trải nghiệm.
+
+Một task backend không phải lúc nào cũng cần browser. Một task UI không phải lúc nào cũng cần end-to-end suite đầy đủ. Nhưng task user-facing mà chỉ được verify bằng typecheck thường chưa đi đủ xa.
+
+Các command cụ thể phải lấy từ project instructions và repository hiện tại. Đừng để agent tự đoán `npm test` trong một project dùng `bun`, hoặc chạy toàn bộ suite tốn bốn mươi phút khi chỉ có một command targeted chính xác hơn.
+
+<Callout type="tip" title="Ghi lại command chính xác">
+  Đừng chỉ ghi "tests pass". Hãy ghi command đã chạy, kết quả, phạm vi mà
+  command cover và thời điểm chạy trên final state. Không cần paste log dài nếu
+  exit code cùng summary đã đủ.
+</Callout>
+
+## Yêu cầu agent tự review trước khi mình review
+
+Self-review không thay independent review. Nhưng nó là một filter rẻ.
+
+Sau khi implement, mình yêu cầu writer dừng sửa và tạo verification report trước. Prompt có thể như vầy:
+
+```text
+Dừng sửa file.
+
+Review trạng thái hiện tại theo task và acceptance criteria.
+Chưa fix thêm trong lượt này.
+
+Kiểm tra:
+- git status, file list và diff stat
+- thay đổi ngoài scope
+- public API, dependency, migration, generated file và secret handling
+- test có cover behavior vừa thay đổi không
+- command verification đã chạy trên final state chưa
+
+Trả về:
+1. Changed files và lý do từng file thay đổi
+2. Evidence cho từng acceptance criterion
+3. Commands đã chạy và kết quả
+4. Finding phát hiện khi self-review
+5. Risk còn lại
+6. Phần chưa verify được
+```
+
+Điểm mình thích ở prompt này là agent không được vừa review vừa âm thầm sửa.
+
+Nếu report phát hiện lỗi, mình mở một vòng fix riêng. Sau khi fix xong, agent phải chạy lại check bị ảnh hưởng và cập nhật report dựa trên trạng thái mới.
+
+Report cuối có thể theo format ngắn:
+
+```text
+Final state:
+- [Branch, worktree hoặc working tree đang được review]
+
+Changed:
+- [file]: [vì sao cần thay đổi]
+
+Acceptance criteria:
+- PASS [criterion]: [evidence]
+- FAIL [criterion]: [evidence]
+- NOT VERIFIED [criterion]: [lý do]
+
+Commands:
+- [command] -> [pass/fail và summary]
+
+Manual checks:
+- [flow đã kiểm tra]
+
+Risks:
+- [risk còn lại]
+
+Not verified:
+- [phần chưa thể kiểm tra]
+```
+
+`PASS`, `FAIL` và `NOT VERIFIED` quan trọng hơn một paragraph nghe tự tin.
+
+{/* IMAGE PROMPT:
+Create a 16:9 editorial technical loop diagram on warm off-white paper. Show a friendly navy coding agent moving through five distinct stages: writing at a desk, placing the files at a freeze checkpoint, a reviewer inspecting the diff with a magnifying glass, a small focused fix station, and a final re-verification gate with check cards. Use hand-drawn navy ink outlines, soft watercolor fills in muted blue, coral, yellow, and sage, generous whitespace, and the established Agent Coding 101 editorial style. Use only the exact labels "IMPLEMENT", "FREEZE", "REVIEW", "FIX", and "RE-VERIFY". Make the arrow loop return from FIX to RE-VERIFY, not directly to done. No logos, fake application UI, gradients, watermark, tiny text, or decorative clutter.
+*/}
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1784095307/xjn7jja5d4eplbtf78gj.webp"
+  alt="Workflow implement, đóng băng trạng thái, review, fix và re-verify trước khi hoàn thành"
+  caption="Mỗi lần fix làm thay đổi trạng thái đã review. Vì vậy vòng lặp phải kết thúc bằng re-verify trên final state."
+/>
+
+## Khi nào nên dùng một agent khác để review
+
+Chính agent vừa viết code vẫn có thể self-review tốt. Nó biết decision đã chọn và file nào liên quan.
+
+Nhưng nó cũng mang theo assumption cũ.
+
+Một reviewer khác hữu ích khi:
+
+- Diff đủ lớn để writer dễ bỏ sót chi tiết
+- Task liên quan auth, permission, concurrency, migration hoặc data loss
+- Writer đã fix cùng một lỗi nhiều lần
+- Có nhiều agent vừa fan-in vào một final state
+- Test pass nhưng behavior vẫn làm mình không chắc
+- Cần một góc nhìn chuyên môn như security, accessibility hoặc performance
+
+Reviewer nên bắt đầu ở mode read-only.
+
+Mình không giao một prompt mơ hồ kiểu "review code giúp mình". Reviewer cần task, acceptance criteria, final diff, project instructions và phạm vi review.
+
+Prompt có thể như sau:
+
+```text
+Review read-only cho task này. Không sửa file.
+
+Source of truth:
+- [task hoặc spec]
+- [project instructions]
+
+Review final state hiện tại, tập trung vào:
+- behavior lệch acceptance criteria
+- bug, edge case và regression
+- permission, transaction hoặc concurrency risk
+- test gap và verification gap
+- thay đổi ngoài scope
+
+Mỗi finding phải có:
+- severity
+- file và vị trí
+- evidence
+- impact
+- hướng xử lý ngắn
+
+Không báo finding chỉ dựa trên style preference.
+Nêu rõ phần nào chưa review hoặc không đủ chuyên môn để kết luận.
+```
+
+Reviewer không cần sửa ngay vì review và implementation là hai mode khác nhau.
+
+Nếu reviewer vừa thấy finding vừa tự thay code, writer có thể không còn biết decision nào đã đổi. Diff lại trở thành moving target. Mình thích nhận finding trước, triage, rồi mới giao fix cho một owner rõ ràng.
+
+Finding cũng không tự đúng chỉ vì đến từ agent thứ hai.
+
+Mình vẫn yêu cầu file reference, evidence và impact. Nếu reviewer nói có race condition, nó cần chỉ ra shared state và interleaving có thể xảy ra. Nếu nói thiếu test, nó cần nói behavior nào chưa được cover.
+
+Sau khi writer fix, reviewer hoặc main agent kiểm tra lại finding trên final diff. Approval cũ không nên được giữ nguyên cho code đã thay đổi đáng kể.
+
+## Ví dụ review feature workspace invitation
+
+Quay lại feature workspace invitation đã đi cùng series từ bài 04.
+
+Giả sử writer vừa hoàn thành task "Admin tạo invitation" và báo:
+
+```text
+Implemented workspace invitations.
+Added service, API route and tests.
+All tests pass.
+```
+
+Summary này chưa sai. Nhưng nó chưa đủ để merge.
+
+Mình mở lại acceptance criteria và dựng matrix:
+
+| Acceptance criterion | Evidence cần có | Review thực tế |
+| --- | --- | --- |
+| Chỉ workspace admin được tạo invitation | Permission test và API response | Member thường nhận forbidden, không có record mới |
+| Email đã là member không tạo invitation | Service hoặc integration test | Database count không đổi |
+| Chỉ có một pending invitation cho cùng workspace và email | Constraint cùng test duplicate | Hai request không tạo hai record |
+| Email được normalize nhất quán | Test chữ hoa và khoảng trắng | Lookup cùng dùng normalized value |
+| Raw token không xuất hiện trong log | Diff review và log check | Chỉ hash hoặc redacted value được ghi |
+| Email job chỉ được enqueue cho invitation hợp lệ | Integration test hoặc fake adapter assertion | Không enqueue khi transaction fail |
+
+Sau đó mình review file list.
+
+Service, route, migration, email adapter và test đều có lý do hợp lý. Nhưng nếu diff còn đổi package manager config hoặc refactor toàn bộ membership module, đó là phần cần giải thích trước.
+
+Trong behavior review, mình nhìn kỹ:
+
+- Permission check có dùng helper hiện tại không?
+- Email normalize trước hay sau khi check duplicate?
+- Database constraint có khớp với rule trong service không?
+- Hai request đồng thời đi qua check rồi cùng insert được không?
+- Email được enqueue trước hay sau transaction commit?
+- Error có làm lộ thông tin membership không?
+- Raw token có đi vào log, exception hoặc queue payload không?
+
+Tiếp theo mới tới verification.
+
+Mình chạy test targeted cho service và route. Sau đó chạy integration flow trên database thật của test environment. Nếu email dùng fake adapter, report phải nói rõ delivery thật chưa được verify.
+
+Một report honest có thể kết thúc như sau:
+
+```text
+PASS Admin permission: integration test xác nhận member thường nhận forbidden.
+PASS Duplicate pending invitation: unique constraint và concurrent test chỉ giữ một record.
+PASS Existing member: không tạo invitation và không enqueue email.
+PASS Raw token: diff và captured logs không chứa raw token.
+NOT VERIFIED Email delivery thật: local flow dùng fake adapter.
+
+Risk còn lại:
+- Chưa chạy test với provider email production.
+```
+
+`NOT VERIFIED` không làm task thất bại tự động.
+
+Nó giúp người merge biết chính xác mình đang chấp nhận uncertainty nào.
+
+## Khi verification fail
+
+Verification fail không có nghĩa phải prompt agent "fix test" ngay.
+
+Mình phân loại lỗi trước:
+
+1. **Implementation sai:** code không đáp ứng behavior đã chốt.
+2. **Task hoặc acceptance criteria mơ hồ:** implementation và test đang bám hai interpretation khác nhau.
+3. **Test hoặc harness sai:** check không phản ánh requirement, setup thiếu hoặc fixture đã stale.
+4. **Environment sai:** dependency, service, port, credential hoặc data local làm check không đáng tin.
+
+Nếu implementation sai, giao lại finding cụ thể cùng evidence.
+
+Nếu requirement mơ hồ, dừng code và đưa decision về cho người sở hữu. Đừng để agent tự chọn behavior chỉ để test xanh.
+
+Nếu test sai, sửa test nhưng vẫn phải chứng minh implementation đúng bằng evidence khác trong lúc test chưa đáng tin.
+
+Nếu environment sai, ghi rõ blocker. Không đổi assertion hoặc bỏ check để biến lỗi hạ tầng thành màu xanh.
+
+Sau mỗi fix, mình không chỉ chạy lại command vừa fail. Mình chạy thêm regression check gần vùng bị ảnh hưởng, vì fix có thể làm đổi behavior khác.
+
+Workflow sẽ là:
+
+```text
+Freeze final state
+-> Review và verify
+-> Triage finding
+-> Fix có scope
+-> Re-run affected checks
+-> Re-verify final state
+```
+
+Không có đường tắt từ `Fix` tới `Done`.
+
+## Checklist trước khi commit hoặc merge
+
+Đây là checklist ngắn mình có thể dùng cho phần lớn task:
+
+- Task, acceptance criteria và out of scope vẫn là source of truth hiện tại
+- `git status` và file list đã được kiểm tra
+- Mọi file thay đổi đều có lý do thuộc scope
+- Dependency, lockfile, migration, generated file và snapshot đã được review có chủ đích
+- Public API, permission, data behavior và error path không đổi ngoài dự kiến
+- Test mới thật sự assert behavior, không chỉ làm suite xanh
+- Không có test hoặc assertion cũ bị nới lỏng mà chưa giải thích
+- Mỗi acceptance criterion có evidence hoặc được đánh dấu `NOT VERIFIED`
+- Command verification chạy trên final state sau lần fix cuối
+- Behavior user-facing đã được kiểm tra ở mức phù hợp
+- Secret, token và dữ liệu nhạy cảm không đi vào code, log hoặc artifact
+- Risk còn lại và phần chưa verify đã được ghi rõ
+- Independent finding quan trọng đã được triage và kiểm tra lại
+
+Không phải task nào cũng cần tất cả các dòng.
+
+Nhưng nếu task liên quan production data, auth hoặc payment mà mình bỏ qua nửa danh sách, đó không còn là workflow nhẹ nữa. Đó là đang đánh cược.
+
+## Với Knowns, review không nên biến mất trong chat
+
+Khi dùng Knowns, mình giữ acceptance criteria và scope trong task thay vì paste lại qua nhiều session.
+
+Writer có thể ghi command đã chạy, evidence và risk vào task notes. Reviewer trả finding có file reference. Main agent chỉ check acceptance criteria sau khi finding quan trọng đã được xử lý và verification cuối pass.
+
+Task vì vậy không chuyển từ `in-progress` sang `done` chỉ vì writer gửi final message.
+
+Nó đi qua một trạng thái review có bằng chứng.
+
+Điểm mình thích ở cách này là session sau vẫn biết vì sao task được xem là hoàn thành. Không cần tin vào ký ức của một đoạn chat đã compact hoặc một câu "all good" không còn context.
+
+Knowns không tự review code thay mình.
+
+Nó chỉ giữ contract và audit trail để workflow review không biến mất khi agent hoặc session thay đổi.
+
+## Kết
+
+Coding agent nói `done` không phải chuyện xấu.
+
+Đó là tín hiệu writer đã sẵn sàng giao việc cho reviewer.
+
+Từ đó, mình cần một vòng lặp rõ:
+
+- Đóng băng trạng thái
+- Mở lại task và acceptance criteria
+- Kiểm tra phạm vi trước khi đọc chi tiết
+- Review behavior, test và consistency
+- Chạy verification theo rủi ro
+- Ghi evidence, risk và phần chưa verify
+- Fix có scope rồi re-verify final state
+
+Mình không cần đọc code với tâm thế agent chắc chắn đã làm sai.
+
+Mình chỉ không muốn độ tự tin của mình phụ thuộc vào độ trôi chảy của final message.
+
+Khi `done` dẫn tới một diff đã hiểu, một matrix có evidence và một final state đã được kiểm tra, lúc đó commit hoặc merge mới thật sự là bước cuối thay vì một cú nhắm mắt.
+
+See yah.
+
+## Tài liệu tham khảo
+
+<Bookmark
+  url="https://git-scm.com/docs/git-diff"
+  title="Git diff documentation"
+  description="Tài liệu chính thức về cách xem thay đổi trong working tree, index và giữa các trạng thái Git."
+/>
+
+<Bookmark
+  url="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request"
+  title="Reviewing proposed changes in a pull request"
+  description="Tài liệu GitHub về đọc mục tiêu của pull request, review từng file, dependency change và gửi review."
+/>
+
+<Bookmark
+  url="https://google.github.io/eng-practices/review/reviewer/looking-for.html"
+  title="What to look for in a code review"
+  description="Checklist code review của Google Engineering Practices về design, functionality, complexity, tests, naming, comments và docs."
+/>
