@@ -14,14 +14,14 @@ image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1758728688/dc8d5491-b
 
 ## Caddy là gì?
 
-Caddy Server là một Open Source Web Server được xây dựng từ 2015. Với mã nguồn được phát triển từ Golang (Go), Caddy cung cấp những tính năng mạnh mẽ cho nhà phát triển web. Tính năng nổi bật nhất mà Open Source này có là tự động xác thực chứng chỉ HTTPS (Let's Encrypt SSL), giúp loại bỏ sự phức tạp của việc quản lý chứng chỉ SSL/TLS theo cách thủ công. Cùng với đó là một thiết kế để chạy chỉ trong một lệnh (work out of the box), làm nó trở thành một lựa chọn hấp dẫn dành cho các nhà phát triển cần một hệ thống quản lý dễ triển khai.
+Caddy Server là một Open Source Web Server được xây dựng từ 2015. Với mã nguồn được phát triển từ Golang (Go), Caddy cung cấp những tính năng mạnh mẽ cho nhà phát triển web. Tính năng nổi bật nhất mà Open Source này có là tự động xác thực chứng chỉ HTTPS (Let's Encrypt SSL), giúp loại bỏ sự phức tạp của việc quản lý <TermNote explanation="SSL/TLS là nhóm giao thức mã hóa kết nối giữa trình duyệt và máy chủ. Chứng chỉ đi kèm giúp trình duyệt kiểm tra mình đang nói chuyện với đúng website, không phải một anh hàng xóm khả nghi.">chứng chỉ SSL/TLS</TermNote> theo cách thủ công. Cùng với đó là một thiết kế để chạy chỉ trong một lệnh (work out of the box), làm nó trở thành một lựa chọn hấp dẫn dành cho các nhà phát triển cần một hệ thống quản lý dễ triển khai.
 
 Các tính năng của Caddy:
 
 - Tự động xác thực HTTPS
 - Cấu hình từ file **Caddyfile**
 - Hỗ trợ **HTTP/1.1, HTTP/2,** và **HTTP/3**
-- Đa tính năng: web server, reverse proxy, load balancer
+- Đa tính năng: web server, <TermNote explanation="Reverse proxy đứng trước ứng dụng, nhận request rồi chuyển tiếp tới backend phù hợp. Người dùng chỉ thấy một cửa vào, còn bên trong có bao nhiêu phòng là chuyện của server.">reverse proxy</TermNote>, <TermNote explanation="Load balancer phân phối request qua nhiều máy chủ hoặc nhiều instance để một nơi không phải gánh hết việc.">load balancer</TermNote>
 - Mở rộng nhanh chóng nhờ thiết kế theo dạng mô-đun (modular architecture)
 - Và nhiều tính năng khác...
 

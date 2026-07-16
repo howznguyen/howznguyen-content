@@ -11,7 +11,7 @@ featured: false
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778608376/a6f38cf2-fca8-4ab9-aa5c-96dc3cf7e313.png"
 ---
 
-The past few days I've seen Twitter, Reddit, Hacker News, and even Vietnamese dev groups all talking about a gist by **[Andrej Karpathy](https://karpathy.ai/)**. It's about how he built a personal wiki using LLMs to manage knowledge. Many people are calling it "Karpathy's Second Brain."
+The past few days I've seen Twitter, Reddit, Hacker News, and even Vietnamese dev groups all talking about a gist by **[Andrej Karpathy](https://karpathy.ai/)**. It's about how he built a personal wiki using <TermNote id="llm">LLMs</TermNote> to manage knowledge. Many people are calling it "Karpathy's Second Brain."
 
 I was curious so I read the original gist. Then read further analysis from Vi (Mod Nghien AI) on Facebook and a piece by [Goon Nguyen](https://goonnguyen.substack.com/) on Substack.
 
@@ -65,7 +65,7 @@ Reading the gist carefully, Karpathy's approach is quite clear. No fluff. No new
 
 The foundation is just a folder on his machine, Markdown, GitHub, and an LLM.
 
-He doesn't want to use **RAG** in the traditional sense: querying raw documents each time, stuffing context into a prompt, letting the model synthesize from scratch. That's useful, but it doesn't create accumulated knowledge. Each query is almost starting over.
+He doesn't want to use <TermNote id="rag">**RAG**</TermNote> in the traditional sense: querying raw documents each time, stuffing context into a prompt, letting the model synthesize from scratch. That's useful, but it doesn't create accumulated knowledge. Each query is almost starting over.
 
 Karpathy wants to build a **wiki with accumulation**. Meaning the LLM doesn't just answer questions. It also maintains a layer of processed, linked, updated knowledge.
 
@@ -388,7 +388,7 @@ One more point I find very aligned: **the ruleset matters more than the UI**. If
 
 I think the best way is to try small for 2 weeks. Don't over-setup from the start.
 
-1. **Create your ground**: a local folder or GitHub repo. Don't start inside a closed app. The folder is the foundation.
+1. **Create your ground**: a local folder or GitHub <TermNote id="repository">repo</TermNote>. Don't start inside a closed app. The folder is the foundation.
 2. **Throw documents into `raw/`**: articles, PDFs, transcripts, raw notes. Prioritize sources you genuinely want to learn from, not links saved out of fear of missing out.
 3. **Use AI to process into `wiki/`**: ask AI to summarize, explain concepts, link to related notes, record open questions.
 4. **Ask the wiki, not individual files**: ask synthesis questions, comparisons, contradictions, gaps. If the answer is good, save it back into the wiki.

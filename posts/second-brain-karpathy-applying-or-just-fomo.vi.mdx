@@ -11,7 +11,7 @@ featured: false
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778608376/a6f38cf2-fca8-4ab9-aa5c-96dc3cf7e313.png"
 ---
 
-Mấy ngày gần đây mình thấy Twitter, Reddit, Hacker News, rồi cả mấy group dev ở Việt Nam đều nhắc tới một gist của **[Andrej Karpathy](https://karpathy.ai/)**. Nội dung là cách ổng tự xây một kiểu wiki cá nhân dùng LLM để quản lý kiến thức. Nhiều người gọi nó là "Second Brain kiểu Karpathy".
+Mấy ngày gần đây mình thấy Twitter, Reddit, Hacker News, rồi cả mấy group dev ở Việt Nam đều nhắc tới một gist của **[Andrej Karpathy](https://karpathy.ai/)**. Nội dung là cách ổng tự xây một kiểu wiki cá nhân dùng <TermNote id="llm">LLM</TermNote> để quản lý kiến thức. Nhiều người gọi nó là "Second Brain kiểu Karpathy".
 
 Mình cũng tò mò nên vào đọc gist gốc. Đọc xong thì đọc thêm bài phân tích của Vĩ, Mod Nghiện AI, trên Facebook và bài của [anh Goon Nguyễn](https://goonnguyen.substack.com/) trên Substack.
 
@@ -66,7 +66,7 @@ Nhưng khi Karpathy gom chúng lại thành một hệ thống đang chạy đư
 
 Nền chính chỉ là một folder trên máy, Markdown, GitHub và LLM.
 
-Ổng không muốn dùng **RAG** theo kiểu truyền thống: mỗi lần hỏi thì truy vấn tài liệu thô, nhồi ngữ cảnh vào prompt, rồi để model tổng hợp lại từ đầu. Cách đó có ích, nhưng nó không tạo ra nhiều kiến thức tích lũy. Mỗi lần hỏi gần như là một lần làm lại.
+Ổng không muốn dùng <TermNote id="rag">**RAG**</TermNote> theo kiểu truyền thống: mỗi lần hỏi thì truy vấn tài liệu thô, nhồi ngữ cảnh vào prompt, rồi để model tổng hợp lại từ đầu. Cách đó có ích, nhưng nó không tạo ra nhiều kiến thức tích lũy. Mỗi lần hỏi gần như là một lần làm lại.
 
 Karpathy muốn xây một **wiki có tính tích lũy**. Nghĩa là LLM không chỉ trả lời câu hỏi. Nó còn duy trì một lớp kiến thức đã được xử lý, đã liên kết lại, đã cập nhật.
 
@@ -388,7 +388,7 @@ Một điểm nữa mình thấy rất trùng: **bộ quy tắc quan trọng hơ
 
 Mình nghĩ cách tốt nhất là thử nhỏ trong 2 tuần. Đừng setup quá nhiều ngay từ đầu.
 
-1. **Tạo đất của bạn**: một folder local hoặc GitHub repo. Đừng bắt đầu trong app đóng. Folder mới là nền tảng.
+1. **Tạo đất của bạn**: một folder local hoặc GitHub <TermNote id="repository">repo</TermNote>. Đừng bắt đầu trong app đóng. Folder mới là nền tảng.
 2. **Ném tài liệu vào `raw/`**: bài viết, PDF, transcript, note thô. Ưu tiên nguồn bạn thật sự muốn học, không phải link lưu vì sợ bỏ lỡ.
 3. **Dùng AI xử lý sang `wiki/`**: yêu cầu AI tóm tắt, giải thích khái niệm, link đến note liên quan, ghi câu hỏi mở.
 4. **Hỏi wiki, không hỏi từng file**: đặt câu hỏi tổng hợp, so sánh, mâu thuẫn, khoảng trống. Nếu câu trả lời hay, lưu ngược lại vào wiki.

@@ -86,7 +86,7 @@ Nếu mới bắt đầu, mình thường giao ra những việc **đọc nhiề
 
 Đây là những task tạo ra nhiều đầu ra trung gian nhưng ít rủi ro làm hỏng thư mục làm việc.
 
-**Tìm hiểu nhiều vùng codebase** là ví dụ dễ nhất. Một agent phụ tìm cách project xử lý auth, một agent đọc flow email, một agent tìm test fixture. Mỗi agent trả về phát hiện có file tham chiếu. Agent chính không cần ôm toàn bộ log tìm kiếm của cả ba.
+**Tìm hiểu nhiều vùng codebase** là ví dụ dễ nhất. Một agent phụ tìm cách project xử lý auth, một agent đọc flow email, một agent tìm <TermNote explanation="Test fixture là bộ dữ liệu và trạng thái được dựng sẵn để test bắt đầu từ một điểm ổn định.">test fixture</TermNote>. Mỗi agent trả về phát hiện có file tham chiếu. Agent chính không cần ôm toàn bộ log tìm kiếm của cả ba.
 
 **Review theo nhiều góc nhìn** cũng khá hợp. Một agent phụ tìm bug và <TermNote id="race-condition">race condition</TermNote>. Một agent xem khoảng trống trong test. Một agent kiểm tra khả năng bảo trì. Chúng có thể đọc cùng diff nhưng trả về các loại phát hiện độc lập.
 
@@ -291,7 +291,7 @@ Mình không bắt đầu bằng ba agent cùng viết code.
 **Agent B - email và tác vụ nền**
 
 - Tìm cách đưa email vào hàng đợi hiện tại
-- Xác định chuyện thử lại, tính idempotent và quy ước mẫu email
+- Xác định chuyện thử lại, <TermNote id="idempotency">tính idempotent</TermNote> và quy ước mẫu email
 - Trả phần phụ thuộc hoặc trạng thái dùng chung có thể ảnh hưởng việc thực thi
 
 **Agent C - test và trường hợp biên**

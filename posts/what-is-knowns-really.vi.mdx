@@ -34,11 +34,11 @@ Bài này không phải để nói "hãy cài Knowns ngay". Ngược lại, mìn
 
 Đúng.
 
-Nếu task của bạn là restructure thư mục, đổi naming, gom file, tách module, cleanup một đoạn code rõ scope, thì agent có thể tự đọc repo và làm được. Nó dùng `rg`, đọc import, xem file liên quan, rồi sửa.
+Nếu task của bạn là restructure thư mục, đổi naming, gom file, tách module, cleanup một đoạn code rõ scope, thì agent có thể tự đọc <TermNote id="repository">repo</TermNote> và làm được. Nó dùng `rg`, đọc import, xem file liên quan, rồi sửa.
 
 Với những task mà source of truth đã nằm hết trong codebase, mình không nghĩ Knowns nên chen vào.
 
-Không phải việc gì cũng cần task formal. Không phải refactor nào cũng cần doc. Không phải sửa bug nào cũng cần memory.
+Không phải việc gì cũng cần task formal. Không phải refactor nào cũng cần doc. Không phải sửa bug nào cũng cần <TermNote id="memory">memory</TermNote>.
 
 Nếu một prompt ngắn cộng với vài file liên quan là đủ, thì cứ làm vậy cho nhẹ.
 
@@ -56,7 +56,7 @@ Nó bắt đầu cần thêm mấy thứ nằm ngoài code:
 - vì sao folder structure hiện tại được thiết kế như vậy
 - convention nào là mới, convention nào là legacy
 - decision trước đó: không dùng service layer, không thêm Zustand, API này phải giữ backward compatibility
-- acceptance criteria không nằm trong code
+- <TermNote id="acceptance-criteria">acceptance criteria</TermNote> không nằm trong code
 - task kéo dài qua nhiều session
 - nhiều người hoặc nhiều agent cùng làm
 - sau khi làm xong cần lưu lại pattern để lần sau không lặp lỗi
@@ -79,7 +79,7 @@ Và càng đừng nghĩ cài Knowns vào là agent tự nhiên hiểu hết hệ
 
 Không có chuyện đó.
 
-Knowns không phải phép màu. Nó cũng không thay bạn suy nghĩ. Nó chỉ là một CLI tool local-first để giúp bạn tổ chức task, docs, memory, template và workflow theo cách agent có thể retrieve được.
+Knowns không phải phép màu. Nó cũng không thay bạn suy nghĩ. Nó chỉ là một CLI tool <TermNote explanation="Local-first nghĩa là công cụ ưu tiên dữ liệu và file nằm trên máy của bạn, thay vì biến một dịch vụ từ xa thành nguồn duy nhất nắm mọi thứ.">local-first</TermNote> để giúp bạn tổ chức task, docs, memory, template và workflow theo cách agent có thể retrieve được.
 
 Nói cách khác: Knowns là một implementation cho một cách nghĩ.
 
@@ -229,7 +229,7 @@ Sau đó trong repo, mình tạo task:
 knowns task create "Thêm OAuth login cho user"
 ```
 
-Task đó có thể có mô tả, acceptance criteria, notes, link tới docs hoặc spec.
+Task đó có thể có mô tả, acceptance criteria, notes, link tới docs hoặc <TermNote id="spec">spec</TermNote>.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565830/task-in-knowns_x0yeig.png"

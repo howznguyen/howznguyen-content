@@ -126,7 +126,7 @@ Research flow workspace membership trong repo này.
 Chưa sửa code.
 
 Tìm và tóm tắt:
-- Model hoặc schema liên quan tới workspace member.
+- Model hoặc <TermNote id="database-schema">schema database</TermNote> liên quan tới workspace member.
 - Cách project kiểm tra quyền admin.
 - Pattern tạo token có thời hạn nếu đã có.
 - Cách gửi email hiện tại.
@@ -361,7 +361,7 @@ Phạm vi:
 
 - Validate token, expiry và trạng thái pending
 - Kiểm tra email của user hiện tại
-- Tạo membership theo transaction phù hợp
+- Tạo membership trong cùng một <TermNote id="database-transaction">transaction</TermNote> phù hợp
 - Đánh dấu invitation đã accepted
 - Thêm accept page với success và error state
 - Viết test cho valid token, expired token, wrong email và replay
@@ -388,7 +388,7 @@ Depends on: Task 2 và Task 3.
 
 Phạm vi:
 
-- Chạy integration test xuyên suốt create, accept và revoke
+- Chạy <TermNote id="integration-test">integration test</TermNote> xuyên suốt create, accept và revoke
 - Review transaction boundary
 - Kiểm tra log không lộ raw token
 - Kiểm tra race condition cho duplicate invitation và double accept

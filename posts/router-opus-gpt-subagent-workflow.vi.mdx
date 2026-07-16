@@ -225,7 +225,7 @@ Nếu bạn dùng 9Router, flow setup trong giao diện sẽ như sau:
 </Callout>
 
 <Callout type="warning">
-  Đừng paste API key vào blog, repo, issue, hay prompt public. Config local nên
+  Đừng paste <TermNote id="secret">API key</TermNote> vào blog, repo, issue, hay prompt public. Config local nên
   để trong env var hoặc file local đã được gitignore.
 </Callout>
 
@@ -274,7 +274,7 @@ Với config này, khi mình dùng Claude Code bình thường, Opus sẽ là mo
 
 ### Bước 3: Spawn sub-agent - tính năng built-in của Claude Code
 
-Đây là phần nhiều người không biết: **sub-agent là tính năng có sẵn trong Claude Code**. Bạn không cần cài plugin, không cần MCP server riêng, không cần script wrapper.
+Đây là phần nhiều người không biết: **sub-agent là tính năng có sẵn trong Claude Code**. Bạn không cần cài plugin, không cần <TermNote id="mcp">MCP server</TermNote> riêng, không cần script wrapper.
 
 Claude Code có một tool gọi là Agent. Khi model chính (Opus) cần giao việc cho agent khác, nó có thể tự spawn một agent con chạy model khác. Hoặc bạn gõ trực tiếp:
 
@@ -343,7 +343,7 @@ Hai agent này chạy song song, mỗi agent đọc một phần codebase. Opus 
 
 Cách này giúp:
 
-- Opus không phải đọc hết mọi file - tiết kiệm context window
+- Opus không phải đọc hết mọi file - tiết kiệm <TermNote id="context-window">context window</TermNote>
 - Mỗi sub-agent tập trung vào phần riêng - output rõ hơn
 - Research song song - nhanh hơn đáng kể so với đọc tuần tự
 
@@ -609,7 +609,7 @@ Constraints: Do not change backend files. Do not add new chart library.
 Return: summary and tests run.
 ```
 
-Mỗi sub-agent chỉ đụng phần của mình. Opus không cần theo dõi chi tiết từng dòng code - chỉ cần đọc summary và review diff.
+Mỗi sub-agent chỉ đụng phần của mình. Opus không cần theo dõi chi tiết từng dòng code - chỉ cần đọc summary và review <TermNote id="diff">diff</TermNote>.
 
 ### 3. Opus tổng hợp và review
 

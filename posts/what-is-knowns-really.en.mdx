@@ -34,11 +34,11 @@ This post is not a "go install Knowns right now" pitch. I want to explain why I 
 
 Yes.
 
-If your task is restructuring folders, renaming things, grouping files, splitting a module, or cleaning up a clear piece of code, an agent can read the repo and do it. It can use `rg`, inspect imports, read related files, and make the change.
+If your task is restructuring folders, renaming things, grouping files, splitting a module, or cleaning up a clear piece of code, an agent can read the <TermNote id="repository">repo</TermNote> and do it. It can use `rg`, inspect imports, read related files, and make the change.
 
 For tasks where the source of truth already lives inside the codebase, I do not think Knowns needs to get in the way.
 
-Not every piece of work needs a formal task. Not every refactor needs a doc. Not every bug fix needs memory.
+Not every piece of work needs a formal task. Not every refactor needs a doc. Not every bug fix needs <TermNote id="memory">memory</TermNote>.
 
 If one short prompt plus a few related files is enough, keep it lightweight.
 
@@ -56,7 +56,7 @@ It starts needing things that live outside the code:
 - why the folder structure was designed this way
 - which convention is current and which one is legacy
 - past decisions: no service layer, no Zustand, this API must remain backward compatible
-- acceptance criteria that do not live in the code
+- <TermNote id="acceptance-criteria">acceptance criteria</TermNote> that do not live in the code
 - tasks that stretch across multiple sessions
 - multiple people or multiple agents working together
 - lessons that should be saved after the task is done
@@ -79,7 +79,7 @@ And definitely do not expect Knowns to magically understand your whole system th
 
 That is not how it works.
 
-Knowns is not magic. It does not think for you. It is a local-first CLI tool that helps you organize tasks, docs, memory, templates, and workflows in a way an agent can retrieve.
+Knowns is not magic. It does not think for you. It is a <TermNote explanation="Local-first means the tool centers files and data you keep on your own machine, instead of making a remote service the only source of truth.">local-first</TermNote> CLI tool that helps you organize tasks, docs, memory, templates, and workflows in a way an agent can retrieve.
 
 In other words, Knowns is an implementation of a way of thinking.
 
@@ -229,7 +229,7 @@ Then, inside the repo, I can create a task:
 knowns task create "Add OAuth login for users"
 ```
 
-That task can have a description, acceptance criteria, notes, and links to docs or specs.
+That task can have a description, acceptance criteria, notes, and links to docs or <TermNote id="spec">specs</TermNote>.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1780565830/task-in-knowns_x0yeig.png"

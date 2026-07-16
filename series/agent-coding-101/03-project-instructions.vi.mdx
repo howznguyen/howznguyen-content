@@ -9,7 +9,7 @@ image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784030814/6b38ddac-d
 
 Cách đó khá ổn trong một session.
 
-Nhưng sang session tiếp theo, mình lại gặp một vấn đề khác. Agent không còn nhớ project dùng `pnpm` hay `npm`. Không biết folder nào chứa business logic. Không biết team không cho phép sửa migration cũ. Mấy điều mình đã giải thích hôm qua, hôm nay phải nói lại từ đầu.
+Nhưng sang session tiếp theo, mình lại gặp một vấn đề khác. Agent không còn nhớ project dùng `pnpm` hay `npm`. Không biết folder nào chứa business logic. Không biết team không cho phép sửa <TermNote id="database-migration">migration</TermNote> cũ. Mấy điều mình đã giải thích hôm qua, hôm nay phải nói lại từ đầu.
 
 Lúc đó mình mới hiểu vì sao các file như `AGENTS.md` hay `CLAUDE.md` lại có ích.
 
@@ -246,7 +246,7 @@ Mấy thứ mình thường không bỏ vào:
 - Tài liệu API dài hàng trăm dòng
 - Roadmap vài quý tới
 - Chi tiết của một task tạm thời
-- Secret, token, password hoặc credential
+- <TermNote id="secret">Secret</TermNote>, token, password hoặc credential
 
 Tài liệu dài nên nằm ở docs riêng. Instruction file chỉ cần chỉ đường tới đúng tài liệu khi cần.
 

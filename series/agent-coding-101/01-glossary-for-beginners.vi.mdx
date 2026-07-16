@@ -65,7 +65,7 @@ Một prompt tốt thường có ba phần:
 - **Context** (bối cảnh): thông tin nền để AI hiểu bối cảnh
 - **Constraint** (ràng buộc): giới hạn, ràng buộc, điều kiện
 
-Ví dụ: "Sửa bug trong auth redirect. File ở src/auth/redirect.ts. Giữ style hiện tại, đừng thêm abstraction mới."
+Ví dụ: "Sửa bug trong auth redirect. File ở src/auth/redirect.ts. Giữ style hiện tại, đừng thêm <TermNote id="abstraction">abstraction</TermNote> mới."
 
 Câu này có đủ cả ba: instruction (sửa bug), context (file nào), constraint (giữ style, không thêm abstraction).
 
@@ -137,7 +137,7 @@ Con người có nhiều loại bộ nhớ: ngắn hạn (đang nghĩ gì), dài
 
 **Conversation history** (lịch sử hội thoại) - bộ nhớ ngắn hạn. Lịch sử chat trong cùng một session. Bị giới hạn bởi context window.
 
-**Persistent memory** (bộ nhớ lâu dài) - thông tin được lưu lại giữa các session. Ví dụ: agent có thể nhớ preference của bạn, convention của project hoặc quyết định đã chốt. Lần sau mở lại, mình đỡ phải kể lại từ chương một.
+**Persistent memory** (bộ nhớ lâu dài) - thông tin được lưu lại giữa các session. Ví dụ: agent có thể nhớ sở thích của bạn, quy ước của project hoặc quyết định đã chốt. Lần sau mở lại, mình đỡ phải kể lại từ chương một.
 
 **Project files** (file dự án) - kiến thức nền. Các file như `CLAUDE.md`, `AGENTS.md` đóng vai trò như "kiến thức chuyên môn" mà agent đọc mỗi khi bắt đầu làm việc. Giống developer đọc wiki nội bộ trước khi bắt tay vào project mới.
 
