@@ -1,6 +1,8 @@
 ---
 title: "Bắt đầu từ những gì mình đang có"
 description: "Vì sao mình tận dụng PC cũ làm homelab, rồi ghép Home Assistant, thiết bị Wi-Fi và HomeKit thành một hệ thống vừa đủ dùng."
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778063797/howz-nguyen-gm_a2hIBKFU-unsplash_2_vv64xa.jpg"
+author: howznguyen
 ---
 
 Nhắc tới Smart Home, mình thường thấy hai kiểu bắt đầu.
@@ -109,10 +111,20 @@ HomePod còn đóng vai trò <TermNote id="home-hub">home hub</TermNote>. Khi �
 
 <Callout type="info" title="Home Assistant dùng riêng sẽ phức tạp hơn một chút">
   Nếu không muốn tự dựng VPN, Home Assistant Cloud là lựa chọn đơn giản hơn
-  nhưng là một dịch vụ trả phí. <TermNote explanation="Reverse proxy nhận kết nối từ bên ngoài rồi chuyển tiếp request tới dịch vụ nội bộ phù hợp.">Reverse proxy</TermNote> hoặc <TermNote explanation="Port forwarding chuyển lưu lượng từ một cổng trên router tới thiết bị hoặc dịch vụ bên trong mạng nhà.">port forwarding</TermNote> cũng làm
-  được, nhưng cần <TermNote explanation="HTTPS mã hóa kết nối giữa thiết bị và dịch vụ web để hạn chế dữ liệu bị đọc hoặc sửa trên đường truyền.">HTTPS</TermNote>, xác thực mạnh và hiểu rõ rủi ro. Trong setup của mình,
-  HomePod gọn hơn vì nó đã làm home hub cho luồng điều khiển từ xa qua Apple
-  Home.
+  nhưng là một dịch vụ trả phí.{" "}
+  <TermNote explanation="Reverse proxy nhận kết nối từ bên ngoài rồi chuyển tiếp request tới dịch vụ nội bộ phù hợp.">
+    Reverse proxy
+  </TermNote>{" "}
+  hoặc{" "}
+  <TermNote explanation="Port forwarding chuyển lưu lượng từ một cổng trên router tới thiết bị hoặc dịch vụ bên trong mạng nhà.">
+    port forwarding
+  </TermNote>{" "}
+  cũng làm được, nhưng cần{" "}
+  <TermNote explanation="HTTPS mã hóa kết nối giữa thiết bị và dịch vụ web để hạn chế dữ liệu bị đọc hoặc sửa trên đường truyền.">
+    HTTPS
+  </TermNote>
+  , xác thực mạnh và hiểu rõ rủi ro. Trong setup của mình, HomePod gọn hơn vì nó
+  đã làm home hub cho luồng điều khiển từ xa qua Apple Home.
 </Callout>
 
 <Bookmark

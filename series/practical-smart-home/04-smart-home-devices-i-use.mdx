@@ -1,0 +1,284 @@
+---
+title: "Những thiết bị Smart Home mình đang dùng"
+description: "Các thiết bị Smart Home mình đang dùng, từ công tắc, HomePod và máy lọc không khí đến robot hút bụi cùng hai camera Wi-Fi."
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778063797/howz-nguyen-gm_a2hIBKFU-unsplash_2_vv64xa.jpg"
+author: howznguyen
+---
+
+Sau ba chương nói về chiếc PC, Proxmox và cách mình tổ chức homelab, cuối cùng cũng tới phần gần với Smart Home hơn: **những thiết bị đang được lắp trong nhà**.
+
+Danh sách hiện tại khá ngắn. Phần lớn là thiết bị Wi-Fi, nhưng chúng không cùng hãng và cũng không dùng chung một nền tảng.
+
+| Thiết bị                                     | Kết nối         | Nền tảng                       |    Giá mình đã mua |
+| -------------------------------------------- | --------------- | ------------------------------ | -----------------: |
+| Công tắc thông minh Moes, bản 1 nút và 2 nút | Wi-Fi           | Tuya                           |           328.000đ |
+| Bộ điều khiển hồng ngoại Tuya OEM S09        | Wi-Fi + IR      | Tuya                           |           298.000đ |
+| Bóng đèn thông minh OEM 15W                  | Wi-Fi           | Tuya                           |           150.000đ |
+| Điều hòa di động Xiaomi NWT Pro WAP31A15EW   | Wi-Fi + remote  | Xiaomi Home, region Trung Quốc |  Khoảng 3.500.000đ |
+| Xiaomi Air Purifier 4 Lite                   | Wi-Fi           | Xiaomi Home                    |         1.800.000đ |
+| Apple HomePod mini, mua lại                  | Wi-Fi + AirPlay | Apple Home, Siri               |         1.800.000đ |
+| Robot hút bụi Roborock QR 798                | Wi-Fi           | Roborock                       |         9.000.000đ |
+| Camera IMILAB C21 2.5K                       | Wi-Fi           | Xiaomi Home                    |           750.000đ |
+| Camera EZVIZ TY1                             | Wi-Fi           | EZVIZ                          | Được chủ cũ để lại |
+
+<Callout type="note" title="Giá trong bài là giá mình đã mua">
+  Những dòng có giá cụ thể là số tiền mình đã mua hoặc nhớ lại tại thời điểm
+  viết, không phải giá hiện tại. Riêng giá chiếc NWT Pro là con số ước chừng,
+  còn EZVIZ TY1 là camera được chủ cũ để lại. Các link Shopee bên dưới là
+  affiliate và mình có thể nhận hoa hồng nếu các bạn mua qua đó; link Miworld,
+  CellphoneS, Xiaomi và Roborock chỉ dùng để tham khảo sản phẩm.
+</Callout>
+
+## Công tắc thông minh Moes 1 nút và 2 nút
+
+Mình đang dùng cả bản 1 nút và 2 nút của công tắc Moes. Đây là phiên bản kết nối Wi-Fi, dùng nền tảng Tuya và **cần dây nguội**.
+
+Khác với bóng đèn thông minh, công tắc tường vẫn cho mọi người trong nhà một nút bấm vật lý quen thuộc. Điện thoại, Home Assistant hay HomeKit chỉ là những cách điều khiển được thêm vào, chứ không thay thế hoàn toàn thao tác bật tắt ở trên tường.
+
+Một trong những lý do mình mua công tắc thông minh là căn nhà đang thuê có một lầu. Không ít lần mình đã lên phòng ngủ rồi mới nhớ đèn phòng khách vẫn còn sáng. Có hôm đã đóng cửa chuẩn bị đi ra ngoài, nhìn vào trong nhà mới phát hiện mình lại quên tắt đèn. =]] Với công tắc đã kết nối, mình chỉ cần mở điện thoại để tắt thay vì quay lại đúng vị trí công tắc.
+
+<Bookmark
+  url="https://s.shopee.vn/6pzRvptwyb"
+  title="Công tắc thông minh Moes trên Shopee"
+  description="Link đúng sản phẩm mình đã mua. Hai chiếc mình đang dùng lần lượt là bản Wi-Fi 1 nút và 2 nút, đều cần dây nguội."
+/>
+
+## Dây nguội là gì và vì sao phải kiểm tra trước?
+
+Một công tắc cơ thông thường chỉ cần ngắt hoặc nối dây điện cấp tới bóng đèn. Vì vậy, trong hộp công tắc trên tường có thể chỉ có dây nguồn đi vào và dây đi ra tải, còn <TermNote explanation="Dây nguội, thường được ký hiệu là N (neutral), là dây dẫn thuộc mạch điện làm việc. Với công tắc thông minh loại cần dây nguội, nó giúp cấp điện liên tục cho phần Wi-Fi và mạch điều khiển ngay cả khi đèn đang tắt.">dây nguội</TermNote> có thể không được kéo tới vị trí đó.
+
+Công tắc thông minh vẫn cần một lượng điện nhỏ để duy trì Wi-Fi và mạch điều khiển khi đèn đã tắt. Với phiên bản Moes mình đang dùng, dây nguội tạo đường mạch cần thiết để phần điện tử này tiếp tục được cấp nguồn.
+
+Dây nguội cũng **không phải dây tiếp địa**. Dây nguội là một phần của mạch điện làm việc và có thể mang dòng điện trong quá trình sử dụng bình thường. Dây tiếp địa là đường bảo vệ an toàn khi có sự cố. Không nên dùng dây tiếp địa thay cho dây nguội.
+
+<Callout type="warning" title="Đừng xác định dây chỉ bằng màu">
+  Màu dây trong nhà có thể không đúng tiêu chuẩn hoặc đã bị thay đổi qua những
+  lần sửa chữa trước. Hãy ngắt aptomat, kiểm tra chắc chắn mạch đã mất điện và
+  nhờ thợ điện nếu không biết rõ từng dây đang làm gì. Phần này chỉ giải thích
+  cách chọn đúng loại công tắc, không phải hướng dẫn tự đấu điện.
+</Callout>
+
+> Mình chính là một nạn nhân của việc không biết nhà có dây nguội hay không. =]]] Cái gì cũng phải trả giá cả.
+
+Nếu trong hộp công tắc không có dây nguội, các bạn có thể chọn một mẫu được thiết kế để hoạt động không cần dây nguội hoặc nhờ thợ điện đánh giá việc kéo thêm dây. Với một số mẫu không dây nguội, nhà sản xuất có thể yêu cầu lắp thêm <TermNote explanation="Tụ bypass là linh kiện được nhà sản xuất chỉ định cho một số công tắc không dây nguội. Nó thường được đặt ở phía bóng đèn để tạo đường cho dòng điện nhỏ nuôi mạch công tắc và hạn chế hiện tượng đèn LED nhấp nháy hoặc sáng mờ khi đã tắt.">tụ bypass</TermNote> tương thích ở phía bóng đèn.
+
+Tụ bypass không biến một chiếc công tắc **cần dây nguội** thành loại **không cần dây nguội**. Mỗi công tắc và tải đèn có yêu cầu khác nhau, nên chỉ dùng đúng linh kiện và sơ đồ do nhà sản xuất cung cấp, đồng thời nhờ thợ điện thực hiện nếu không có chuyên môn. Đừng mua một chiếc tụ bất kỳ rồi tự đấu thử vào điện lưới.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785178193/howznguyen-content/practical-smart-home/neutral-wire-diagram-v2.png"
+  alt="Sơ đồ so sánh công tắc thông minh có dây nguội và công tắc không dây nguội dùng tụ bypass tương thích ở phía bóng đèn"
+  caption="Sơ đồ khái quát hai trường hợp. Bypass chỉ dùng với công tắc không dây nguội có hỗ trợ và theo đúng hướng dẫn của nhà sản xuất."
+/>
+
+<Bookmark
+  url="https://leviton.com/support/resources/product-support/decora-smart-support/decora-smart-wi-fi/video-how-to-identify-a-neutral-wire"
+  title="Leviton - How to identify a neutral wire"
+  description="Tài liệu tham khảo về vai trò của dây nguội và cách nhận biết khi chuẩn bị lắp công tắc thông minh."
+/>
+
+## Bộ điều khiển hồng ngoại Tuya OEM S09
+
+Món thứ hai là bộ điều khiển hồng ngoại Tuya OEM S09. Thiết bị kết nối Wi-Fi và dùng nền tảng Tuya.
+
+Hiểu đơn giản, S09 đóng vai trò như một chiếc remote <TermNote explanation="IR là viết tắt của infrared, tức hồng ngoại. Đây là loại tín hiệu thường được remote dùng để gửi lệnh tới thiết bị ở gần.">IR</TermNote> đặt cố định trong phòng. Nó nhận lệnh từ hệ thống rồi phát tín hiệu hồng ngoại tới thiết bị vốn được điều khiển bằng remote.
+
+Giá mình đã mua là **298.000đ**. Link mình lưu có nhiều phiên bản, còn chiếc mình đang dùng là bản S09.
+
+<Callout type="note" title="Phần HomeKit vẫn còn dang dở">
+  Tới thời điểm viết bài, mình vẫn chưa tìm được cách phù hợp để đưa các lệnh từ
+  bộ điều khiển IR này sang HomeKit. Đây là phần mình cần tìm hiểu và thử thêm,
+  nên hiện tại mình chưa có một hướng dẫn đủ chắc chắn để chia sẻ. Nếu sau này
+  làm được và sử dụng ổn, mình sẽ ghi lại cách thực hiện trong một bài tiếp
+  theo.
+</Callout>
+
+<Bookmark
+  url="https://s.shopee.vn/111ez9bpTI"
+  title="Bộ điều khiển hồng ngoại Tuya OEM S09 trên Shopee"
+  description="Link đúng sản phẩm mình đã mua; phiên bản của mình là Tuya OEM S09."
+/>
+
+## Điều hòa di động Xiaomi NWT Pro
+
+Mình mua chiếc Xiaomi NWT Pro WAP31A15EW khi còn thuê một căn chung cư không có sẵn máy lạnh. Mình lại lười lắp một bộ điều hòa cố định, nên chọn máy lạnh di động cho nhanh.
+
+<Callout type="warning" title="Phải dùng account vùng Trung Quốc">
+  Ở thời điểm mình mua, model này chưa được phân phối chính hãng tại Việt Nam.
+  Để thêm máy vào Xiaomi Home, mình phải tạo một account với
+  <TermNote explanation="Region là khu vực được chọn cho tài khoản hoặc ứng dụng. Một số thiết bị Xiaomi chỉ xuất hiện và hoạt động khi ứng dụng được đặt đúng khu vực mà thiết bị hỗ trợ.">
+    region Trung Quốc
+  </TermNote>
+  . Đây là một điểm yếu vì mình phải quản lý thêm account và region chỉ cho một
+  thiết bị.
+</Callout>
+
+Gọi là “di động” vì máy không có dàn nóng lắp cố định và có thể đẩy sang vị trí khác. Nhưng khi dùng chế độ làm lạnh, nó vẫn cần một ống đưa khí nóng ra ngoài. Nếu luồng khí nóng không thoát được, phần nhiệt bị đẩy ra sẽ quay lại phòng và hiệu quả làm lạnh giảm đi khá nhiều.
+
+Trong căn phòng cỡ vừa mà mình từng dùng, khả năng làm lạnh của máy khá ngon. Đây là cảm nhận thực tế chứ không phải một bài đo nhiệt độ hay điện năng bài bản; diện tích phòng, độ kín và cách đặt ống thoát khí đều có thể làm kết quả khác đi.
+
+Chiếc máy của mình từng gặp một vấn đề khá khó chịu: <TermNote explanation="Sensor nhiệt độ là cảm biến giúp máy biết nhiệt độ hiện tại để quyết định khi nào cần tiếp tục hoặc giảm hoạt động làm lạnh.">sensor nhiệt độ</TermNote> đo không đúng. Trong giai đoạn đó máy chạy không đúng theo nhiệt độ thực tế trong phòng, nên lượng điện tiêu thụ của mình khá cao. Đây là lỗi mình gặp trên chiếc máy đang sở hữu, không phải kết luận rằng mọi máy NWT Pro đều bị như vậy.
+
+Hiện tại máy vẫn hoạt động rất ngon. Mình chủ yếu dùng nó ở chế độ quạt và với nhu cầu này, máy vẫn đáp ứng tốt hằng ngày. Trang sản phẩm cũng ghi máy có ba chế độ làm lạnh, hút ẩm và quạt, đồng thời hỗ trợ Xiaomi Home. Còn việc mình đưa nó vào Home Assistant theo cách nào sẽ được nói sau, khi đã xác nhận rõ luồng kết nối đang dùng.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785179139/howznguyen-content/practical-smart-home/xiaomi-nwt-pro-in-use.webp"
+  alt="Máy lạnh di động Xiaomi NWT Pro WAP31A15EW mình đang sử dụng"
+  caption="Chiếc Xiaomi NWT Pro hiện tại của mình. Sau một thời gian dài sử dụng, máy vẫn hoạt động rất ngon."
+/>
+
+Theo mình nhớ, giá đã mua chiếc máy này vào khoảng **3.500.000đ**. Đây là con số ước chừng chứ mình không còn hóa đơn để kiểm tra lại.
+
+<Bookmark
+  url="https://miworld.vn/dieu-hoa/dieu-hoa-di-dong-xiaomi-nwt-pro-wap31a15ew-p26344.html"
+  title="Điều hòa di động Xiaomi NWT Pro WAP31A15EW"
+  description="Trang sản phẩm tham khảo thông số, ba chế độ hoạt động, kết nối Xiaomi Home và bộ ống dẫn khí nóng đi kèm."
+/>
+
+## Xiaomi Air Purifier 4 Lite
+
+Một thiết bị Xiaomi khác mình đang dùng là Air Purifier 4 Lite. Mình mua nó từ CellphoneS với giá khoảng **1.800.000đ**.
+
+Với một người nuôi mèo như mình, máy lọc không khí là món khá thực tế. Nó không thay thế việc hút bụi, vệ sinh nhà hay dọn khu vực của mèo, nhưng giúp mình có thêm một lớp xử lý bụi và các hạt nhỏ trong không khí.
+
+Điểm mình thích là máy dùng Xiaomi Home và có thể kết nối với Home Assistant. Nhờ vậy, nó không bị tách riêng trong một app: mình có thể đưa trạng thái và phần điều khiển cần thiết về cùng hệ thống với những thiết bị khác.
+
+Mình chưa nói cụ thể đang dùng integration nào, vì việc đó còn phụ thuộc vào mã model và cách thiết bị được thêm vào Xiaomi Home. Phần kết nối thực tế sẽ được ghi lại khi series đi tới Home Assistant, thay vì nhìn thấy chữ Xiaomi rồi mặc định mọi máy đều cài giống nhau.
+
+<Bookmark
+  url="https://cellphones.com.vn/may-loc-khong-khi-xiaomi-mi-air-purifier-4-lite.html"
+  title="Xiaomi Air Purifier 4 Lite tại CellphoneS"
+  description="Đây là nơi mình đã mua máy. Giá đang hiển thị có thể khác với giá tại thời điểm mình mua."
+/>
+
+<Bookmark
+  url="https://www.mi.com/vn/product/xiaomi-smart-air-purifier-4-lite/"
+  title="Xiaomi Smart Air Purifier 4 Lite"
+  description="Trang chính thức về Xiaomi Home, thông tin bộ lọc và các chỉ số chất lượng không khí mà thiết bị hiển thị."
+/>
+
+## HomePod mini, món mình thấy đáng tiền nhất
+
+Mình mua lại chiếc HomePod mini qua tay với giá **1.800.000đ**. Tới nay mình đã dùng nó gần hai năm và đây vẫn là một trong những món mình thấy đáng tiền nhất trong cả hệ thống.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785179586/howznguyen-content/practical-smart-home/homepod-mini-from-desk-setup.webp"
+  alt="HomePod mini màu trắng đặt cạnh khung đèn in 3D trong góc setup của mình"
+  caption="Chiếc HomePod mini mình mua lại và đã dùng gần hai năm, đặt cạnh khung đèn in 3D."
+/>
+
+Khi nghe nhạc từ MacBook, mình có thể chọn để cả MacBook và HomePod cùng phát. Hai nguồn âm thanh nằm ở hai vị trí khác nhau làm không gian nghe sống động và đầy hơn so với chỉ dùng loa trên MacBook.
+
+HomePod cũng giúp mình gọi Siri nhanh mà không phải tìm điện thoại. Chẳng hạn, khi đã lên phòng ngủ và nhớ ra đèn phòng khách còn sáng, mình có thể gọi Siri để tắt đèn ngay tại chỗ.
+
+Quan trọng hơn, HomePod mini tự động trở thành <TermNote explanation="Home hub là thiết bị luôn ở trong nhà, làm đầu mối cho Apple Home chạy automation và chuyển lệnh điều khiển từ thiết bị của bạn tới các phụ kiện khi bạn không còn ở trong cùng mạng Wi-Fi.">home hub</TermNote> của Apple Home. Nhờ có một thiết bị luôn bật và nằm trong mạng nhà, HomeKit của mình hoạt động ổn định hơn trong quá trình sử dụng hằng ngày. Mình cũng có thể mở Home trên iPhone, iPad hoặc Mac để điều khiển các phụ kiện đã được đưa vào Apple Home khi đang ở ngoài.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785178889/howznguyen-content/practical-smart-home/apple-home-iphone-square.png"
+  alt="Giao diện Apple Home trên iPhone với HomePod, máy lọc không khí, máy lạnh, đèn và camera trong nhà"
+  caption="Giao diện Apple Home trên iPhone của mình. HomePod, máy lọc không khí, máy lạnh, đèn và camera được gom về cùng một nơi."
+/>
+
+<Callout type="info" title="HomePod không thay thế Home Assistant">
+  Home Assistant vẫn là nơi mình kết nối thiết bị từ nhiều nền tảng và tạo
+  automation. HomePod mini phụ trách phía Apple Home: nhận lệnh Siri, làm home
+  hub và hỗ trợ truy cập từ xa. Hai phần có vai trò khác nhau nhưng kết hợp với
+  nhau khá hợp trong hệ thống của mình.
+</Callout>
+
+<Bookmark
+  url="https://support.apple.com/guide/homepod/control-your-home-or-apple-tv-apd8085c1032/1.0/homepod/1.0"
+  title="Apple - Control your home on HomePod"
+  description="Tài liệu Apple về vai trò home hub, điều khiển bằng Siri, automation và truy cập phụ kiện khi ở ngoài nhà."
+/>
+
+## Robot hút bụi Roborock QR 798
+
+Mình mua chiếc Roborock QR 798 với giá khoảng **9.000.000đ**.
+
+Đây là thiết bị làm mình thấy rõ nhất rằng Home Assistant hay HomeKit không nhất thiết phải thay thế hoàn toàn app của hãng. Trong HomeKit của mình, mình vẫn có thể đặt một nút để gọi nhanh một thao tác. Home Assistant cũng giúp robot xuất hiện cùng những thiết bị khác và tham gia vào automation.
+
+Nhưng khi cần mở màn hình theo dõi, xem bản đồ, kiểm tra robot đang ở đâu hoặc tùy chỉnh cách dọn dẹp, mình vẫn quay lại app Roborock. Giao diện của hãng được làm riêng cho robot nên phần giám sát và các thiết lập chi tiết vẫn dễ dùng hơn.
+
+<Callout type="info" title="Gom thiết bị không có nghĩa phải bỏ app hãng">
+  Với mình, HomeKit phù hợp cho thao tác nhanh và giao diện dùng chung trong
+  nhà. Home Assistant phù hợp để kết nối trạng thái với automation. App Roborock
+  vẫn là nơi mình dùng khi cần bản đồ và tùy chỉnh sâu. Ba phần này bổ sung cho
+  nhau, không nhất thiết phải có một phần thay thế hoàn toàn hai phần còn lại.
+</Callout>
+
+<Bookmark
+  url="https://roborock.com.vn/products/roborock-qr-798"
+  title="Roborock QR 798"
+  description="Trang chính thức để đối chiếu đúng model và các chức năng trong app Roborock. Giá hiển thị không phải giá mình đã mua."
+/>
+
+## Bóng đèn Wi-Fi Tuya Smart Bulb
+
+Món còn lại là một bóng đèn Wi-Fi Tuya 15W dạng <TermNote explanation="OEM trong bài này chỉ một mẫu bóng đèn phổ thông có thể xuất hiện dưới nhiều tên hoặc cấu hình khác nhau tùy nhà cung cấp và lô sản phẩm.">OEM</TermNote>. Giá mình mua là **150.000đ**.
+
+So với việc thay công tắc âm tường, bóng đèn là cách bắt đầu ít phải can thiệp vào hệ thống điện hơn. Chỉ cần lưu ý rằng nếu ai đó tắt công tắc cơ đang cấp điện cho bóng, phần Wi-Fi của bóng cũng mất nguồn và hệ thống không thể điều khiển nó cho tới khi công tắc được bật lại.
+
+Với đúng chiếc bóng này, mình khuyên dùng app **Tuya Smart** thay vì **Smart Life**. Trong hệ thống của mình, app được dùng để thêm thiết bị có ảnh hưởng tới cách màu đèn được nhận trong Home Assistant và HomeKit. Khi thêm bằng Smart Life, phần màu đèn không hoạt động đúng như mình mong muốn; còn Tuya Smart phù hợp hơn với cách mình đang config. Đây là trải nghiệm trên chiếc bóng và hệ thống của mình, không phải kết luận rằng mọi thiết bị Tuya đều gặp giống nhau.
+
+<Bookmark
+  url="https://s.shopee.vn/6fg1jjctG5"
+  title="Bóng đèn Wi-Fi Tuya Smart Bulb trên Shopee"
+  description="Link bóng đèn OEM mình đã mua; chiếc mình đang dùng là bản 15W."
+/>
+
+## Camera IMILAB C21 2.5K
+
+Chiếc camera mình chủ động mua là IMILAB C21 2.5K, giá lúc đó khoảng **750.000đ**.
+
+Điểm làm mình hụt hẫng chỉ xuất hiện sau khi mang camera về. Trên chiếc C21 của mình, mình không thể mở một luồng <TermNote explanation="RTSP là giao thức thường được dùng để lấy luồng hình ảnh hoặc âm thanh trực tiếp từ camera IP sang phần mềm khác như NVR hay Home Assistant.">RTSP</TermNote> trực tiếp để phần mềm khác đọc hình ảnh. Mình phải xem và quản lý camera qua Xiaomi Home, khiến việc đưa nó vào phần còn lại của hệ thống phức tạp hơn khá nhiều.
+
+Đây là trải nghiệm trên đúng chiếc camera và firmware mình đang dùng. Mình không khẳng định mọi phiên bản C21 trên thị trường đều giống nhau. Tuy nhiên, tài liệu chính thức của IMILAB cũng tập trung vào việc thiết lập camera qua Mi Home hoặc IMILAB Home và không công bố địa chỉ RTSP để kết nối trực tiếp.
+
+<Bookmark
+  url="https://www.imilabglobal.com/pages/user-manual"
+  title="IMILAB - User Manual"
+  description="Trang hướng dẫn chính thức có tài liệu riêng cho hai phiên bản C21 dùng Mi Home và IMILAB Home."
+/>
+
+<Bookmark
+  url="https://s.shopee.vn/6fg1kGXbSi"
+  title="Camera IMILAB C21 2.5K trên Shopee"
+  description="Link mình đã mua hiện gộp nhiều mẫu camera; biến thể của mình là IMILAB C21 2.5K."
+/>
+
+Cách mình xử lý giới hạn này và đưa camera vào hệ thống sẽ được kể kỹ hơn ở chương sau.
+
+## Camera EZVIZ TY1 được chủ cũ để lại
+
+Chiếc camera còn lại là EZVIZ TY1. Nó đã được chủ cũ gắn ở ngoài sân và để lại khi mình nhận nhà.
+
+Camera vẫn còn dùng được nên mình tận dụng luôn, thay vì tháo xuống rồi mua một chiếc khác chỉ để mọi thiết bị cùng hãng. Đây cũng đúng với cách mình đang xây cả hệ thống: dùng những gì đã có trước, chỉ thay khi nó thật sự không đáp ứng được nhu cầu.
+
+Mình không có giá mua cho chiếc TY1 vì đây không phải thiết bị mình bỏ tiền mua. Phần reset, kết nối tài khoản và cách mình đưa camera ngoài sân này vào hệ thống cũng sẽ nằm trong chương camera tiếp theo.
+
+## Nếu mua từng bước thì nên bắt đầu từ đâu?
+
+Đây không phải thứ tự từ món tốt nhất tới món kém nhất. Mình chỉ xếp theo mức độ can thiệp khi lắp đặt:
+
+1. **Bóng đèn Wi-Fi:** phù hợp để thử Tuya và cách điều khiển bằng app mà chưa phải thay công tắc âm tường.
+2. **HomePod mini:** phù hợp nếu các bạn đã dùng hệ sinh thái Apple, muốn điều khiển bằng Siri, cần home hub và truy cập Apple Home khi ở ngoài. Nếu chỉ dùng Home Assistant trong LAN thì đây không phải món bắt buộc.
+3. **Bộ điều khiển IR:** thêm vào khi trong nhà có một thiết bị dùng remote hồng ngoại mà các bạn thật sự muốn đưa vào automation.
+4. **Công tắc Moes:** làm sau khi đã kiểm tra hộp công tắc có dây nguội và biết rõ bản 1 nút hay 2 nút cần mua.
+5. **Điều hòa di động:** chỉ nên cân nhắc khi các bạn thật sự cần giải quyết chuyện làm mát, chẳng hạn đang ở nhà thuê không tiện lắp điều hòa cố định. Đây không phải món nên mua chỉ để thử Smart Home.
+6. **Máy lọc không khí:** cân nhắc theo diện tích phòng, môi trường sống và cả chi phí thay lõi lọc về sau. Với nhà nuôi thú cưng như mình, đây là món có giá trị sử dụng rõ ràng hơn một automation cho vui.
+7. **Robot hút bụi:** xem trước app hãng có đáp ứng cách chia phòng, lập lịch và theo dõi mà các bạn cần hay không. Home Assistant và HomeKit có thể bổ sung thao tác nhanh, nhưng chưa chắc là giao diện chính để quản lý robot.
+8. **Camera:** xác định trước các bạn muốn chỉ xem trong app hay còn muốn lưu video và kết nối với hệ thống khác. Độ phân giải cao chưa chắc bù được việc camera không cung cấp luồng RTSP phù hợp.
+
+Nếu bất tiện lớn nhất trong nhà nằm ở công tắc tường, các bạn vẫn có thể bắt đầu từ công tắc. Thứ tự trên chỉ giúp một người mới thử hệ thống với ít thay đổi hơn, không phải công thức bắt buộc.
+
+## Cùng dùng Wi-Fi nhưng chưa chắc cùng cách kết nối
+
+Công tắc, bộ điều khiển IR S09 và bóng đèn dùng Tuya. Chiếc NWT Pro, Air Purifier 4 Lite và IMILAB C21 dùng Xiaomi Home, nhưng riêng NWT Pro nằm trong account region Trung Quốc. Robot hút bụi có app Roborock, camera ngoài sân dùng EZVIZ, còn HomePod mini nằm trong Apple Home và làm home hub. Tên nền tảng không có nghĩa thiết bị mặc định là local, cũng không có nghĩa Home Assistant sẽ kết nối với tất cả theo cùng một cách.
+
+Cách hoạt động còn phụ thuộc vào model, firmware, integration và cách mình config. Có thiết bị có thể điều khiển trong LAN, có thiết bị vẫn cần cloud. Vì chưa xác nhận riêng từng món trong chương này, mình không gắn nhãn local, hybrid hay cloud-dependent chỉ dựa trên tên sản phẩm.
+
+Ở chương sau, mình sẽ đi riêng vào hai chiếc camera: vì sao IMILAB C21 trở nên khó kết nối khi không lấy được RTSP, mình đã xử lý ra sao và chiếc EZVIZ TY1 được tận dụng như thế nào. Sau phần camera, mình sẽ quay lại server để dựng Home Assistant trên Proxmox rồi lần lượt đưa các thiết bị còn lại vào hệ thống.
+
+Đó là một vài sản phẩm mình đang dùng trong nhà. Danh sách này không được chọn để đủ mọi danh mục Smart Home, mà hình thành từ những nhu cầu xuất hiện qua từng nơi mình sống.
+
+Mua thiết bị là phần dễ thấy nhất của Smart Home. Biết nhà mình có dây gì, thiết bị đang nói chuyện qua đâu và mất Internet thì còn dùng được không mới là phần quyết định nó có tiện lâu dài hay không.
