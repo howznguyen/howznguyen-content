@@ -1,0 +1,57 @@
+---
+title: "Từng bước xây Smart Home từ những gì tôi đang có"
+description: "Nhật ký tận dụng PC cũ làm homelab với Proxmox, XPEnology và Home Assistant, rồi kết nối những thiết bị mình đã mua qua HomeKit."
+date: "2026-07-27"
+tags:
+  - Smart Home
+  - Home Assistant
+  - HomeKit
+  - Proxmox
+  - XPEnology
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778063797/howz-nguyen-gm_a2hIBKFU-unsplash_2_vv64xa.jpg"
+status: active
+---
+
+Smart Home của mình không bắt đầu từ một căn nhà mới, một bản thiết kế hoàn chỉnh hay một danh sách thiết bị được chọn sẵn từ đầu.
+
+Nó bắt đầu từ một chiếc PC cũ được công ty thanh lý, vài thiết bị Wi-Fi mình đã mua qua từng năm và một chiếc HomePod mà tới giờ mình vẫn thấy là món đáng tiền nhất trong cả hệ thống.
+
+Thay vì bỏ hết để làm lại theo một stack đẹp trên giấy, mình muốn thử ghép những gì đang có thành một hệ thống đủ ổn để dùng mỗi ngày. Thiết bị nào điều khiển được trong <TermNote id="lan">LAN</TermNote> thì ưu tiên chạy local. Thiết bị nào bắt buộc qua <TermNote id="cloud">cloud</TermNote> thì mình vẫn dùng, miễn là hiểu rõ mình đang phụ thuộc vào đâu.
+
+<Callout type="note" title="Một hành trình kéo dài gần ba năm">
+  Series này ghi lại những gì mình đã làm từ lúc nhận chiếc PC cũ gần ba năm
+  trước cho tới hệ thống hiện tại. Các lựa chọn xuất hiện trong bài phù hợp với
+  thiết bị, ngân sách và nhu cầu của mình ở từng thời điểm. Các bạn không cần
+  làm giống từng bước, chỉ cần xem đây là một nguồn tham khảo rồi điều chỉnh cho
+  phù hợp với căn nhà và cách sử dụng của mình.
+</Callout>
+
+## Series này sẽ đi qua những gì
+
+Mình sẽ bắt đầu từ chiếc PC chạy Proxmox và cách một máy cũ gánh cả XPEnology, Home Assistant cùng những dịch vụ khác trong <TermNote id="homelab">homelab</TermNote>. Smart Home là một phần quan trọng của chiếc máy này, nhưng không phải thứ duy nhất chạy trên đó.
+
+XPEnology xuất hiện vì mình có nhu cầu lưu trữ và muốn chiếc PC kiêm luôn vai trò <TermNote id="nas">NAS</TermNote>. Đây không phải thành phần bắt buộc của Smart Home. Nếu bạn không cần lưu trữ, có thể bỏ qua hoàn toàn nhánh này và chỉ triển khai những <TermNote id="workload">workload</TermNote> phù hợp với mình.
+
+Sau phần nền tảng, mình sẽ đi vào lý do vẫn chọn Wi-Fi thay vì chuyển toàn bộ sang Zigbee, rồi tới HomeKit, HomePod và những thiết bị đang có trong nhà. Phần cuối sẽ dành cho mấy chuyện ít vui hơn nhưng không thể né: mất mạng, mất điện, backup và lúc một thiết bị cloud bỗng dưng không muốn hợp tác.
+
+Mỗi phần sẽ đi theo thứ tự mình đã làm ngoài đời. Các bạn có thể bắt đầu bằng một thiết bị, dùng thử, rồi mới quyết định có cần đi tiếp hay không.
+
+## Chỉ có những món mình đã dùng
+
+Đây không phải danh sách thiết bị tốt nhất thị trường. Mình cũng không định giới thiệu một món chỉ vì thông số của nó trông ổn trên trang bán hàng.
+
+Thiết bị xuất hiện trong series đều là thứ mình đã mua và đưa vào hệ thống. Khi còn nhớ giá hoặc tìm lại được link Shopee, mình sẽ để kèm cho các bạn tiện tham khảo. Nhận xét vẫn chỉ là trải nghiệm trong căn nhà và mạng của mình.
+
+<Callout type="note" title="Không tài trợ, không affiliate">
+  Các link sản phẩm chỉ để các bạn nhận ra đúng model mình đang dùng. Mình không
+  nhận hoa hồng và cũng không cố thuyết phục mọi người mua giống mình.
+</Callout>
+
+## Một Smart Home vừa đủ
+
+Mục tiêu của series không phải nối được mọi thứ có điện trong nhà vào Home Assistant.
+
+Mình muốn hệ thống phản hồi đủ nhanh, vẫn điều khiển được theo cách quen thuộc và không khiến người trong nhà phải học một quy trình mới chỉ để bật cái đèn. Nếu một <TermNote id="automation">automation</TermNote> làm mọi thứ phức tạp hơn, có lẽ vấn đề không nằm ở việc thiếu thêm cảm biến.
+
+Đây là hành trình mình xây Smart Home từ những gì đã có. Chỗ nào chạy ngon mình sẽ kể. Chỗ nào còn phụ thuộc cloud, hơi chậm hoặc phải làm lại, mình cũng sẽ kể luôn.

@@ -1,0 +1,138 @@
+---
+title: "Vì sao mình chọn Proxmox thay vì cài thẳng một hệ điều hành"
+description: "Từ những lần phải lắp màn hình để sửa XPEnology đến một homelab có thể quản lý qua trình duyệt."
+---
+
+“Sao không cài Ubuntu, một bản Linux nào đó hoặc Windows cho nhanh?”
+
+Câu hỏi này hợp lý. Một chiếc PC cũ hoàn toàn có thể chạy Ubuntu Server. Windows cũng có cách quản trị từ xa. Nếu biết mình chỉ cần đúng một ứng dụng, cài thẳng hệ điều hành rồi chạy ứng dụng đó đôi khi còn đơn giản hơn.
+
+Nhưng server của mình không chỉ chạy một thứ.
+
+Mình có XPEnology cho một nhóm nhu cầu, Home Assistant cho Smart Home và những dịch vụ khác được thêm vào theo thời gian. Càng dùng lâu, chiếc PC càng ít giống một máy cài một phần mềm và càng giống một cái homelab nhỏ.
+
+Đó là lúc Proxmox bắt đầu hợp lý.
+
+## Một server ở nhà hiếm khi chỉ chạy một thứ
+
+Lúc mới nhận chiếc Dell OptiPlex 3010, mình không có một roadmap rõ ràng rằng ba năm sau nó sẽ chạy những gì.
+
+Ban đầu mình chỉ cần giải quyết nhu cầu trước mắt. Sau đó có thêm storage, Home Assistant và các dịch vụ khác. Mỗi thứ lại có cách cài đặt, yêu cầu và vòng đời riêng.
+
+Nếu cài tất cả lên cùng một hệ điều hành, mình vẫn có thể làm được. Ubuntu có <TermNote explanation="SSH là giao thức giúp đăng nhập và thao tác dòng lệnh trên một máy khác qua mạng.">SSH</TermNote>, Docker, KVM và đủ công cụ để tự xây một stack quản lý riêng. Vấn đề là mình sẽ phải tự ghép các mảnh đó lại, rồi tự nhớ dịch vụ nào đang dùng port nào, storage nằm ở đâu và một lần update có thể ảnh hưởng tới thứ gì.
+
+Mình không chọn Proxmox vì Ubuntu hay Windows không chạy được. Mình chọn vì muốn chiếc PC làm **host cho nhiều workload**, thay vì biến host thành nơi cài lẫn tất cả mọi thứ.
+
+## Quãng thời gian cài XPEnology trực tiếp
+
+Trước Proxmox, mình từng cài XPEnology trực tiếp lên máy.
+
+Nó chạy và giải quyết được nhu cầu lúc đó. Nhưng mỗi lần muốn bổ sung hoặc thay đổi gì, mình lại phải lôi màn hình với bàn phím tới, cắm vào chiếc PC rồi ngồi thao tác ngay bên cạnh nó.
+
+Không phải mọi hệ thống cài trực tiếp đều bắt buộc phải làm như vậy. Ubuntu có thể quản lý qua SSH. Windows có Remote Desktop. Ngay cả XPEnology cũng có các cách quản trị từ xa cho những phần nó hỗ trợ.
+
+Đây chỉ là trải nghiệm với cách mình đã dựng hệ thống ở thời điểm đó: mỗi lần chạm tới phần boot, cài lại hoặc xử lý thứ nằm ngoài giao diện có sẵn là một lần khá cực.
+
+Một hai lần thì không sao. Làm nhiều lần bắt đầu thấy mình đang phục vụ cái server, thay vì server phục vụ mình.
+
+## Proxmox thay đổi cách mình quản lý chiếc máy
+
+Sau khi cài Proxmox và thiết lập mạng lần đầu, phần lớn thao tác hằng ngày của mình diễn ra qua <TermNote explanation="Web UI là giao diện quản lý mở bằng trình duyệt, thay vì phải thao tác hoàn toàn bằng dòng lệnh.">web UI</TermNote>.
+
+Từ một máy khác trong cùng mạng LAN, mình mở:
+
+```text
+https://<ip-cua-proxmox>:8006
+```
+
+Trong đó mình có thể nhìn thấy host, storage, VM và container ở cùng một nơi. Mình có thể cấp CPU, RAM, disk và network cho từng guest; bật, tắt hoặc mở console mà không cần bê màn hình tới chỗ đặt server.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785157214/articles/practical-smart-home/proxmox-web-ui.png"
+  alt="Giao diện quản lý Proxmox VE trên chiếc Dell OptiPlex 3010 của mình"
+  caption="Giao diện Proxmox trên chiếc Dell OptiPlex 3010, được truy cập trực tiếp qua trình duyệt trong mạng LAN."
+/>
+
+Proxmox dùng KVM cho virtual machine và <TermNote explanation="LXC là bộ công cụ tạo và quản lý Linux container bằng các tính năng cô lập có sẵn trong kernel Linux.">LXC</TermNote> cho <TermNote id="container">container</TermNote>. Với mình, điều quan trọng không nằm ở việc nhớ hai công nghệ này hoạt động ra sao. Điều quan trọng là mỗi workload có một chỗ riêng và được quản lý từ cùng một giao diện.
+
+<Bookmark
+  url="https://github.com/proxmox/pve-docs/blob/master/pve-intro.adoc"
+  title="Proxmox VE — Introduction"
+  description="Tài liệu chính thức về KVM, LXC và giao diện quản lý tập trung của Proxmox VE."
+/>
+
+Mình sẽ không viết lại toàn bộ từng màn hình cài đặt Proxmox trong series này. Nếu bạn muốn tự cài từ đầu, có thể tham khảo bài hướng dẫn bằng tiếng Việt của anh Thuận Bùi bên dưới.
+
+<Bookmark
+  url="https://thuanbui.me/cai-dat-promox-ve/"
+  title="Hướng dẫn cài đặt Proxmox VE"
+  description="Hướng dẫn tạo USB cài đặt, thiết lập Proxmox và truy cập Web UI. Tên menu hoặc giao diện có thể khác tùy phiên bản bạn đang sử dụng."
+/>
+
+## XPEnology và Home Assistant có thể cùng chạy, nhưng không phải ai cũng cần cả hai
+
+XPEnology không phải thành phần bắt buộc để làm Smart Home. Mình dùng nó vì có nhu cầu lưu trữ và muốn chiếc PC kiêm luôn vai trò NAS. Nếu bạn chỉ cần Home Assistant và các automation trong nhà, có thể bỏ qua XPEnology.
+
+Nếu cài XPEnology trực tiếp, chiếc PC gần như trở thành một máy dành cho XPEnology. Nếu cài Home Assistant OS trực tiếp, nó lại trở thành một máy dành cho Home Assistant.
+
+Proxmox cho mình đặt hai thứ đó lên cùng một host mà không phải chọn một trong hai làm hệ điều hành chính.
+
+XPEnology, Home Assistant và các dịch vụ khác trở thành những guest riêng. Mỗi guest được cấp tài nguyên phù hợp với công việc của nó. Khi cần thử một thứ mới, mình không phải cài nó lẫn vào hệ thống đang chạy ổn.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785157372/articles/practical-smart-home/xpenology-web-ui.png"
+  alt="Giao diện XPEnology đang chạy trên homelab của mình"
+  caption="Giao diện XPEnology hiện tại của mình, được vận hành như một guest trên host Proxmox."
+/>
+
+Để dựng XPEnology trên Proxmox, mình đã làm theo bài hướng dẫn của anh Thuận Bùi bên dưới. Bài viết ban đầu hướng dẫn DSM 7.1 và đã được bổ sung video cho DSM 7.2; loader hoặc một số bước cấu hình có thể khác ở thời điểm bạn đọc.
+
+<Bookmark
+  url="https://thuanbui.me/cai-dat-xpenology-dsm-7-1-len-may-ao-proxmox/"
+  title="Cài đặt XPEnology DSM lên máy ảo Proxmox"
+  description="Đây là bài mình đã tham khảo để tạo máy ảo, gắn bootloader và cài DSM trên Proxmox."
+/>
+
+Nếu bạn đang tìm một tài liệu mới hơn, anh Thuận Bùi cũng có bài cập nhật cho DSM 7.2.2 cùng ARC Loader và ARC Patch:
+
+<Bookmark
+  url="https://thuanbui.me/xpenology-dsm-7-2-2-arc-loader-arc-patch/"
+  title="Cài đặt XPEnology DSM 7.2.2 bằng ARC Loader và ARC Patch"
+  description="Hướng dẫn chuẩn bị loader, cấu hình DSM và các tính năng mở rộng; chỉ cần thực hiện nếu bạn chọn thêm nhánh NAS cho homelab."
+/>
+
+Đây là lợi ích lớn nhất với mình. Không phải cài được nhiều phần mềm hơn, mà là **dám thử thêm một thứ mà ít sợ làm hỏng những thứ còn lại hơn**.
+
+## Nhanh hơn không có nghĩa là bấm một nút là xong
+
+Proxmox giúp quy trình của mình gọn hơn, nhưng nó không tự hiểu mình muốn dựng XPEnology hay Home Assistant như thế nào.
+
+Mình vẫn phải đọc tài liệu, chuẩn bị image, chọn cách gắn storage, phân bổ RAM và hiểu network. Cấu hình sai thì guest vẫn không chạy. Chọn RAID0 thì dữ liệu vẫn không tự nhiên an toàn hơn.
+
+Điểm khác là mình có một nơi rõ ràng để làm những việc đó. Nếu cần cài lại một guest, mình xử lý guest đó. Nếu cần mở console, mình mở ngay trong trình duyệt. Nếu muốn xem tài nguyên đang được chia ra sao, mình không phải nhớ từng câu lệnh trên từng hệ điều hành.
+
+Với một người phải config nhiều vì không có nhiều tiền như mình, giảm được số lần bê màn hình và bàn phím đã là một cải tiến khá lớn rồi.
+
+## Vẫn có lúc phải lắp màn hình
+
+Web UI không có nghĩa chiếc PC sẽ vĩnh viễn không cần màn hình.
+
+Lần cài Proxmox đầu tiên vẫn cần thao tác trực tiếp. Nếu host mất mạng, cấu hình network sai, không boot được hoặc hỏng tới mức web UI không lên, màn hình và bàn phím vẫn là đường lui cần thiết.
+
+Proxmox cũng tạo ra một điểm phụ thuộc lớn hơn: host gặp vấn đề thì XPEnology, Home Assistant và các guest khác đều bị ảnh hưởng. Vì vậy backup, cách khôi phục và việc ghi lại cấu hình vẫn quan trọng hơn vẻ tiện lợi của giao diện.
+
+<Callout type="warning" title="Đừng mở web UI thẳng ra Internet">
+  Mình truy cập Proxmox qua IP trong mạng LAN. Nếu cần quản trị từ bên ngoài,
+  nên có một lớp truy cập an toàn như VPN và giới hạn thiết bị được phép kết
+  nối, thay vì forward trực tiếp cổng quản trị ra Internet.
+</Callout>
+
+## Vì sao Proxmox phù hợp với mình
+
+Nếu chỉ chạy một ứng dụng nhỏ, mình có thể đã chọn Ubuntu Server rồi quản lý qua SSH.
+
+Nhưng chiếc PC hiện tại phải gánh XPEnology, Home Assistant và những dịch vụ khác. Mình muốn mỗi phần có không gian riêng, muốn thao tác từ máy đang sử dụng và không muốn mỗi lần thử thứ mới lại phải kéo màn hình tới góc đặt server.
+
+Proxmox giải quyết đúng những bất tiện đó.
+
+Nó không làm chiếc OptiPlex 3010 mạnh hơn. Nó chỉ giúp mình chia và quản lý phần tài nguyên ít ỏi đang có dễ hơn. Với mình, đó mới là lý do đáng để cài Proxmox thay vì cài thẳng một hệ điều hành rồi chất mọi thứ lên trên.

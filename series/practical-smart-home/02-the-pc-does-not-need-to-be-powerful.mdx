@@ -1,0 +1,127 @@
+---
+title: "Chiếc PC không cần quá ngon"
+description: "Một chiếc Dell OptiPlex 3010 cũ, vài món nâng cấp mua sau và gần ba năm làm nền cho hệ thống trong nhà mình."
+---
+
+Chiếc PC chạy Smart Home của mình không được mua để làm homelab.
+
+Nó là một chiếc Dell OptiPlex 3010 từng được dùng làm NAS ở công ty cũ. Đến lúc công ty thanh lý thiết bị, mình may mắn được nhận lại chiếc máy này.
+
+Vì biết nó đã chạy như một chiếc NAS của công ty trong thời gian dài, mình cũng không mong đợi phần cứng còn quá tốt. Lúc nhận, máy có 8 GB RAM và không có ổ cứng. Nói đơn giản thì mình có một cái thùng máy cũ, bật lên được, nhưng chưa thể dùng ngay.
+
+Vậy mà sau vài lần mua thêm đồ cũ và nâng cấp dần, nó đã chạy cùng mình gần ba năm.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785164218/articles/practical-smart-home/dell-optiplex-3010-reference.png"
+  alt="Ảnh minh họa máy Dell OptiPlex 3010 dạng tower màu đen"
+  caption="Ảnh minh họa Dell OptiPlex 3010 cùng model với máy của mình. Chiếc máy thực tế vẫn đang chạy nên mình không rút ra khỏi vị trí chỉ để chụp ảnh."
+/>
+
+## Cấu hình hiện tại
+
+Đây là cấu hình mình đọc trực tiếp từ `lscpu` và `lshw` trên máy:
+
+| Thành phần | Cấu hình |
+|---|---|
+| Máy | Dell OptiPlex 3010 |
+| CPU | Intel Core i5-3470, 4 nhân/4 luồng, 3.20 GHz |
+| Virtualization | Intel VT-x |
+| RAM | 16 GiB DDR3-1600, 2 thanh 8 GiB |
+| Mạng | Realtek Gigabit Ethernet |
+| Ổ chạy Proxmox | HDD 500 GB |
+| Ổ dữ liệu | 2 HDD 2 TB chạy RAID0 |
+| Workload | XPEnology, Home Assistant và các dịch vụ khác |
+
+Đây rõ ràng không phải cấu hình server hiện đại. CPU chỉ có bốn nhân, không có Hyper-Threading. RAM là DDR3. Toàn bộ storage hiện tại đều là HDD.
+
+Nhưng nhìn lại nhu cầu của mình, câu hỏi quan trọng hơn không phải máy cũ tới đâu. Mà là nó có đủ để Proxmox chạy XPEnology, Home Assistant và những dịch vụ mình thật sự dùng hay không.
+
+## Mình đã nâng cấp nó như thế nào
+
+Máy ban đầu có 8 GB RAM. Mình thay bằng hai thanh 8 GB DDR3 cũ, đưa tổng dung lượng lên 16 GB.
+
+Phần storage bắt đầu bằng một ổ HDD 500 GB. Hiện tại ổ này dùng để cài và chạy Proxmox.
+
+Về sau mình có thêm hai ổ HDD 2 TB và ghép chúng thành RAID0 cho phần dữ liệu. Cách làm này cho mình toàn bộ dung lượng của hai ổ, nhưng không có khả năng dự phòng.
+
+<Callout type="warning" title="RAID0 không phải backup">
+  Chỉ cần một trong hai ổ gặp vấn đề, toàn bộ dữ liệu trên array có thể mất. Đây
+  là cấu hình mình đang dùng, không phải cấu hình mình khuyên mọi người sao chép
+  cho dữ liệu quan trọng.
+</Callout>
+
+Mình sẽ dành phần backup cho một chương riêng. Nếu chỉ nhìn thấy chữ RAID rồi mặc định dữ liệu đã an toàn thì RAID0 là ví dụ khá đau để học điều ngược lại.
+
+## Vì sao chiếc máy này vẫn chạy được Proxmox
+
+Tài liệu Proxmox VE yêu cầu CPU Intel 64 hoặc AMD64 có <TermNote id="virtualization">hardware virtualization</TermNote> để chạy <TermNote explanation="KVM là công nghệ ảo hóa được tích hợp trong Linux và được Proxmox dùng để chạy máy ảo.">KVM</TermNote> <TermNote id="virtual-machine">virtual machine</TermNote>. Máy của mình là `x86_64`, và output CPU có cờ `vmx`, tương ứng với Intel VT-x.
+
+Về RAM, tài liệu đưa ra mức tối thiểu 2 GB cho hệ điều hành và các dịch vụ Proxmox, chưa tính phần phải cấp cho guest. Chiếc máy có 16 GB nên mình có thể chia tài nguyên cho XPEnology, Home Assistant và các dịch vụ khác đang chạy trên <TermNote id="host">host</TermNote>.
+
+Con số đó không có nghĩa 16 GB luôn đủ cho mọi homelab. Nếu chạy thêm nhiều VM, database nặng hoặc dùng ZFS, cách tính sẽ khác. Với đúng nhóm workload hiện tại của mình, chiếc máy đã chạy gần ba năm mà chưa buộc mình phải thay host mạnh hơn.
+
+<Bookmark
+  url="https://github.com/proxmox/pve-docs/blob/master/pve-system-requirements.adoc"
+  title="Proxmox VE — System Requirements"
+  description="Yêu cầu phần cứng chính thức của Proxmox VE cho CPU, RAM, storage và network."
+/>
+
+## “Chạy được” và “cấu hình lý tưởng” là hai chuyện khác nhau
+
+Proxmox khuyến nghị storage nhanh và có dự phòng, trong đó SSD cho kết quả tốt hơn. Máy của mình lại đang chạy Proxmox trên HDD 500 GB.
+
+Nó vẫn chạy. Nhưng mình không vì thế mà kết luận HDD tốt ngang SSD, hay cấu hình này là lựa chọn nên mua ở thời điểm hiện tại.
+
+Đây là khác biệt mình muốn giữ xuyên suốt series:
+
+- **Chạy được:** hệ thống đang hoạt động với phần cứng mình có.
+- **Đủ dùng:** trải nghiệm hằng ngày chưa tạo ra vấn đề buộc mình phải nâng cấp.
+- **Lý tưởng:** cấu hình mình sẽ chọn nếu mua mới hoàn toàn.
+
+Chiếc OptiPlex này đang nằm ở khoảng giữa hai dòng đầu. Nó chạy được và tới giờ vẫn đủ cho nhu cầu của mình. Nó không phải cấu hình lý tưởng nếu hôm nay các bạn bắt đầu đi mua từng món.
+
+## Những giới hạn mình không muốn giấu
+
+Máy cũ có vài đánh đổi khá rõ.
+
+Đầu tiên là storage. HDD sẽ không cho độ phản hồi giống SSD, nhất là khi nhiều VM cùng đọc ghi. RAID0 tăng rủi ro mất dữ liệu thay vì giảm rủi ro.
+
+Tiếp theo là điện năng. Mình chưa có số đo đủ tin cậy để kết luận chiếc máy tiêu thụ bao nhiêu điện trong một tháng, nên phần này mình chưa ghi một con số đoán mò.
+
+Cuối cùng là tuổi thọ. Đây là thiết bị từng làm NAS ở công ty trước khi về tay mình. Việc nó chạy ổn gần ba năm là trải nghiệm thật, nhưng không phải lời bảo đảm rằng một chiếc OptiPlex 3010 khác cũng sẽ có tình trạng tương tự.
+
+## Nếu đang có máy cũ, hãy kiểm tra trước khi mua máy mới
+
+Mình không nghĩ ai cũng nên tìm mua đúng một chiếc OptiPlex 3010.
+
+Điều đáng tham khảo ở đây là cách bắt đầu: kiểm tra chiếc máy đang có trước, rồi mới quyết định nó thiếu gì.
+
+Với một host Proxmox nhỏ, mình sẽ nhìn ít nhất vào:
+
+- CPU có hỗ trợ virtualization hay không.
+- RAM còn đủ để chia cho host và các guest hay không.
+- Ổ đĩa đang chứa dữ liệu gì và hỏng một ổ thì mất những gì.
+- Có Ethernet ổn định để nối vào mạng nhà hay không.
+- Máy có chạy liên tục mà nhiệt độ, tiếng ồn và điện năng vẫn chấp nhận được không.
+
+## PC, laptop hay build riêng đều được
+
+Các bạn không cần có đúng một chiếc PC văn phòng giống mình.
+
+Một bộ PC cũ, laptop không còn sử dụng, mini PC hoặc chiếc máy tự build đều có thể là điểm bắt đầu. Quan trọng là phần cứng đáp ứng được workload dự định chạy và chấp nhận được việc hoạt động liên tục trong nhà.
+
+Mỗi lựa chọn sẽ có đánh đổi riêng. PC thường dễ nâng RAM và gắn thêm ổ hơn nhưng chiếm chỗ. Laptop gọn, có sẵn màn hình với bàn phím nhưng khả năng nâng cấp storage và network có thể hạn chế. Một bộ máy build riêng cho mình nhiều quyền lựa chọn nhất, đổi lại chi phí ban đầu cũng cao hơn.
+
+Nếu đang có sẵn máy, mình nghĩ cứ kiểm tra và thử bằng thứ đó trước. Nếu dư dả hơn, các bạn hoàn toàn có thể lên kế hoạch build bài bản ngay từ đầu:
+
+- Liệt kê XPEnology, Home Assistant và những workload dự định chạy.
+- Tính lượng RAM cần cho host và từng guest.
+- Chọn storage dựa trên dung lượng, tốc độ và phương án backup.
+- Dự trù số cổng mạng, khay ổ đĩa và khả năng nâng cấp sau này.
+- Cân nhắc điện năng, nhiệt độ, tiếng ồn và vị trí đặt máy.
+
+Build bài bản không có nghĩa mua cấu hình mạnh nhất có thể. Nó là biết mình cần chạy gì, muốn giữ hệ thống bao lâu và chừa khoảng trống hợp lý cho những thứ sẽ thêm vào sau.
+
+Chiếc PC của mình trả lời được phần lớn những câu hỏi đó bằng đồ đã có và vài món nâng cấp cũ. Nhờ vậy, tiền có thể dành cho những thứ trực tiếp thay đổi trải nghiệm Smart Home hơn: cảm biến, công tắc, thiết bị điều khiển và HomePod.
+
+Máy chủ không cần là món ngon nhất trong hệ thống. Nó chỉ cần đủ ổn để mình quên mất nó đang chạy ở một góc nhà.

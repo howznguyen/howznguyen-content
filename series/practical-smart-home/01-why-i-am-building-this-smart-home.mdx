@@ -1,0 +1,153 @@
+---
+title: "Bắt đầu từ những gì mình đang có"
+description: "Vì sao mình tận dụng PC cũ làm homelab, rồi ghép Home Assistant, thiết bị Wi-Fi và HomeKit thành một hệ thống vừa đủ dùng."
+---
+
+Nhắc tới Smart Home, mình thường thấy hai kiểu bắt đầu.
+
+Một kiểu là mua vài thiết bị cùng hãng, cài app rồi điều khiển từng món trên điện thoại. Kiểu còn lại là lên hẳn một sơ đồ với server, hub, cảm biến và đủ loại <TermNote explanation="Protocol là bộ quy tắc để các thiết bị hoặc phần mềm trao đổi dữ liệu với nhau.">protocol</TermNote> trước khi chiếc đèn đầu tiên được bật.
+
+Hệ thống của mình không bắt đầu theo kiểu nào cả.
+
+Mình có một chiếc PC cũ. Trong nhà đã có sẵn vài thiết bị Wi-Fi, một số điều khiển được qua LAN, một số vẫn phải đi qua cloud. Mình cũng dùng hệ sinh thái Apple và có HomePod.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785160253/articles/practical-smart-home/smart-bulb-3d-printed-lamp-homepod.jpg"
+  alt="Smart bulb trong khung đèn in 3D cạnh HomePod và màn hình Proxmox"
+  caption="Một góc setup hiện tại của mình: smart bulb trong khung đèn in 3D, HomePod và homelab được quản lý qua Proxmox."
+/>
+
+Vậy nên câu hỏi của mình không phải là **nên mua một hệ Smart Home nào từ đầu**. Câu hỏi là:
+
+> Làm sao ghép những gì mình đang có thành một hệ thống dễ dùng hơn?
+
+## Mình không muốn làm lại từ đầu
+
+Nếu nhìn vào các cộng đồng Smart Home đủ lâu, rất dễ có cảm giác mình đang dùng sai protocol, sai thiết bị hoặc sai cách triển khai.
+
+Wi-Fi đông thiết bị quá thì sao? Có nên chuyển sang Zigbee không? Thiết bị qua cloud có còn được gọi là Smart Home không? Home Assistant nên cài trực tiếp hay chạy trong máy ảo?
+
+Mấy câu hỏi đó đều hợp lý. Nhưng thay toàn bộ thiết bị chỉ để kiến trúc nhìn đẹp hơn thì không hợp lý với mình.
+
+Những món đang có vẫn hoạt động. Một số món phản hồi hơi chậm, nhưng chưa tới mức gây khó chịu. Một số món phụ thuộc cloud, nhưng mình biết giới hạn đó và chưa có lý do đủ lớn để thay.
+
+Mình chọn bắt đầu từ hiện trạng, dùng một thời gian rồi để vấn đề thật quyết định lần nâng cấp tiếp theo.
+
+<Callout type="tip" title="Đừng mua trước khi biết mình đang sửa vấn đề gì">
+  Nếu công tắc hiện tại vẫn tiện hơn mở điện thoại, đổi nó thành công tắc thông
+  minh chưa chắc đã làm căn nhà thông minh hơn. Mình muốn mỗi món được thêm vào
+  phải giải quyết một bất tiện cụ thể.
+</Callout>
+
+## Sao không dùng Aqara cho nhanh?
+
+“Sao không dùng Aqara đi, vừa ngon mà vừa dễ sử dụng?”
+
+Câu trả lời ngắn nhất là:
+
+> Vì mình không có tiền. Nói vậy cho nhanh. =]]]
+
+Một hệ thiết bị đồng bộ sẽ gọn hơn nhiều. Nhưng ở thời điểm bắt đầu, mình không có ngân sách để thay những món vẫn đang dùng được chỉ vì chúng không cùng một hãng.
+
+Không có tiền thì phải trả bằng thứ khác: **thời gian**.
+
+Mình phải đọc kỹ hơn trước khi mua, tìm hiểu thiết bị điều khiển được trong LAN hay bắt buộc qua cloud, kiểm tra Home Assistant có <TermNote explanation="Integration là phần kết nối giúp Home Assistant giao tiếp với một thiết bị, dịch vụ hoặc nền tảng khác.">integration</TermNote> phù hợp không và config nhiều hơn để mấy món từ các hãng khác nhau nói chuyện được với nhau.
+
+Cách này không tốt hơn. Nó chỉ phù hợp với túi tiền của mình lúc đó. Đổi lại, sau gần ba năm tự mò, mình hiểu rõ hơn mỗi thiết bị trong nhà đang phụ thuộc vào đâu và vì sao nó hoạt động.
+
+## Wi-Fi-first không có nghĩa là cloud-first
+
+Phần lớn thiết bị mình đang dùng kết nối bằng Wi-Fi. Điều đó không đồng nghĩa tất cả đều phải gửi lệnh ra Internet rồi vòng về nhà.
+
+Có thiết bị Home Assistant có thể điều khiển trực tiếp trong LAN. Có thiết bị dùng local cho những thao tác chính nhưng vẫn cần cloud cho một số tính năng. Và cũng có vài món mất Internet là gần như đứng ngoài hệ thống.
+
+Mình tạm chia chúng thành ba nhóm:
+
+- **Local:** Home Assistant giao tiếp trực tiếp trong mạng nhà.
+- **Hybrid:** dùng được trong LAN nhưng vẫn còn một phần phụ thuộc cloud.
+- **Cloud-dependent:** phải qua dịch vụ của hãng để hoạt động.
+
+Series này sẽ ghi rõ từng thiết bị nằm ở nhóm nào. Không phải để chê món dùng cloud, mà để biết khi Internet gặp vấn đề thì thứ gì còn hoạt động.
+
+Mình cũng chưa chuyển sang Zigbee chỉ vì mọi người bảo nên dùng Zigbee. Khi số lượng thiết bị, độ ổn định hoặc nhu cầu cảm biến khiến Wi-Fi không còn phù hợp, lúc đó việc chuyển một phần hệ thống mới có lý do rõ ràng.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785162942/articles/practical-smart-home/smart-home-architecture-diagram-v3.png"
+  alt="Sơ đồ kiến trúc trong nhà với thiết bị Wi-Fi, Home Assistant trên Proxmox, XPEnology và Apple Home"
+  caption="Sơ đồ phần trong nhà: thiết bị đi qua Wi-Fi hoặc cloud, Home Assistant chạy trên Proxmox rồi đưa những thiết bị cần dùng hằng ngày sang Apple Home."
+/>
+
+## Proxmox là nền của cả homelab
+
+Chiếc PC này không chỉ chạy Home Assistant.
+
+Mình dùng Proxmox làm lớp nền để chạy XPEnology, Home Assistant và những dịch vụ khác. Smart Home là một phần của homelab, nằm cạnh storage và các workload mình vẫn dùng cho nhu cầu riêng.
+
+Đó cũng là lý do mình không cài Home Assistant thẳng lên máy. Dùng Proxmox có thêm một lớp phải quản lý, nhưng đổi lại mình có thể tách từng workload, phân bổ tài nguyên và tận dụng cùng một chiếc PC cho nhiều việc.
+
+Chi tiết mình cài Proxmox, chia storage và tổ chức các <TermNote id="guest">guest</TermNote> sẽ nằm ở các chương sau. Trước hết, mình muốn bắt đầu bằng chính chiếc PC cũ đang gánh tất cả những phần đó.
+
+## Home Assistant lo phần Smart Home
+
+Trong phạm vi Smart Home, mình đặt Home Assistant ở giữa để gom thiết bị từ nhiều hãng về một nơi, quản lý trạng thái và chạy automation.
+
+Home Assistant không làm mấy thiết bị cloud tự nhiên biến thành local. Nhưng ít nhất nó cho mình một bức tranh rõ hơn: thiết bị nào nói chuyện trực tiếp trong LAN, thiết bị nào cần Internet và automation nào đang phụ thuộc vào dịch vụ bên ngoài.
+
+Trước đây mình cũng từng dùng Homebridge để đưa một số thiết bị sang HomeKit. Trên setup của mình ở thời điểm đó, nó chưa ổn định lắm nên hiện tại mình dùng Home Assistant làm phần trung tâm. Đây chỉ là trải nghiệm với hệ thống của mình, không phải kết luận rằng Homebridge sẽ không phù hợp với nhà khác.
+
+## HomeKit là phần mọi người nhìn thấy
+
+Nếu Home Assistant là phần phía sau, Apple Home là giao diện mà mình và người trong nhà tương tác hằng ngày.
+
+Mình không muốn ai phải nhớ địa chỉ Home Assistant, mở dashboard rồi tìm đúng <TermNote explanation="Entity là một đối tượng trạng thái trong Home Assistant, chẳng hạn một bóng đèn, cảm biến nhiệt độ hoặc công tắc.">entity</TermNote> chỉ để bật đèn. Những thiết bị cần dùng thường xuyên sẽ được đưa sang HomeKit để xuất hiện trong một giao diện quen thuộc hơn.
+
+HomePod làm phần còn lại trở nên tự nhiên: đứng trong phòng và nói một câu, thay vì tìm điện thoại.
+
+HomePod còn đóng vai trò <TermNote id="home-hub">home hub</TermNote>. Khi ở ngoài nhà, mình vẫn có thể dùng Apple Home để điều khiển những thiết bị đã đưa vào HomeKit. Mình không phải forward cổng Home Assistant hay mở trực tiếp từng thiết bị trong LAN ra Internet chỉ để dùng luồng này.
+
+Đây mới là điểm mình muốn nhấn mạnh khi nói HomePod đáng tiền. Nếu chỉ dùng Home Assistant và muốn truy cập từ ngoài nhà theo cách tự quản lý, mình phải dựng thêm <TermNote explanation="VPN tạo một đường hầm được bảo vệ để thiết bị ở ngoài kết nối vào mạng nhà như đang ở bên trong.">VPN</TermNote> như Tailscale hoặc ZeroTier. Nó không phải việc bất khả thi, nhưng có thêm một lớp để cài đặt, kết nối và xử lý khi gặp lỗi.
+
+<Callout type="info" title="Home Assistant dùng riêng sẽ phức tạp hơn một chút">
+  Nếu không muốn tự dựng VPN, Home Assistant Cloud là lựa chọn đơn giản hơn
+  nhưng là một dịch vụ trả phí. <TermNote explanation="Reverse proxy nhận kết nối từ bên ngoài rồi chuyển tiếp request tới dịch vụ nội bộ phù hợp.">Reverse proxy</TermNote> hoặc <TermNote explanation="Port forwarding chuyển lưu lượng từ một cổng trên router tới thiết bị hoặc dịch vụ bên trong mạng nhà.">port forwarding</TermNote> cũng làm
+  được, nhưng cần <TermNote explanation="HTTPS mã hóa kết nối giữa thiết bị và dịch vụ web để hạn chế dữ liệu bị đọc hoặc sửa trên đường truyền.">HTTPS</TermNote>, xác thực mạnh và hiểu rõ rủi ro. Trong setup của mình,
+  HomePod gọn hơn vì nó đã làm home hub cho luồng điều khiển từ xa qua Apple
+  Home.
+</Callout>
+
+<Bookmark
+  url="https://support.apple.com/guide/iphone/control-your-home-remotely-iph1d10f7f2b/ios"
+  title="Apple Support — Control your home remotely"
+  description="HomePod hoặc Apple TV có thể làm home hub để điều khiển thiết bị trong Apple Home khi bạn ở ngoài nhà."
+/>
+
+<Bookmark
+  url="https://www.home-assistant.io/docs/configuration/remote/"
+  title="Home Assistant — Remote access"
+  description="Các lựa chọn truy cập Home Assistant từ xa bằng Home Assistant Cloud, VPN hoặc một external URL được bảo vệ đúng cách."
+/>
+
+Với mình, HomePod không phải thiết bị có nhiều automation nhất. Nhưng nó là món khiến cả hệ thống bớt giống một project homelab và gần với một sản phẩm trong nhà hơn. Đó cũng là lý do mình thấy nó đáng tiền nhất.
+
+## Series này không phải một bài bán hàng dài
+
+Mình sẽ chỉ viết về những thiết bị đã mua và sử dụng. Có link Shopee thì mình để kèm cho dễ nhận ra model. Có nhớ giá thì mình ghi lại để các bạn hình dung.
+
+Mình sẽ không lập bảng xếp hạng, tìm một món rẻ hơn để đủ ba phân khúc hay giới thiệu thiết bị chưa từng cầm trên tay. Một món chạy ổn trong nhà mình cũng chưa chắc sẽ là lựa chọn phù hợp với mạng và thói quen của nhà khác.
+
+Thứ mình có thể chia sẻ thành thật là:
+
+- Vì sao mình mua nó.
+- Nó kết nối local hay phải qua cloud.
+- Mình đưa nó vào Home Assistant và HomeKit như thế nào.
+- Sau một thời gian sử dụng, mình có còn thấy nó đáng tiền không.
+
+## Bắt đầu bằng chiếc PC cũ
+
+Trước khi có XPEnology, Home Assistant, HomeKit hay automation, cả homelab cần một chỗ để chạy.
+
+Chỗ đó của mình là một chiếc Dell OptiPlex 3010 từng làm server ở công ty cũ. Nó không mới, không tiết kiệm diện tích như mini PC và cấu hình cũng không có gì để khoe.
+
+Nhưng nó đã chạy cùng mình gần ba năm.
+
+Chương tiếp theo sẽ bắt đầu từ chiếc máy đó: lúc mình nhận nó có gì, mình đã mua thêm gì và vì sao một chiếc PC cũ vẫn đủ để mình xây phần còn lại lên trên.
