@@ -1,0 +1,141 @@
+---
+title: "Pi Delegate MCP"
+description: "An MCP server that turns the pi coding agent into a steerable background worker you can delegate to, redirect mid-run, and keep out of your own context."
+date: 2026-08-25
+tags:
+  - MCP
+  - AI Agents
+  - Claude Code
+  - TypeScript
+  - Developer Tools
+type: open-source
+status: active
+featured: false
+image: "https://socialify.git.ci/howznguyen/pi-delegate-mcp/png?forks=1&issues=1&language=1&name=1&owner=1&pattern=Circuit+Board&pulls=1&stargazers=1&theme=Dark"
+github: "https://github.com/howznguyen/pi-delegate-mcp"
+demo: "https://www.npmjs.com/package/pi-delegate-mcp"
+author: howznguyen
+---
+
+**Pi Delegate MCP** exposes the [pi](https://pi.dev) coding agent as a delegable, steerable worker over the Model Context Protocol.
+
+Point Claude Code — or any MCP host — at the server and hand work to a delegate running on any of pi's providers: DeepSeek, Grok, GLM, Kimi, Qwen, Codex, OpenRouter, or a local llama.cpp. The delegate reads files on its own budget and returns a result, so its context never lands in your main conversation.
+
+## The problem it solves
+
+Your main harness runs on an expensive model, inside a context window you care about. A lot of what it does needs neither: grepping a repository for every call site, reading a 2000-line file to answer one question, auditing what a refactor left behind.
+
+Handing that work to a delegate changes three things:
+
+- **Cost.** Grunt work runs on a cheap or local model. You pay frontier prices only for the reasoning that actually needs them.
+- **Context.** The delegate reads the files itself and returns an answer. The 200 KB it read never enters your conversation.
+- **Blast radius.** Delegates are read-only by default — `read`, `grep`, `find`, `ls` — enforced when the session is constructed, not after the fact.
+
+The delegate is always the pi agent. Codex, Grok, DeepSeek and the rest supply the *model* behind it; this is not a wrapper around their CLIs.
+
+## Why pi, and not a CLI wrapper
+
+A delegate is only steerable if two channels stay open: you must be able to redirect it mid-task, and it must be able to ask you something and block until you answer. Most ways of driving a coding agent from another program close both.
+
+| | `pi -p` / CLI wrappers | opencode SDK | Pi Delegate MCP |
+| --- | --- | --- | --- |
+| Runs in-process | No (subprocess) | No (HTTP client to a server) | Yes |
+| Redirect a running turn | No | `abort` only | `steer` |
+| Agent can ask you something | No | Not in the session API | `status` → `answer` |
+| Model per call | No | Yes | `model` argument |
+
+`pi -p` and `--mode json` set `ctx.hasUI = false`. A delegate started that way is fire-and-forget by construction. opencode's SDK is a typed client for a separate server process — clean, but it means another process to supervise, and its session surface has no mid-turn steering.
+
+pi ships `createAgentSession` as an embeddable library. This server holds the session object in-process, so a steering message can land between the current tool call and the next model call, and a synthetic UI context catches the agent's questions and parks them for an answer. Nothing is shelled out; nothing has to be supervised.
+
+## The tool surface
+
+| Tool | Purpose |
+| --- | --- |
+| `init` | Called first. Reports reachable models, permitted tools, and how to drive a delegate. |
+| `spawn` | Delegate in the background. Returns a session id immediately. |
+| `spawn_batch` | Fan out up to ten delegates in one validated call. |
+| `run` | Delegate and block until done, for quick questions. |
+| `status` | State, turns, an ordered tool trace, latest text, and pending questions. |
+| `steer` | Redirect a running agent between tool calls. |
+| `follow_up` | Give a finished delegate another turn, with everything it read still in context. |
+| `answer` | Answer a question the delegate raised. |
+| `abort`, `models`, `sessions`, `forget` | Session and model management. |
+
+<Callout type="info" title="Spawn, then poll">
+  `spawn` returns in milliseconds because launching a delegate does not wait for
+  it to think. Poll one delegate with `status`, or a whole fan-out with a single
+  `sessions` call.
+</Callout>
+
+## Quick start
+
+Node.js 22.19+ and a pi install that has been logged in once are required.
+
+```bash
+claude mcp add pi -e PI_DELEGATE_MODEL=openrouter/stealth/ox-alpha -- npx -y pi-delegate-mcp
+```
+
+For any other MCP host, the same thing in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "pi": {
+      "command": "npx",
+      "args": ["-y", "pi-delegate-mcp"],
+      "env": { "PI_DELEGATE_MODEL": "openrouter/stealth/ox-alpha" },
+      "timeout": 1800000
+    }
+  }
+}
+```
+
+Then delegate something:
+
+```json
+{
+  "id": "audit-01",
+  "label": "who still imports onnxruntime",
+  "prompt": "Search this repo for anything still importing onnxruntime and list the files.",
+  "cwd": "/path/to/repo"
+}
+```
+
+## Traceability
+
+Every session takes your own id and a free-text label, and finished sessions stay readable instead of vanishing — so you can go back and check what a delegate actually did.
+
+`status` returns an ordered trace of every tool the delegate ran, with arguments, results, and timing. Arguments and results are clipped with the dropped length recorded, so one `read` of a large file cannot flood the context you were trying to protect.
+
+A finished delegate is not spent either. `follow_up` re-prompts the same agent with everything it already read still in memory, so a second question costs one model call rather than a fresh session re-reading the repository.
+
+## Read-only by default
+
+Tools are locked to `read`, `grep`, `find`, `ls` at session construction. Anything else is refused before a session exists. Widening that is explicit, through `PI_DELEGATE_ALLOW_TOOLS` on the server.
+
+<Callout type="warning" title="`bash` is not a middle ground">
+  pi ships no permission system, so a delegate holding `bash` can write files,
+  delete them, and reach the network regardless of whether `write` and `edit` are
+  on its list. Refusing those two while allowing `bash` records your intent; it
+  does not enforce anything. If you need a real boundary, run the server in a
+  container.
+</Callout>
+
+For network access without `bash`, pi extensions register their own tools. Permit `web_search` on the server and pass `extensions: true` on the call, and the delegate can search the web and nothing else — through the same allowlist as every other tool.
+
+## Status line
+
+Claude Code allows exactly one status line command, so the bundled `pi-delegate-statusline` wraps whatever you already run and appends a segment for this workspace's delegates:
+
+```text
+π ▸ audit engine·t1·12s audit index·t2·8s   running, with turn counts and elapsed time
+π ▸ migrate·t7·3m04s ?1 waiting             one delegate is blocked on a question
+π ✓2                                        finished, nothing running
+```
+
+Attribution uses process lineage rather than the working directory, so two Claude Code sessions open on the same repository never show each other's delegates.
+
+## Open source
+
+Pi Delegate MCP is written in TypeScript and released under the MIT License. Install it from [npm](https://www.npmjs.com/package/pi-delegate-mcp), or read the source and open issues on [GitHub](https://github.com/howznguyen/pi-delegate-mcp).
