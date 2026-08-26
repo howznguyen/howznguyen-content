@@ -1,0 +1,197 @@
+---
+title: "Model rẻ không thiếu năng lực, nó thiếu đề bài"
+description: "Model rẻ sai phần lớn vì đề bài mơ hồ. Thứ model đắt bán cho bạn là khả năng viết lại đề bài, và ghép hai thứ đó không cần đụng vào harness."
+date: 2026-08-26
+tags:
+  - AI
+  - Agent
+  - MCP
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1787715677/posts/delegate-cheap-models/cover.png"
+---
+
+Tháng 5 mình có viết [một bài về việc kết hợp Opus và GPT trong Claude Code bằng router](/blog/router-opus-gpt-subagent-workflow/vi): trỏ `ANTHROPIC_BASE_URL` về một router, Opus làm supervisor, GPT chạy việc nhỏ.
+
+Cách đó giờ hết dùng được, vì Anthropic đã siết đúng cái cửa đó. Nhưng chuyện kỹ thuật hết đường mới là phần nhỏ. Phần lớn hơn: **lý do mình đưa ra hồi đó cũng sai.**
+
+Hồi đó mình bán câu chuyện tiết kiệm credit. Opus đắt, đừng bắt nó rename file. Nghe hợp lý, nhưng nó mời ngay một câu hỏi ngược mà mình chưa trả lời được tử tế:
+
+> Nếu model rẻ làm được, sao không dùng luôn model rẻ cho hết?
+
+## Năm delegate, và chỗ mình nghĩ sai
+
+Trước hết phải thành thật: model rẻ bây giờ code rất được. DeepSeek v4 Flash đọc file, sửa code, chạy lệnh, lặp tới khi xong, làm ổn. Ox Alpha thì hơn thế, reasoning model, free, context 1M. Vấn đề không nằm ở năng lực.
+
+Mình spawn 5 delegate chạy Ox Alpha cùng lúc, mỗi con soi một mảng của source code và spec. Kết quả trả về không đều. Có con đọc đúng chỗ. Có con trả lời một câu gần giống câu mình hỏi nhưng không phải câu mình hỏi. Có con đọc đúng file nhưng kết luận sai vì bỏ qua một nhánh điều kiện.
+
+Phản xạ đầu của mình là kết luận: model rẻ thiếu người giám sát. Đúng, nhưng chưa tới.
+
+Vì chỗ đáng nói nằm ở việc Opus làm gì tiếp theo. Nó không vứt kết quả đi, cũng không ngồi sửa hộ. Nó đọc output, nhận ra delegate hiểu lệch chỗ nào, rồi **viết lại đề bài**: nói rõ phạm vi, chỉ đích danh file cần đọc, ghi thẳng ràng buộc mà lần đầu mình quên ghi, và thêm một câu đáng giá nhất, bắt delegate **tự kiểm chứng phát hiện quan trọng nhất trước khi báo cáo**. Rồi giao lại cho chính con delegate đó.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1787714639/posts/delegate-cheap-models/pi-delegate-session.png"
+  alt="Kết quả một phiên delegate: 4/5 agent đã xong, agent D còn chạy, kèm phát hiện đã được tự grep xác minh"
+  caption="Delegate tự grep xác minh trước khi báo cáo, rồi chốt lại chỗ thiệt hại thật sự nằm ở đâu"
+/>
+
+Đây là vòng hai của đợt fan-out đó, đi soi hậu quả của việc gỡ ONNX khỏi codebase. Delegate không liệt kê nghi vấn nữa. Nó grep tự xác nhận, dẫn số dòng cụ thể, rồi chốt:
+
+> `go build`/`go vet` sạch nên nhìn tưởng xong, thiệt hại nằm ở CI, e2e test, docs và packaging, không nằm ở code Go.
+
+Câu đó đáng tiền, và nó không ra được ở vòng một. Cùng một model, cùng một repo, cùng một con delegate. Thứ duy nhất thay đổi là đề bài.
+
+## Model đắt không chấm bài, nó viết lại đề bài
+
+Cách mọi người hay mô tả supervisor/sub-agent là: model đắt **chấm bài** model rẻ. Sub-agent làm xong, supervisor review, sai thì bắt sửa. Bài tháng 5 của mình cũng mô tả y như vậy.
+
+Nhưng nếu thật sự là chấm bài thì cách này không kinh tế. Muốn chấm được, model đắt phải đọc lại gần hết thứ model rẻ vừa làm. Đọc gần hết thì tự làm luôn cho nhanh.
+
+Cái thật sự xảy ra khác. Model đắt đọc **triệu chứng**, không đọc toàn bộ bài làm. Nó nhìn output lệch rồi suy ngược: đề bài thiếu gì mà dẫn tới lệch kiểu này. Nó sửa đề bài, không sửa bài làm.
+
+Đó là việc rẻ hơn review nhiều, và cũng là việc model rẻ dở nhất. Viết được đề bài tốt thì phải giữ được ý định gốc, biết repo có gì, và đoán được chỗ người thực thi sẽ hiểu nhầm.
+
+<Quote color="blue">
+  Model rẻ bị chặn ở chất lượng đề bài, không phải ở năng lực thực thi. Còn thứ
+  model đắt giỏi nhất là biến một task mơ hồ thành một đề bài chính xác.
+</Quote>
+
+Mà model đắt đó thì bạn đang trả tiền hàng tháng rồi, dù có dùng hết hạn mức hay không. Nên bạn không cần tin model rẻ ngang model đắt. Bạn chỉ cần tin rằng một đề bài đủ chính xác thì model rẻ làm được.
+
+## Một đề bài đủ tốt gồm gì
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1787716585/posts/delegate-cheap-models/brief-anatomy.png"
+  alt="Checklist năm phần của một đề bài: scope, start, limits, output, proof"
+  caption="Năm phần của một đề bài. Ba phần dưới là ba phần mình hay quên ở vòng một"
+/>
+
+**Phạm vi (SCOPE).** Đang hỏi cái gì, và quan trọng hơn, không hỏi cái gì. "Tìm chỗ nào còn dùng ONNX" khác hẳn "tìm chỗ nào còn dùng ONNX trong CI, test và docs, bỏ qua code Go".
+
+**Điểm bắt đầu (START).** Chỉ đích danh file hoặc thư mục để nó khỏi tự đi tìm. Delegate tự tìm thì tốn lượt, mà lượt nào cũng là chỗ để đi lệch.
+
+**Ràng buộc (LIMITS).** "Không đổi public API", "không thêm dependency", "không sửa file ngoài thư mục này". Ràng buộc bạn thấy hiển nhiên thì delegate không thấy hiển nhiên.
+
+**Hình dạng output (OUTPUT).** Một bảng, một danh sách đường dẫn kèm số dòng, hay một câu kết luận. Không nói thì bạn nhận về một bài văn, và đọc bài văn tốn đúng cái token bạn đang cố tiết kiệm.
+
+**Yêu cầu tự kiểm chứng (PROOF).** Bắt nó tự chứng minh phát hiện quan trọng nhất trước khi báo cáo. Nó chuyển delegate từ chế độ đoán sang chế độ tra, và chuyển việc kiểm tra từ phía đắt sang phía rẻ.
+
+Hai phần cuối tồn tại thuần vì lý do chi phí. Điều kiện để cả cách làm này đáng dùng là: **chi phí viết đề bài cộng chi phí đọc kết quả phải nhỏ hơn chi phí tự làm.** OUTPUT cắt vế thứ hai, PROOF cắt phần bạn phải đi xác minh hộ.
+
+<Callout type="tip" title="Đề bài là thứ tái dùng được, output thì không">
+  Output dùng xong là xong. Nhưng một đề bài đã mài qua hai vòng thì lần sau gặp
+  task cùng loại, sửa vài chữ là dùng lại được. Đáng giữ hơn giữ output.
+</Callout>
+
+## Chọn việc theo đề bài, không theo giá
+
+Đây là chỗ đổi hẳn so với bài cũ. Bài tháng 5 mình chọn theo giá: việc nào lặp lại và nhàm chán thì đẩy đi. Giờ tiêu chí là **việc nào mình viết được đề bài chính xác thì đẩy.**
+
+Hai tiêu chí trùng nhau nhiều, nhưng chỗ lệch mới đáng chú ý. Có việc rất nhàm mà mình không viết nổi đề bài, vì chính mình cũng chưa rõ muốn gì, việc đó giữ lại. Có việc nghe khó như soi toàn bộ hậu quả của một lần gỡ thư viện, nhưng đề bài viết được rất rõ, việc đó đẩy ra được. Ví dụ ở trên chính là loại thứ hai.
+
+Nên phép thử của mình gọn lại còn một câu:
+
+> Thử viết đề bài ra. Viết không nổi thì đừng giao.
+
+Và phép thử này có ích cả khi bạn quyết định không giao. Viết không nổi đề bài thường nghĩa là chính bạn chưa hiểu task đủ rõ. Lúc đó thứ cần làm không phải tự code cho nhanh, mà là ngồi làm rõ yêu cầu đã, vì tự code trong trạng thái đó cũng sai, chỉ là sai chậm hơn và khó thấy hơn.
+
+Delegate không tạo ra sự mơ hồ. Nó làm sự mơ hồ hiện ra sớm, ở một chỗ rẻ.
+
+Thứ mình không giao ra, kể cả khi viết được đề bài: quyết định đánh đổi, đổi architecture hay schema hay public API, gộp output từ nhiều delegate, việc động vào security. Và đọc diff cuối cùng.
+
+## Vòng giám sát là vòng sửa đề bài
+
+Khi nhìn supervisor là người viết đề bài chứ không phải người chấm bài, mấy cái tool của delegate mang nghĩa khác hẳn.
+
+**`status` là chỗ đọc triệu chứng.** Trace theo thứ tự từng tool call, kèm argument và kết quả. Bạn không đọc để chấm điểm, bạn đọc để tìm chỗ delegate rẽ nhầm, vì chỗ nó rẽ nhầm chính là chỗ đề bài thiếu.
+
+**`steer` là sửa đề giữa chừng.** Câu bạn gửi rơi vào sau tool call hiện tại, trước lần gọi model kế tiếp. Thấy sai ở bước 3 thì bổ sung ràng buộc ngay ở bước 3.
+
+**`follow_up` là giao đề mới mà không mất context.** Delegate đã xong vẫn còn nguyên thứ nó đã đọc, nên vòng hai tốn một lần gọi model chứ không phải một session mới đọc lại cả repo. Vòng hai rẻ là lý do cả cách làm này đứng được.
+
+**Allowlist là ràng buộc cứng.** Mặc định delegate chỉ có `read`, `grep`, `find`, `ls`, khoá ngay lúc dựng session. Có những ràng buộc không nên viết trong đề bài mà nên chặn bằng cơ chế.
+
+<Callout type="warning" title="`bash` không phải mức trung gian">
+  pi không có hệ thống permission. Delegate cầm `bash` thì ghi file, xoá file, và
+  ra được mạng, bất kể `write` với `edit` có trong danh sách hay không. Từ chối
+  hai cái đó mà vẫn cho `bash` chỉ ghi lại ý định của bạn. Cần ranh giới thật thì
+  chạy server trong container.
+</Callout>
+
+## Ghép vào đâu mà không phá harness
+
+Còn một câu hỏi hiển nhiên: sao không trỏ thẳng harness sang model rẻ cho xong?
+
+Vì hai lý do, và lý do thứ hai mới là lý do thật.
+
+Lý do bề mặt là điều khoản. Ngày 20/02/2026 Anthropic làm rõ: dùng OAuth token của gói Free, Pro, Max ở ngoài Claude Code và Claude.ai là vi phạm. [Tài liệu legal của Claude Code](https://code.claude.com/docs/en/legal-and-compliance) viết thẳng:
+
+> Anthropic does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, or Max plan credentials on behalf of their users.
+
+Ngày 04/04/2026 thì phần thực thi tới: subscription không còn cover usage trên third-party tool.
+
+<Callout type="warning" title="Chỗ này đáng phân biệt cho kỹ">
+  Trỏ harness sang provider khác **bằng API key của chính provider đó** là chuyện
+  giữa bạn và họ, Anthropic không liên quan. Còn dùng proxy phục vụ model Claude
+  bằng subscription token của ai đó thì khác hẳn. Vế đầu là cấu hình, vế sau là
+  thứ đã bị chặn.
+</Callout>
+
+Nhưng lý do thật thì nằm ở trục của bài. Nếu thứ bạn cần từ model đắt là **viết đề bài**, thì nó phải ở nguyên chỗ của nó, giữ nguyên context và ý định gốc. Đổi model của harness là làm hỏng đúng cái vai trò mình đang cần. Bạn không muốn thay người viết đề, bạn muốn thêm người thực thi.
+
+Nên để harness yên, và đẩy việc ra một tiến trình thứ hai:
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1787716581/posts/delegate-cheap-models/architecture.png"
+  alt="Harness đi thẳng lên Anthropic bằng key riêng, pi đi thẳng lên provider của nó bằng key riêng, hai đường không giao nhau, MCP chỉ nối ngang giữa hai agent"
+  caption="Hai đường credential tách rời. MCP nối ngang, nó không nằm trên đường auth của bên nào"
+/>
+
+Đọc theo chiều dọc là thấy điểm mấu chốt: mỗi agent tự cầm chìa khoá của mình đi thẳng lên nhà cung cấp của mình. Không có credential nào của Anthropic bị trung chuyển. Và vì <TermNote id="mcp">MCP</TermNote> là chuẩn chung, cách này không phụ thuộc harness nào, đang trả tiền cho Codex thì dùng Codex viết đề bài.
+
+```bash
+claude mcp add pi -e PI_DELEGATE_MODEL=opencode-go/deepseek-v4-flash -- npx -y pi-delegate-mcp
+```
+
+Mình viết [pi-delegate-mcp](/projects/pi-delegate-mcp) đúng cho việc này.
+
+<Callout type="note" title="Free không có nghĩa là không trả giá">
+  [Stealth EULA của OpenRouter](https://openrouter.ai/terms/stealth) nói chung là
+  model free đổi lấy User Content để train. Nhưng trang model của Ox Alpha ghi rõ
+  hơn: prompts và completions "are retained by the provider and are not used for
+  training". Tức là không train, nhưng vẫn được lưu bởi một nhà cung cấp giấu
+  tên. Điều khoản chương trình và ghi chú từng model không giống nhau, nên trước
+  khi cho delegate đọc repo công ty, mở đúng trang model bạn định dùng và đọc
+  dòng data policy trên đó.
+</Callout>
+
+## Kết
+
+Bài tháng 5 mình nghĩ vấn đề là tiền, nên đi tìm cách trả ít hơn cho cùng một việc. Cách giải là đổi model phía dưới harness, và cách đó vừa mong manh về điều khoản vừa không giải đúng bài toán.
+
+Bài toán thật: model rẻ code được rồi, cái chặn nó là đề bài. Còn thứ model đắt giỏi nhất, cũng là thứ bạn đang trả tiền hàng tháng mà hay dùng sai chỗ, chính là viết lại đề bài.
+
+Nên đừng ghép model rẻ vào chỗ model đắt. Để model đắt làm đúng việc của nó, rồi đưa đề bài nó viết ra cho một model rẻ thực thi.
+
+See yah.
+
+## Tài liệu tham khảo
+
+<Bookmark
+  url="https://code.claude.com/docs/en/legal-and-compliance"
+  title="Legal and compliance - Claude Code Docs"
+  description="Phần Authentication and credential use nói rõ OAuth token của gói subscription dùng được ở đâu."
+/>
+
+<Bookmark
+  url="https://openrouter.ai/terms/stealth"
+  title="Stealth Program End User License Agreement - OpenRouter"
+  description="Điều khoản chung của chương trình stealth. Đọc kèm ghi chú data policy trên trang từng model."
+/>
+
+<Bookmark
+  url="https://github.com/howznguyen/pi-delegate-mcp"
+  title="pi-delegate-mcp"
+  description="MCP server biến pi agent thành một delegate chạy nền, bẻ hướng được, và không tràn vào context của bạn."
+/>

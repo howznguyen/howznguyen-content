@@ -1,6 +1,6 @@
 ---
 title: "Knowns"
-description: "Project memory for AI coding assistants. Structured tasks, docs, specs, templates, and memory exposed via MCP."
+description: "A local-first memory layer that keeps project tasks, docs, decisions, and reusable knowledge connected for people and AI coding agents."
 date: 2025-12-25
 tags:
   - AI
@@ -10,68 +10,134 @@ tags:
 type: open-source
 status: active
 featured: true
-image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058995/cover_lkg1dl.png"
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147142/content/knowns/knowns-mental-model-2026-07.png"
 images:
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058995/cover_lkg1dl.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-01-hero_rvfbo6.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-02-problem_xowzcw.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-03-how_o1cryx.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-04-features_ykvml1.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058848/ph-05-audience_kmyoxv.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058847/ph-06-before-after_vcz1qc.png"
-  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1778058847/ph-07-different_fe6ovm.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147142/content/knowns/knowns-mental-model-2026-07.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147647/content/knowns/knowns-architecture-2026-07.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147647/content/knowns/knowns-how-it-works-2026-07.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-dashboard-2026-07.webp"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-kanban-2026-07.webp"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-task-detail-2026-07.webp"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-context-graph-2026-07.webp"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146774/content/knowns/knowns-docs-2026-07.webp"
 github: "https://github.com/knowns-dev/knowns"
 demo: "https://knowns.sh"
 authors:
   - howznguyen
 ---
 
-**Knowns** is the memory layer for AI-native development — giving AI coding assistants (Claude, Cursor, Kiro, Copilot…) structured, persistent project context across sessions.
+**Knowns is a local-first project memory layer for people and AI coding agents.**
 
-Instead of pasting files and re-explaining your project every time you open a new chat, your assistant works from **project state** — tasks, docs, specs, templates, and memory are all linked together and accessible through MCP.
+It keeps the context that code cannot explain on its own: what the team is building, why a decision was made, which conventions still apply, what an agent should read, and what “done” means.
 
-## Why Knowns?
+Instead of pasting the same background into every new coding session, you give the agent a path into the project knowledge it needs.
 
-Your AI forgets. Every new session starts from scratch. `CLAUDE.md` and `AGENTS.md` are static instruction files — no tasks, no acceptance criteria, no links between spec and code.
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147142/content/knowns/knowns-mental-model-2026-07.png"
+  alt="Tasks, docs, memory, and decisions flow through Knowns to coding agents"
+  caption="Knowns connects structured project knowledge to coding agents, so each session can retrieve the right context instead of starting from zero."
+/>
 
-Knowns fills that gap:
+## The short version
 
-- **Structured tasks:** every task has acceptance criteria and links to specs, templates, and memory
-- **Semantic doc search:** find docs by meaning, not grep
-- **Specs as graph nodes:** acceptance criteria stay in sync with tasks automatically
-- **Layered memory:** project-level and global, tagged and searchable
-- **Code intelligence:** symbol graph and dependency tracking
+Your repository already tells an agent **how the software works**.
 
-## Key features
+Knowns keeps the things your team knows **about the work around that software**:
 
-- **Context flows through your project:** when a task, spec, or template changes, Knowns traces the impact downstream. Your AI always works with fresh, connected context.
-- **Incremental delta updates:** only the changes are synced — no full reindex.
-- **Browser UI:** Kanban board, docs editor, AI chat, and semantic search — all running locally via `knowns browser`.
-- **MCP server:** exposes tasks, docs, specs, memory, templates, and code intelligence through a single MCP server.
-- **Workflow skills for Claude Code:** `/kn-research`, `/kn-plan`, `/kn-implement`, `/kn-extract` — a standardized working loop.
+- **Tasks** describe what needs to happen and what counts as complete.
+- **Docs** explain architecture, conventions, workflows, and product context.
+- **Decisions** preserve why the team chose one direction over another.
+- **Memory** keeps useful patterns, preferences, and lessons available across sessions.
+- **References** connect those pieces instead of leaving them as isolated notes.
 
-## How it compares
+Everything stays close to the project, remains readable by people, and can be retrieved by coding agents through CLI or MCP.
 
-- **CLAUDE.md / AGENTS.md** are static instructions. Knowns tells the AI *what to build* and what "done" looks like.
-- **Task managers** are built for humans. Knowns structures tasks so the AI can read them, verify acceptance criteria, and extract knowledge when done.
-- **Memory tools** only store facts. Knowns links memory to specs, tasks, templates, and code intelligence.
-- **Spec tools** help you write specs. Knowns connects specs to everything else — ACs sync, templates generate code from specs, and verification checks coverage.
-- **MCP** is the transport layer. Knowns is the structured context that travels through it.
+<Callout type="info" title="The core idea">
+  Knowns does not make the model smarter. It gives the model structured access
+  to what the project already knows.
+</Callout>
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147647/content/knowns/knowns-architecture-2026-07.png"
+  alt="Knowns architecture connecting the CLI, Web UI, local storage, MCP server, and AI coding agents"
+  caption="The CLI and Web UI work from the same local project state, while MCP gives coding agents structured access to the context they need."
+/>
+
+## From a cold session to a working loop
+
+Without project memory, a new session often begins with copy-pasting architecture notes, repeating conventions, and explaining old decisions again.
+
+With Knowns, the loop becomes:
+
+1. **Capture** the task, context, and acceptance criteria.
+2. **Link** the relevant docs, decisions, patterns, and past work.
+3. **Retrieve** only the context the current task needs.
+4. **Work and verify** against the same acceptance criteria.
+5. **Remember** useful decisions and lessons for the next session.
+
+The result is not “AI that knows everything.” It is an agent with a reliable way to search, follow references, and stop guessing.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785147647/content/knowns/knowns-how-it-works-2026-07.png"
+  alt="How Knowns turns scattered project context into structured knowledge for AI-assisted delivery"
+  caption="Knowns organizes tasks, docs, decisions, memory, references, and code intelligence so agents can retrieve context, verify work, and preserve what they learn."
+/>
+
+## The Web UI
+
+The browser UI exposes the same project state to people: progress, tasks, docs, memory, decisions, and their relationships remain visible in one local workspace.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-dashboard-2026-07.webp"
+  alt="Knowns Web UI dashboard with task progress, priorities, activity, and project metrics"
+  caption="The dashboard gives a quick view of project progress and recent activity."
+/>
+
+### Tasks carry working context
+
+A task can hold its description, acceptance criteria, implementation plan, priority, labels, references, and progress. The agent and the person reviewing its work read from the same definition of done.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-task-detail-2026-07.webp"
+  alt="Knowns task detail with description, acceptance criteria, implementation plan, and metadata"
+  caption="A task is more than a todo line: it is the focused context for a piece of work."
+/>
+
+### Relationships stay visible
+
+Tasks, docs, memories, and decisions do not live as separate piles of text. The graph makes their references and impact paths visible before the system changes.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146773/content/knowns/knowns-context-graph-2026-07.webp"
+  alt="Knowns Context Graph showing connected tasks, docs, memories, and decisions"
+  caption="The Context Graph shows how project knowledge is connected and what a change may affect."
+/>
+
+### Documentation remains part of the work
+
+Docs live beside the same tasks, references, and graph relationships. They are searchable, versioned, and available to agents when a task needs deeper context.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1785146774/content/knowns/knowns-docs-2026-07.webp"
+  alt="Knowns Docs workspace with a document list, article content, and relationship panel"
+  caption="Architecture, conventions, guides, and project knowledge stay readable for both people and agents."
+/>
 
 ## Get started
 
-Install via Homebrew, a shell script, PowerShell, npm, or `npx`. Node.js 20+ is required for npm-based installs.
+You can install Knowns with Homebrew, shell, PowerShell, npm, or try it directly with `npx`.
 
 ```bash
-# Quick install with npx
 npx knowns@latest init
 
-# Open the browser UI
-knowns browser
+# Optional: open the local Web UI
+knowns browser --open
 ```
 
-Full install instructions and platform-specific guides are on [knowns.sh](https://knowns.sh) and the [GitHub repo](https://github.com/knowns-dev/knowns).
+Then connect the coding agent you already use. Knowns works as the project memory layer around that workflow; it does not replace your editor, Git, tests, or code review.
+
+Full installation guides are available on [knowns.sh](https://knowns.sh), and the source code lives on [GitHub](https://github.com/knowns-dev/knowns).
 
 ## Open source
 
-Knowns is open source (MIT), local-first, self-hosted, and free. Bug reports, pull requests, and doc improvements are welcome at [github.com/knowns-dev/knowns](https://github.com/knowns-dev/knowns).
+Knowns is open source under the MIT license, local-first, and self-hostable. Bug reports, pull requests, documentation improvements, and feedback are welcome.
