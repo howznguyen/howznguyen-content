@@ -1,0 +1,211 @@
+---
+title: "Scion: khi Anthropic phải thay Git vì AI viết code nhanh hơn hạ tầng"
+description: "Git không hỏng, người dùng của nó đã đổi. Anthropic thay Git bằng Scion sau khi merge tăng 12 lần trong 4 tháng."
+date: 2026-10-14
+tags:
+  - AI
+  - Agent
+  - Engineering
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972722/posts/anthropic-scion-thay-git/cover.jpg"
+---
+
+Ngày 13/10/2026, Anthropic đăng một bài engineering có tiêu đề rất tỉnh: "Redesigning source control at Anthropic". Nội dung thì không tỉnh chút nào — họ đã bỏ Git cho monorepo chính của mình, thay bằng một hệ thống quản lý phiên bản tự viết tên là **Scion**, và hoàn tất migration trong 5 tháng.
+
+Mình đọc xong thấy có mấy tầng ý nghĩa.
+
+Tầng dễ thấy nhất là "Anthropic giỏi thật". Tầng thứ hai là "AI viết code nhanh tới mức hạ tầng sập". Nhưng tầng mình nghĩ đáng mang về nhà nhất lại là: **Git không hề dở. Nó chỉ đang phục vụ một loại người dùng khác với loại người dùng mà nó được thiết kế cho.**
+
+## Chuyện gì đã xảy ra
+
+Con số nằm ở đây:
+
+<Callout type="note" title="Tốc độ merge tại Anthropic">
+  Tháng 5/2026: khoảng **2.500 thay đổi được merge mỗi ngày**. Tháng 9/2026: **hơn 30.000 mỗi ngày**. Đỉnh điểm ghi nhận **30.401** trong ngày 9/9.
+</Callout>
+
+Gấp hơn 12 lần trong 4 tháng. Và theo chính Anthropic, phần lớn phần tăng đó đến từ agent chứ không phải từ việc tuyển thêm người.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972724/posts/anthropic-scion-thay-git/merges-per-day.png"
+  alt="Biểu đồ cột so sánh số thay đổi merge mỗi ngày: khoảng 2.500 vào tháng 5/2026 và hơn 30.000 vào tháng 9/2026"
+  caption="Số thay đổi được merge mỗi ngày vào monorepo của Anthropic. Đỉnh 30.401 vào ngày 9/9. Nguồn: Anthropic Engineering."
+/>
+
+Điều mình thích ở bài viết này là họ không hề né việc tự nhận nguyên nhân:
+
+> Claude's ability to write code was both what put us in this situation in the first place _and_ how we were able to quickly build a high-quality, scalable system to deal with it.
+
+Tức là: công cụ gây ra vấn đề, và cũng là công cụ giải quyết vấn đề. Không có chuyện "AI làm được mọi thứ", cũng không có chuyện "AI chỉ toàn gây rắc rối".
+
+## Vì sao Git thành nút thắt
+
+Đọc phần này mình mới thấy quy mô của vấn đề khủng tới mức nào.
+
+Monorepo chính của Anthropic có **lịch sử nhánh main gần 100 GB**, còn bản working copy **đã nén vẫn hơn 25 GB**. Riêng cho CI, họ thực hiện **khoảng 25 triệu lượt checkout mỗi ngày** — chưa tính môi trường dev, <TermNote id="sandbox">sandbox</TermNote> của agent, và các job nghiên cứu. Nếu fetch theo cách thông thường, lượng traffic Git sẽ **vượt 600 PB mỗi ngày**.
+
+Trước khi bỏ, họ đã thử mọi cách vá:
+
+- Shallow clone, sparse checkout, promisor remote
+- Internal Git mirror — đỉnh điểm là **vài trăm mirror** chạy song song
+- Repository snapshot (seeds) lưu trong blob storage
+
+Mấy cách này mua được thời gian, nhưng tới một điểm thì bắt đầu tự mâu thuẫn: merge rate tăng khiến seed ngày càng xa tip của main, và các thao tác phụ thuộc lịch sử như <TermNote id="diff">diff</TermNote> hay blame trên partial clone ngày càng khó giữ đúng.
+
+Rồi họ nhận ra điều mấu chốt.
+
+<Quote color="blue">
+  Chúng tôi đang dùng Git như một hệ thống tập trung, với một bản quyền lực duy nhất. Nhưng gần như toàn bộ client của chúng tôi là agent và job — những thứ mặc định luôn online. Những tính chất làm nên sự xuất sắc của Git cho công việc phân tán, offline, lại đang chống lại khả năng mở rộng của chúng tôi.
+</Quote>
+
+Đây là câu quan trọng nhất của cả bài viết gốc, theo mình.
+
+Git ra đời để giải một bài toán rất cụ thể: mỗi máy giữ một bản <TermNote id="repository">repo</TermNote> đầy đủ, tự tính diff, tự đọc history, tự blame, và **làm được tất cả khi không có mạng**. Với gần như mọi repo trên đời, đó là thiết kế đúng — và là lý do Git thắng.
+
+Nhưng Git trả giá cho khả năng đó bằng một giả định: **client có thể là server**. Mọi bản clone đều đầy đủ. Mọi thao tác đều tính được cục bộ. Cái giá đó chỉ hợp lý khi client thật sự cần offline.
+
+Ở Anthropic, "người dùng" Git gần như toàn là agent, CI job và sandbox — những tiến trình mà việc offline là chuyện không tưởng. Họ đang trả một cái giá cho một khả năng mà không ai dùng.
+
+Một kỹ sư Scion, Nick G., trả lời trên Hacker News về việc Scion không hỗ trợ offline, gọn tới mức buồn cười:
+
+> Vì Claude là người dùng nặng nhất của Scion và chắc chắn là luôn online, nên việc đó đơn giản là không quan trọng.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972726/posts/anthropic-scion-thay-git/git-vs-scion.jpg"
+  alt="So sánh hai mô hình: bên Git robot phải vác cả kho tài liệu khổng lồ, bên Scion robot chỉ mang một túi nhỏ và hỏi server"
+  caption="Cùng một agent, hai mô hình. Git bắt client giữ bản đầy đủ; Scion để client hỏi server khi cần."
+/>
+
+## Scion khác Git ở đâu
+
+Anthropic không phải đội đầu tiên làm việc này. Họ nói rõ mình học từ **Piper** của Google và **Sapling** của Meta. Nhưng cách họ phát biểu nguyên tắc rất gọn và đáng để đọc chậm:
+
+| Nguyên tắc | Git | Scion |
+| --- | --- | --- |
+| Client | Có thể offline, giữ bản đầy đủ | Luôn online, fetch khi cần |
+| Vai trò | Mọi client đều có thể làm server | Bất đối xứng: server tính, client chỉ cache và hiển thị file |
+| Truy vấn | Client phải có repo local, hoặc phụ thuộc API riêng của vendor | Mọi truy vấn client dùng đều mở thành API |
+| Mở rộng | Mirror là bản sao đầy đủ, chạm trần disk và RAM | Không có bản đầy đủ ở đâu cả, từng thành phần scale độc lập |
+| Commit | Commit local rồi push | Commit/rebase/merge đều trên server, không có gì để push |
+| Working copy | Mặc định là cần | Tùy chọn, sparse, và có thể virtualize |
+
+Vài chi tiết mình thấy hay:
+
+**Đơn vị công việc gọi là "changeset"**, nằm trong write-ahead log. Một commit của Git trỏ tới một tree; một changeset của Scion lưu **danh sách file đã thay đổi so với parent đầu tiên**, kèm con trỏ content-addressed tới nội dung file đã nén trong blob storage. Hệ quả: **không có packfile, không có lock, không cần cross-server coordination, không cần move ref**. Ref vẫn tồn tại, nhưng move ref chỉ là một compare-and-swap trên một dòng Spanner, tách hẳn khỏi việc tạo changeset.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972728/posts/anthropic-scion-thay-git/changeset.jpg"
+  alt="So sánh Git commit với Scion changeset: commit là một gói lớn buộc dây bên cạnh cả cây thư mục, changeset là vài tờ giấy rời kèm các lọ nhỏ"
+  caption="Git commit trỏ tới một tree và đi kèm packfile. Scion changeset chỉ ghi file nào đã đổi, kèm con trỏ tới blob đã nén."
+/>
+
+**Dữ liệu suy diễn (derived data).** Changeset chỉ ghi cái đã đổi, nên tự nó không trả lời nhanh được "ai sửa dòng này lần cuối". Scion xây thêm các cấu trúc như blame, path history, skip list cho commit graph — và định nghĩa chúng **đệ quy**: giá trị của một changeset tính từ giá trị của các parent. Cách này cho ba lợi ích: thêm loại dữ liệu mới dễ, chọn eager hay lazy cho từng loại được, và client không thấy internals nên optimize bên trong không phá client.
+
+**Kiến trúc 3 tầng cache:**
+
+- `scion-server` — API nguồn, đọc từ Spanner hoặc cloud storage
+- `scion-cache` — cache theo region, stream object trực tiếp từ memory, theo đúng định dạng mà daemon sẽ dùng, nên không tốn thời gian delta compression
+- `scion-daemon` — chạy trên từng node, giữ object cho cả máy, khởi đầu từ snapshot refresh định kỳ
+
+Cả ba tầng trả lời **cùng một bộ RPC**, nên client không cần biết topology. Nhưng họ vẫn enforce tiering nghiêm ngặt để cô lập failure domain — không để một cache region chết kéo sập server nguồn.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972731/posts/anthropic-scion-thay-git/architecture.jpg"
+  alt="Sơ đồ ba tầng của Scion: client, scion-daemon, scion-cache, scion-server xếp chồng với mũi tên hướng lên"
+  caption="Ba tầng của Scion: daemon trên từng node, cache theo region, và server nguồn. Cả ba trả lời cùng một bộ RPC."
+/>
+
+## Kết quả
+
+Theo số liệu Anthropic công bố:
+
+- Hạ tầng Scion có **footprint CPU và bộ nhớ nhỏ hơn 200 lần** so với hạ tầng Git mirror trước đó
+- CI và job nghiên cứu checkout code **nhanh hơn hai bậc độ lớn** — từ vài phút xuống vài giây
+- Riêng CI tiết kiệm **25% CPU capacity**
+- Mỗi tầng cache đạt **cache hit rate trên 99%**, không cần long-lived state
+- Không cần repository maintenance — hết chuyện `git gc`, packfile, repack
+
+Và điều đáng chú ý: **7 người** làm Scion, Antique (công cụ review code), code search, hệ thống IAM, cộng thêm nửa tá hệ thống liên quan — và migrate xong trong 5 tháng, trong lúc lượng code merge mỗi ngày tăng 10 lần.
+
+## AI vừa là áp lực, vừa là thợ xây
+
+Đoạn mình thấy thú vị nhất là cách Claude tham gia vào chính quá trình xây hệ thống thay thế.
+
+Pipeline ingestion từ Git sang Scion ban đầu được viết tay. Đội nghĩ nó ổn. Rồi họ có bản internal snapshot của Claude Mythos Preview, đưa vào và yêu cầu viết lại toàn bộ. **Không có hướng dẫn gì thêm**, nó trả về bản dùng **ít bộ nhớ hơn 20 lần, chạy nhanh hơn 4 lần**, và vẫn giữ nguyên các implicit invariant về thứ tự ingestion và cấu trúc dữ liệu.
+
+Ở mặt vận hành, họ dùng Claude Tag để tạo các agent trong Slack gọi là **"superfans"**: mỗi con chỉ obsess đúng một thành phần — `scion-daemon` superfan, `scion-cache` superfan, Antique merge queue superfan. Chúng có quyền đọc telemetry và log, hành xử như một kỹ sư kinh nghiệm không có gì khác để làm ngoài việc refresh chart và soi bất thường.
+
+Anthropic nói thẳng: hệ thống alert truyền thống vẫn có, nhưng superfans bắt được những vấn đề tinh vi và mới lạ mà alert trông "một chiều" so với chúng.
+
+Nhưng phần trung thực nhất của bài là đây — họ cũng nói rõ AI **không** hoàn hảo:
+
+<Callout type="warning" title="Adversarial review cũng có thể hẹp">
+  Anthropic dùng adversarial review rất nhiều, và nó hiệu quả. Nhưng nó cũng có thể myopic: họ phải liên tục kéo Claude ra khỏi việc **over-engineer**. Ví dụ có một lượt review quá hoài nghi việc tin tưởng một internal service khác, dẫn tới Claude thêm validation và độ phức tạp thừa.
+</Callout>
+
+## Vai trò kỹ sư không nhỏ đi, nó đổi hình
+
+Câu mình nghĩ sẽ được trích nhiều nhất:
+
+> Tất cả kỹ sư tham gia hệ thống này giờ đều sẽ đánh giá Claude viết code tốt hơn mình. Nhưng kỹ sư vẫn cung cấp hiểu biết về các thành phần cấp hệ thống và những đánh đổi ở tầng thiết kế.
+
+Cụ thể hơn, họ mô tả công việc mới bằng một động từ khá lạ: **nói "không"**.
+
+Agent có xu hướng thỏa mãn một pattern nào đó bằng mọi giá, kể cả khi làm vậy là vi phạm ràng buộc cốt lõi của hệ thống. Trong lúc migration, có nhiều hệ thống cố brute-force tra xem một thay đổi được merge lên main lúc nào bằng cách **đọc tuyến tính commit log**, thay vì hỏi code review tool. Kiểu sai đó không phải sai cú pháp, cũng không phải bug. Nó là sai ở tầng kiến trúc — và chỉ có người hiểu hệ thống mới bắt được.
+
+Cách review cũng đổi theo: team vẫn review **mọi** change request, nhưng họ đọc **ý định của thay đổi** thay vì đọc từng dòng code.
+
+Nghĩ kỹ thì đây là dịch chuyển hợp lý. Khi chi phí viết code gần bằng 0, thứ trở nên khan hiếm không phải là code, mà là **phán đoán về việc nên viết cái gì và không nên viết cái gì**.
+
+## Anthropic cũng đang phải bỏ vài định kiến khác
+
+Phần cuối bài gốc có mấy đoạn mình thấy còn giá trị hơn cả phần kiến trúc.
+
+**Merge queue truyền thống không còn nhiều ý nghĩa ở agent scale.** Câu hỏi họ đặt ra rất hay: CI còn nghĩa gì khi hàng trăm, thậm chí hàng nghìn thay đổi có thể merge trong lúc test đang chạy? Họ chưa replicate được cơ chế global repository lock trên merge queue, nên thay vào đó đầu tư vào **post-merge và pre-deploy automated testing**. Nghĩa là chấp nhận việc các thay đổi đồng thời có thể conflict — nhưng theo họ, Claude thường fix conflict còn nhanh hơn tốc độ con người nhận ra có conflict.
+
+**Bảo mật monorepo cũng đổi cách tiếp cận.** Scion hỗ trợ access control ở mức repository, và **permission cho từng thư mục** để bảo vệ code nhạy cảm mà không mất lợi ích của monorepo. Code review tool của họ còn biểu diễn được các ràng buộc ngữ nghĩa phức tạp cho approval — phân biệt thay đổi chỉ sửa comment với thay đổi logic nhạy cảm, để người review tập trung vào chỗ đáng tập trung.
+
+## Còn với phần còn lại của chúng ta?
+
+Anthropic nói rất rõ, và mình nghĩ nên nhấn mạnh để tránh mọi hiểu lầm:
+
+<Callout type="error" title="Đừng đi viết VCS của riêng bạn">
+  **Scion không phải giải pháp thay thế Git cho mục đích chung.** Nó không được open source. Anthropic nói những ý tưởng này chỉ có nghĩa với monorepo thật sự khổng lồ, với hàng chục nghìn kỹ sư hoặc bầy agent viết code liên tục. Họ còn thừa nhận mức độ đốt token cho nhu cầu nội bộ của họ vượt xa mức mà doanh nghiệp khác thực tế muốn chi.
+</Callout>
+
+Nên nếu đọc xong mà định mở PR viết lại VCS cho team 8 người: đừng.
+
+Cái đáng mang về là một câu hỏi, không phải một kiến trúc:
+
+> Trong pipeline của mình, giả định nào được viết ra khi người dùng là con người, mà giờ người dùng đã là agent?
+
+Với Anthropic, giả định đó là "client có thể offline và cần bản đầy đủ". Với bạn nó có thể là chuyện khác hoàn toàn:
+
+- Review code giả định con người đọc một PR trong vài chục phút
+- CI giả định mỗi commit là một sự kiện đáng chú ý
+- Merge queue giả định throughput thấp hơn tốc độ test
+- Alerting giả định người trực là người bắt đầu điều tra
+
+Không cái nào trong số này hỏng vì AI. Chúng hỏng vì **giả định đã cũ mà không ai để ý**.
+
+Anthropic cũng không đóng cửa lại. Họ đề xuất khá cụ thể: **git server không nhất thiết phải hoạt động giống git client**. Hoàn toàn có thể có những kiến trúc server mới scale tốt hơn, các forge cung cấp RPC phía server phong phú theo chuẩn chung mà git client học được, giao thức negotiation thay đổi, và các tính năng sparse/shallow compose với nhau tốt hơn. Họ nói muốn hợp tác với GitHub, GitLab và cộng đồng OSS.
+
+Mình thấy đó là phần insight giá trị nhất: họ bỏ Git, nhưng không tuyên chiến với Git. Họ chỉ ra rằng Git có thể giữ nguyên giao diện và vẫn được xây lại ở phía dưới.
+
+## Mình rút ra mấy điều
+
+**Một, hạ tầng tốt nhất cho một giả định có thể là hạ tầng tệ nhất cho giả định khác.** Git không sai. Nó đúng tới mức trở thành mặc định. Rồi mặc định bị dùng ở chỗ nó chưa từng được thiết kế cho.
+
+**Hai, "AI viết code" là tin cũ.** Tin mới là những gì xảy ra **sau khi** code được viết: source control, build, CI, review, deploy. Đây là nơi dòng chảy kẹt lại, và cũng là nơi còn nhiều việc đáng làm nhất trong 6-12 tháng tới.
+
+**Ba, viết code nhanh hơn không tự động nghĩa là ship nhanh hơn.** Anthropic tăng 12 lần tốc độ merge và ngay lập tức đụng trần. Bỏ được trần đó, họ nói thẳng, sẽ dẫn tới việc sản xuất thêm code. Vòng lặp không có điểm dừng tự nhiên.
+
+**Bốn, giá trị của kỹ sư đang dịch từ "viết" sang "chọn".** Chọn cái gì nên tồn tại, cái gì nên bị từ chối, cái gì là over-engineering trả lời cho một lo lắng giả định. Trong bảy người đó, phần khó nhất gần như chắc chắn không phải là code.
+
+Và có lẽ điều đáng nể nhất ở bài viết gốc là nó không phải một bản marketing. Nó kể cả phần chưa giải quyết: merge queue chưa replicate được, conflict vẫn xảy ra, adversarial review vẫn cần người kéo lại. Một bài engineering tốt nên trông như vậy.
+
+---
+
+Nguồn: [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) — Anthropic Engineering, 13/10/2026. Thảo luận thêm tại [Hacker News](https://news.ycombinator.com/item?id=50073633) và ghi chú của [Simon Willison](https://simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic/).
