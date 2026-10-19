@@ -1,0 +1,63 @@
+---
+title: "macss.app"
+description: "A hand-checked catalogue of Mac apps with pricing spelled out, anonymous ratings, per-app changelogs, and an MCP server for curation."
+date: 2026-09-15
+tags:
+  - macOS
+  - Directory
+  - Next.js
+  - Cloudflare
+  - AI
+type: product
+status: active
+featured: false
+icon: "https://macss.app/favicon.svg"
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792388966/content/macss/macss-home-dark-2026-10.png"
+images:
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792388966/content/macss/macss-home-dark-2026-10.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792388990/content/macss/macss-app-detail-2026-10.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792388993/content/macss/macss-top-picks-2026-10.png"
+  - "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792389017/content/macss/macss-home-light-2026-10.png"
+demo: "https://macss.app"
+author: howznguyen
+---
+
+**macss.app is a hand-checked catalogue of Mac apps.** At the time of writing it holds 474 of them. Every app is opened and checked by a person before it goes in, and every listing states what the app costs.
+
+Lists of Mac apps are not new, and collecting one more was never the hard part. Finding the one indie app that fixes a specific annoyance is. The catalogue is built around that search: browse, filter, rate, and suggest.
+
+## What a listing tells you
+
+- **Price, stated plainly.** Free, freemium, or paid, whether the paid part is a one-time purchase or a subscription, and whether the app sells anything inside itself.
+- **Open source, shown as a license** next to the repository, with an install command where there is one.
+- **Whether it is still maintained.** An app that is no longer looked after says so, and points at what to use instead.
+- **A changelog.** Each app has a version source (Homebrew cask, Sparkle appcast, GitHub releases, or the App Store). A nightly job reads it, stores new releases, and groups them, so a burst of changes shows up as a big update rather than a silent patch.
+
+## How an app gets in
+
+New candidates are found with AI, which searches the web and reads what it finds. Nothing is published on that basis alone: every app is opened and checked by hand first.
+
+Developers can submit their own app through the Submit page, and anyone who has actually used one can rate it. A rating is one anonymous vote from one to five stars, with no account attached. An app needs at least five votes before its average counts for anything, so one enthusiastic vote cannot outrank an app with a track record.
+
+Top picks are chosen by hand. The rest of the order is automatic, and the list can be re-sorted by newest, name, or rating.
+
+<Callout type="info" title="Nobody can buy a place">
+  There are no sponsored listings, no paid top picks, and no affiliate link dressed up as a recommendation.
+  The tip jar is the only money involved.
+</Callout>
+
+## Finding things
+
+- **Search** from the toolbar with `⌘K`.
+- **21 categories**, from menu bar and window management to developer tools, AI, and writing.
+- **Collections** for new arrivals, recently updated, top picks, and top rated.
+- **Filters** for price and open source, plus four sort orders and three view modes for the grid.
+- **Similar apps** appear on each app page.
+
+## Curation over MCP
+
+The catalogue is also edited through an MCP server at `/mcp`, authenticated with OAuth through Cloudflare Access. An agent can search the catalog, write drafts, import from the App Store, turn submissions into drafts, manage version sources, and run the version check. Publishing stays a manual step.
+
+## Links
+
+Read the catalogue and the reasoning behind it at [macss.app](https://macss.app), or [submit an app](https://macss.app/submit) you think belongs there.
