@@ -18,6 +18,9 @@ posts/                       Blog posts (.mdx)
 projects/                    Project showcases (.mdx)
 series/                      Series (subdirectories with _meta.mdx + chapters)
 glossary/                    One Markdown file per shared contextual term note
+stack.mdx                    The whole Stack page: one MDX file at the repo root
+workspace/                   One file per thing on the Workspace page
+journey/                     One file per milestone on the Journey page
 assets/                      Optional committed images
 README.md
 AGENTS.md
@@ -25,10 +28,15 @@ llms.txt
 ```
 
 Rules:
-- Only `.mdx` files in `posts/` and `projects/` are published.
+- Only `.mdx` files in `posts/`, `projects/`, `workspace/` and `journey/` are
+  published, plus `stack.mdx` at the root.
 - Files starting with `_` are ignored (for drafts and templates).
 - No subdirectories inside `posts/` or `projects/`.
 - `series/` uses subdirectories: each series is a folder containing `_meta.mdx` + numbered chapter files.
+- `stack.mdx` is a normal MDX file: `title` and `description` in the frontmatter
+  fill the page header and its meta tags, and the body is rendered like a post
+  body. Adding a tool is editing that one file, there is no folder to keep in
+  sync.
 
 ## Filename → URL
 
@@ -43,7 +51,7 @@ Rules:
 
 Posts and projects can be translated by adding a locale suffix before `.mdx`.
 
-- A file **without a suffix** is "neutral" — not tagged with any language. Good for code-heavy or reference content.
+- A file **without a suffix** is "neutral": not tagged with any language. Good for code-heavy or reference content.
 - A file **with a suffix** is a specific translation (e.g. `.en`, `.vi`, `.ja`).
 - A post may have only neutral, only localized, or both.
 - If there is no neutral file, the base URL serves the first available translation (prefers `en`).
@@ -256,7 +264,7 @@ Prefer fenced code blocks; use `<Code>` when you need a custom title.
 
 ## Images
 
-1. **External CDN (preferred):** Cloudinary, Imgur, S3 — paste URL.
+1. **External CDN (preferred):** Cloudinary, Imgur, S3: paste URL.
 2. **Commit to `assets/`** and reference via jsDelivr:
    ```
    https://cdn.jsdelivr.net/gh/howznguyen/howznguyen-content@main/assets/posts/file.png
@@ -283,9 +291,11 @@ Prefer fenced code blocks; use `<Code>` when you need a custom title.
 
 - Do not add imports in MDX.
 - Do not use components other than the ones listed above.
+- Do not write HTML comments (`<!-- -->`) in MDX: they fail to parse and take the
+  whole page down with a 500. Use `{/* ... */}` instead, as `posts/_template.mdx` does.
 - Do not put `.mdx` files in subdirectories inside `posts/` or `projects/` (series uses subdirectories under `series/`).
 - Do not commit assets > 1MB; use a CDN.
-- Do not use display names in the `author` field — use GitHub usernames.
+- Do not use display names in the `author` field: use GitHub usernames.
 
 ## Related
 

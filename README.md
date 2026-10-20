@@ -13,6 +13,7 @@ howznguyen-content/
 ├── CONTRIBUTING.md        ← contribution guide
 ├── AGENTS.md              ← AI coding assistant instructions
 ├── llms.txt               ← AI agent reference
+├── stack.mdx              ← the whole Stack page, one MDX file
 ├── posts/                 ← blog posts
 │   ├── _template.mdx      ← copy this to start a new post
 │   ├── _demo.mdx          ← showcase of all components

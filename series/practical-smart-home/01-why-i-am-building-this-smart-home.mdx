@@ -110,21 +110,7 @@ HomePod còn đóng vai trò <TermNote id="home-hub">home hub</TermNote>. Khi �
 Đây mới là điểm mình muốn nhấn mạnh khi nói HomePod đáng tiền. Nếu chỉ dùng Home Assistant và muốn truy cập từ ngoài nhà theo cách tự quản lý, mình phải dựng thêm <TermNote explanation="VPN tạo một đường hầm được bảo vệ để thiết bị ở ngoài kết nối vào mạng nhà như đang ở bên trong.">VPN</TermNote> như Tailscale hoặc ZeroTier. Nó không phải việc bất khả thi, nhưng có thêm một lớp để cài đặt, kết nối và xử lý khi gặp lỗi.
 
 <Callout type="info" title="Home Assistant dùng riêng sẽ phức tạp hơn một chút">
-  Nếu không muốn tự dựng VPN, Home Assistant Cloud là lựa chọn đơn giản hơn
-  nhưng là một dịch vụ trả phí.{" "}
-  <TermNote explanation="Reverse proxy nhận kết nối từ bên ngoài rồi chuyển tiếp request tới dịch vụ nội bộ phù hợp.">
-    Reverse proxy
-  </TermNote>{" "}
-  hoặc{" "}
-  <TermNote explanation="Port forwarding chuyển lưu lượng từ một cổng trên router tới thiết bị hoặc dịch vụ bên trong mạng nhà.">
-    port forwarding
-  </TermNote>{" "}
-  cũng làm được, nhưng cần{" "}
-  <TermNote explanation="HTTPS mã hóa kết nối giữa thiết bị và dịch vụ web để hạn chế dữ liệu bị đọc hoặc sửa trên đường truyền.">
-    HTTPS
-  </TermNote>
-  , xác thực mạnh và hiểu rõ rủi ro. Trong setup của mình, HomePod gọn hơn vì nó
-  đã làm home hub cho luồng điều khiển từ xa qua Apple Home.
+  Nếu không muốn tự dựng VPN, Home Assistant Cloud là lựa chọn đơn giản hơn nhưng là một dịch vụ trả phí. <TermNote explanation="Reverse proxy nhận kết nối từ bên ngoài rồi chuyển tiếp request tới dịch vụ nội bộ phù hợp.">Reverse proxy</TermNote> hoặc <TermNote explanation="Port forwarding chuyển lưu lượng từ một cổng trên router tới thiết bị hoặc dịch vụ bên trong mạng nhà.">port forwarding</TermNote> cũng làm được, nhưng cần <TermNote explanation="HTTPS mã hóa kết nối giữa thiết bị và dịch vụ web để hạn chế dữ liệu bị đọc hoặc sửa trên đường truyền.">HTTPS</TermNote>, xác thực mạnh và hiểu rõ rủi ro. Trong setup của mình, HomePod gọn hơn vì nó đã làm home hub cho luồng điều khiển từ xa qua Apple Home.
 </Callout>
 
 <Bookmark
