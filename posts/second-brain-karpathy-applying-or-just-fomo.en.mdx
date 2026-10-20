@@ -39,7 +39,7 @@ I want to ask more directly:
 
 ## Why Karpathy's words carry so much weight
 
-For those who don't know, Karpathy is one of the biggest names in AI. He was Director of AI at Tesla, co-founder of [OpenAI](https://openai.com/), and taught **[CS231n](https://cs231n.stanford.edu/)** at Stanford — one of the most famous deep learning courses.
+For those who don't know, Karpathy is one of the biggest names in AI. He was Director of AI at Tesla, co-founder of [OpenAI](https://openai.com/), and taught **[CS231n](https://cs231n.stanford.edu/)** at Stanford - one of the most famous deep learning courses.
 
 Recently he's been making very polished [educational videos](https://www.youtube.com/@AndrejKarpathy) about LLMs, tokenizers, backpropagation, neural networks. The kind of videos that technical people love because everything is explained clearly without fluff.
 
@@ -49,17 +49,17 @@ Not just because he's brilliant. But because he rarely speaks in marketing-speak
 
 So when he talks about how to learn, take notes, or use AI, people don't see it as a fun productivity hack. It feels like a process that a very capable person has actually been using for real.
 
-That's why even a fairly short gist created waves. Not because the idea is entirely new. [Obsidian](https://obsidian.md/), [Zettelkasten](https://zettelkasten.de/introduction/), [PARA](https://fortelabs.com/blog/para/), [RAG](https://www.anthropic.com/engineering/building-effective-agents), personal wikis — all existed before.
+That's why even a fairly short gist created waves. Not because the idea is entirely new. [Obsidian](https://obsidian.md/), [Zettelkasten](https://zettelkasten.de/introduction/), [PARA](https://fortelabs.com/blog/para/), [RAG](https://www.anthropic.com/engineering/building-effective-agents), personal wikis - all existed before.
 
 But when Karpathy combines them into a working system, the community sees a more credible version.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1778609168/1daacd08-f406-4054-a42a-33cca36235e7.png"
   alt="Andrej Karpathy"
-  caption="Andrej Karpathy — one of the most authoritative voices in AI today"
+  caption="Andrej Karpathy - one of the most authoritative voices in AI today"
 />
 
-## Karpathy's LLM Wiki — short summary
+## Karpathy's LLM Wiki - short summary
 
 Reading the gist carefully, Karpathy's approach is quite clear. No fluff. No new app needed. No complex database.
 
@@ -73,7 +73,7 @@ Next time you ask, you ask against that wiki layer. Not always going back to the
 
 The structure has 3 layers:
 
-- **Source documents**: original materials — papers, articles, code, transcripts, images, raw notes. These are ingredients. Kept intact, never modified.
+- **Source documents**: original materials - papers, articles, code, transcripts, images, raw notes. These are ingredients. Kept intact, never modified.
 - **Wiki**: processed Markdown files. Summaries, concept pages, person/org pages, cross-links, observations, contradictions, open questions.
 - **Ruleset**: files like `CLAUDE.md` or `AGENTS.md`, defining conventions, operations, naming, updating rules, how the LLM should behave.
 
@@ -92,7 +92,7 @@ But the important point isn't the tool names. The important point is the structu
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1778608376/a6f38cf2-fca8-4ab9-aa5c-96dc3cf7e313.png"
   alt="Karpathy's LLM Wiki diagram"
-  caption="Karpathy's LLM Wiki system — source documents, processed wiki, and ruleset kept separate"
+  caption="Karpathy's LLM Wiki system - source documents, processed wiki, and ruleset kept separate"
 />
 
 ## Knowledge as a codebase
@@ -165,7 +165,7 @@ A twist I found really clever from Vi's analysis: Karpathy doesn't build the wik
 
 Sounds counterintuitive, right?
 
-Because most of us think note apps are places to save things for later reading. Notion, Apple Notes, Obsidian vault, bookmark folders — all typically used as storage.
+Because most of us think note apps are places to save things for later reading. Notion, Apple Notes, Obsidian vault, bookmark folders - all typically used as storage.
 
 We save because we're afraid of losing things. But honestly, we rarely go back to read. I've also set up Obsidian beautifully and then just left it there.
 
@@ -187,7 +187,7 @@ A library with a librarian is different. You ask a question. The librarian knows
 
 The LLM in this system plays a role close to a librarian. But it's only good when the library is well-structured.
 
-If you just throw in links, screenshots, unnamed PDFs, notes without context — then AI is just sifting through garbage faster.
+If you just throw in links, screenshots, unnamed PDFs, notes without context - then AI is just sifting through garbage faster.
 
 ## Why Karpathy builds his own search tool
 
@@ -201,7 +201,7 @@ If you ask an AI platform and let it decide where to pull information from, you'
 
 What does it retrieve? What does it skip? What ranking criteria? Does it use your sources? Does it prioritize new or old? Does context limits cause it to lose important details?
 
-In some cases that's fine. But for a personal knowledge base — especially one representing your learning journey — information retrieval is too important to hand entirely to a black box.
+In some cases that's fine. But for a personal knowledge base - especially one representing your learning journey - information retrieval is too important to hand entirely to a black box.
 
 Karpathy doesn't necessarily build everything himself because he enjoys suffering. I think he's maintaining ownership at the foundational layer.
 
@@ -221,11 +221,11 @@ Karpathy says the LLM in the system is a "librarian" and the user is a "curator.
 
 **Karpathy has 20+ years of AI experience to verify outputs.**
 
-When the LLM summarizes a paper, fabricates a citation, misinterprets a concept — he catches it quickly. Most of us don't. Our brains aren't the kind that can instantly spot where the model is bullshitting.
+When the LLM summarizes a paper, fabricates a citation, misinterprets a concept - he catches it quickly. Most of us don't. Our brains aren't the kind that can instantly spot where the model is bullshitting.
 
 <Quote color="blue">AI hallucination isn't a bug. It's a feature.</Quote>
 
-That's not my line — Goon Nguyen quoted it in his piece. But it captures the nature of LLMs perfectly: the model generates text with the highest probability, not the highest accuracy.
+That's not my line - Goon Nguyen quoted it in his piece. But it captures the nature of LLMs perfectly: the model generates text with the highest probability, not the highest accuracy.
 
 When you ask it to systematize knowledge you don't yet understand well, it still produces a very fluent wiki. So fluent you don't realize it's wrong.
 
@@ -255,7 +255,7 @@ Read carefully before clipping. Don't use Obsidian as a substitute for reading.
 
 Write a note by hand before asking AI to expand it. The first idea should be yours.
 
-Check sources. LLMs fabricate citations better than you'd think — build the habit of opening original links.
+Check sources. LLMs fabricate citations better than you'd think - build the habit of opening original links.
 
 Go deep before going wide. You don't need 10 topics in parallel. One topic deep enough is already hard.
 
@@ -311,13 +311,13 @@ In other words: the hard part isn't installing Obsidian. The hard part is whethe
 
 I think most people sharing this gist aren't doing so because they've applied it, but because they found it interesting. And finding it interesting is perfectly fine.
 
-But if you find it interesting and rush to set up immediately because you're afraid of being left behind in the AI race — that's FOMO. Tools only have value when they actually solve an existing problem.
+But if you find it interesting and rush to set up immediately because you're afraid of being left behind in the AI race - that's FOMO. Tools only have value when they actually solve an existing problem.
 
 ## When should you apply this
 
 In my view, this approach fits a small group. But for the right person, it's very valuable.
 
-For example, researchers who read many papers and need to compare and synthesize continuously. Content creators — bloggers, YouTubers, newsletter writers — who need to combine many sources into their own perspective.
+For example, researchers who read many papers and need to compare and synthesize continuously. Content creators - bloggers, YouTubers, newsletter writers - who need to combine many sources into their own perspective.
 
 Senior engineers working on large systems could use it to store architecture decisions, trade-offs, incidents, technical conventions. Founders or product builders could track markets, customer insights, competitors, technical direction.
 
@@ -325,7 +325,7 @@ Or simply someone learning a new field seriously enough, wanting to build a long
 
 If you only occasionally read articles, occasionally take notes, then Apple Notes, Notion, or a simple Markdown folder is enough. No need to build an entire ingest-query-audit pipeline.
 
-But if you frequently feel "I've read this somewhere before," "these sources seem to contradict each other," "I need to synthesize everything I know about this topic" — then LLM Wiki starts making sense.
+But if you frequently feel "I've read this somewhere before," "these sources seem to contradict each other," "I need to synthesize everything I know about this topic" - then LLM Wiki starts making sense.
 
 ## Principles matter more than tools
 
@@ -359,7 +359,7 @@ That's it. Don't start with 15 plugins.
 
 ## My perspective from Knowns
 
-I'm also building a CLI tool called [Knowns](https://knowns.sh) — a memory layer for one or more projects. So when I read Karpathy's gist, I felt quite a lot of resonance.
+I'm also building a CLI tool called [Knowns](https://knowns.sh) - a memory layer for one or more projects. So when I read Karpathy's gist, I felt quite a lot of resonance.
 
 The reason I'm building Knowns is similar to Karpathy's story at one point: **every time I wanted AI to understand the current task, I had to manually re-type context, re-explain everything**. Gets tiring. So I wanted a place where I type `@doc/architecture` or `@task-123` and AI reads it, understands it, no re-explanation needed each new session.
 
@@ -381,7 +381,7 @@ One more point I find very aligned: **the ruleset matters more than the UI**. If
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1778614430/d11eb25a-340f-4ccf-86e0-837bd5794151.png"
   alt="Owning your knowledge foundation"
-  caption="Structured Markdown — simple enough for humans, clear enough for AI. Own your knowledge foundation; tools can be replaced."
+  caption="Structured Markdown - simple enough for humans, clear enough for AI. Own your knowledge foundation; tools can be replaced."
 />
 
 ## If you want to try, how to start
@@ -400,7 +400,7 @@ If not, stop. That's fine. At least you've learned the principles.
 
 ## Conclusion
 
-Karpathy's gist is worth reading. Not because it gives a perfect formula to copy. But because it clearly articulates a new direction: AI isn't just a chatbot for instant answers — it can be an assistant helping maintain a knowledge codebase for you.
+Karpathy's gist is worth reading. Not because it gives a perfect formula to copy. But because it clearly articulates a new direction: AI isn't just a chatbot for instant answers - it can be an assistant helping maintain a knowledge codebase for you.
 
 But I don't think everyone needs to follow along. If you're doing it just because Karpathy did, it's very easy to turn it into another productivity theater performance.
 

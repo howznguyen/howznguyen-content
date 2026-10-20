@@ -38,7 +38,7 @@ Posts and projects can have translations by adding a locale suffix to the filena
 
 ```
 posts/
-├── my-post.mdx           # neutral — no language attached
+├── my-post.mdx           # neutral - no language attached
 ├── my-post.en.mdx        # English
 ├── my-post.vi.mdx        # Vietnamese
 └── my-post.ja.mdx        # Japanese
@@ -52,7 +52,7 @@ posts/
 
 **Rules:**
 
-- A file **without a suffix** is "neutral" — not tagged with any language. Use this for code-heavy posts, reference docs, or posts where the language isn't relevant.
+- A file **without a suffix** is "neutral" - not tagged with any language. Use this for code-heavy posts, reference docs, or posts where the language isn't relevant.
 - A post can have **only the neutral file**, **only localized files**, or **both**.
 - If there is no neutral file, `/blog/my-post` serves the first available translation (prefers `en`).
 - The language switcher appears automatically when more than one variant exists.
@@ -106,7 +106,7 @@ tags:
   - Next.js
   - TypeScript
 
-# Project classification — renders with a type-specific badge, gradient, and icon
+# Project classification - renders with a type-specific badge, gradient, and icon
 type: open-source          # open-source | side-project | work | experiment | product | writing
 status: shipped            # active | wip | shipped | archived | sunset
 
@@ -180,14 +180,14 @@ Supported languages: `typescript`, `javascript`, `tsx`, `jsx`, `python`, `go`, `
 
 See [`posts/_demo.mdx`](posts/_demo.mdx) for a live example of every component. Quick reference:
 
-- `<Callout type="info|warning|error|success|note|tip" title="...">` — highlighted box
-- `<Image src="..." alt="..." caption="..." />` — image with caption + zoom
-- `<Bookmark url="..." title="..." description="..." />` — link preview card
-- `<Video src="..." />` — YouTube URL auto-detected
-- `<TodoList>` + `<Todo checked>` — checklist
-- `<Quote color="blue|red|green|...">` — styled blockquote
-- `<Code language="..." title="...">` — code block with custom title
-- `<TermNote id="...">term</TermNote>` — inline contextual note resolved from `glossary/<id>.md`
+- `<Callout type="info|warning|error|success|note|tip" title="...">` - highlighted box
+- `<Image src="..." alt="..." caption="..." />` - image with caption + zoom
+- `<Bookmark url="..." title="..." description="..." />` - link preview card
+- `<Video src="..." />` - YouTube URL auto-detected
+- `<TodoList>` + `<Todo checked>` - checklist
+- `<Quote color="blue|red|green|...">` - styled blockquote
+- `<Code language="..." title="...">` - code block with custom title
+- `<TermNote id="...">term</TermNote>` - inline contextual note resolved from `glossary/<id>.md`
 
 ### Shared term notes
 

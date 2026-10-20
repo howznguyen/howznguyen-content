@@ -20,7 +20,7 @@ author: howznguyen
 
 **Pi Delegate MCP** exposes the [pi](https://pi.dev) coding agent as a delegable, steerable worker over the Model Context Protocol.
 
-Point Claude Code — or any MCP host — at the server and hand work to a delegate running on any of pi's providers: DeepSeek, Grok, GLM, Kimi, Qwen, Codex, OpenRouter, or a local llama.cpp. The delegate reads files on its own budget and returns a result, so its context never lands in your main conversation.
+Point Claude Code - or any MCP host - at the server and hand work to a delegate running on any of pi's providers: DeepSeek, Grok, GLM, Kimi, Qwen, Codex, OpenRouter, or a local llama.cpp. The delegate reads files on its own budget and returns a result, so its context never lands in your main conversation.
 
 ## The problem it solves
 
@@ -30,7 +30,7 @@ Handing that work to a delegate changes three things:
 
 - **Cost.** Grunt work runs on a cheap or local model. You pay frontier prices only for the reasoning that actually needs them.
 - **Context.** The delegate reads the files itself and returns an answer. The 200 KB it read never enters your conversation.
-- **Blast radius.** Delegates are read-only by default — `read`, `grep`, `find`, `ls` — enforced when the session is constructed, not after the fact.
+- **Blast radius.** Delegates are read-only by default - `read`, `grep`, `find`, `ls` - enforced when the session is constructed, not after the fact.
 
 The delegate is always the pi agent. Codex, Grok, DeepSeek and the rest supply the *model* behind it; this is not a wrapper around their CLIs.
 
@@ -45,7 +45,7 @@ A delegate is only steerable if two channels stay open: you must be able to redi
 | Agent can ask you something | No | Not in the session API | `status` → `answer` |
 | Model per call | No | Yes | `model` argument |
 
-`pi -p` and `--mode json` set `ctx.hasUI = false`. A delegate started that way is fire-and-forget by construction. opencode's SDK is a typed client for a separate server process — clean, but it means another process to supervise, and its session surface has no mid-turn steering.
+`pi -p` and `--mode json` set `ctx.hasUI = false`. A delegate started that way is fire-and-forget by construction. opencode's SDK is a typed client for a separate server process - clean, but it means another process to supervise, and its session surface has no mid-turn steering.
 
 pi ships `createAgentSession` as an embeddable library. This server holds the session object in-process, so a steering message can land between the current tool call and the next model call, and a synthetic UI context catches the agent's questions and parks them for an answer. Nothing is shelled out; nothing has to be supervised.
 
@@ -105,7 +105,7 @@ Then delegate something:
 
 ## Traceability
 
-Every session takes your own id and a free-text label, and finished sessions stay readable instead of vanishing — so you can go back and check what a delegate actually did.
+Every session takes your own id and a free-text label, and finished sessions stay readable instead of vanishing - so you can go back and check what a delegate actually did.
 
 `status` returns an ordered trace of every tool the delegate ran, with arguments, results, and timing. Arguments and results are clipped with the dropped length recorded, so one `read` of a large file cannot flood the context you were trying to protect.
 
@@ -123,7 +123,7 @@ Tools are locked to `read`, `grep`, `find`, `ls` at session construction. Anythi
   container.
 </Callout>
 
-For network access without `bash`, pi extensions register their own tools. Permit `web_search` on the server and pass `extensions: true` on the call, and the delegate can search the web and nothing else — through the same allowlist as every other tool.
+For network access without `bash`, pi extensions register their own tools. Permit `web_search` on the server and pass `extensions: true` on the call, and the delegate can search the web and nothing else - through the same allowlist as every other tool.
 
 ## Status line
 

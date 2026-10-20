@@ -31,10 +31,10 @@ Each tool gets its own Discord application identity, so what appears in Discord 
 | Claude Code / Claude Desktop | Lifecycle hooks + process fallback | Subscription OAuth |
 | Grok Code | Lifecycle hooks + process fallback | Billing API |
 | OpenCode CLI | Process detection | OpenCode Go usage |
-| Pi | Process detection (or the bundled extension) | — |
+| Pi | Process detection (or the bundled extension) | - |
 | Cursor IDE / CLI | Process detection | Cursor dashboard usage |
 
-When several tools are active at once, the daemon publishes presence only for the session updated most recently and clears the others — Discord shows one activity per user, so a stale background process never wins over the terminal you are typing in.
+When several tools are active at once, the daemon publishes presence only for the session updated most recently and clears the others - Discord shows one activity per user, so a stale background process never wins over the terminal you are typing in.
 
 ## What Discord displays
 
@@ -53,7 +53,7 @@ Quota percentages are shown as *remaining*. Three privacy levels decide how much
 
 Full filesystem paths, prompt text, transcript content, account emails, secrets, repository URLs, and raw commands are never used as Rich Presence text. Context usage is fail-closed: it appears only when a hook supplies a numeric metric such as `42%` or `128k / 256k`, and free-form context text is discarded.
 
-Activity text comes in four styles — `fun` (`Bash survived the assignment`), `normal` (`Using Bash`), `technical` (`Running npm test`), and `minimal` (`Working`).
+Activity text comes in four styles - `fun` (`Bash survived the assignment`), `normal` (`Using Bash`), `technical` (`Running npm test`), and `minimal` (`Working`).
 
 ## How it works
 
@@ -82,7 +82,7 @@ Discord Desktop and Node.js 18 or newer are required. Install the daemon and its
 npx -y discord-coding-status@latest setup
 ```
 
-Setup detects your installed tools, copies a self-contained runtime into your application-data directory, installs startup, and adds managed hooks for the tools it finds. Codex requires one manual approval — open Codex, run `/hooks`, and trust the managed command hooks.
+Setup detects your installed tools, copies a self-contained runtime into your application-data directory, installs startup, and adds managed hooks for the tools it finds. Codex requires one manual approval - open Codex, run `/hooks`, and trust the managed command hooks.
 
 Verify the installation, then start a session:
 
@@ -104,7 +104,7 @@ macOS and Windows have managed startup support. Linux users can run the daemon m
 
 Session state stays on your computer. Discord receives only the short, sanitized Rich Presence strings selected by the configured detail level. There is no public HTTP listener, hosted backend, or telemetry service.
 
-Quota lookup reads local credentials — Codex auth files, Claude Code OAuth from the Keychain, Cursor's local session token — talks only to that vendor's own usage endpoints, and keeps results in daemon memory. Tokens are never included in the Discord activity payload, and quota can be disabled per tool.
+Quota lookup reads local credentials - Codex auth files, Claude Code OAuth from the Keychain, Cursor's local session token - talks only to that vendor's own usage endpoints, and keeps results in daemon memory. Tokens are never included in the Discord activity payload, and quota can be disabled per tool.
 
 Managed hooks are marked as owned by this project, existing configuration is preserved, and the previous file is backed up before any write. Uninstall removes only what the installer added.
 
