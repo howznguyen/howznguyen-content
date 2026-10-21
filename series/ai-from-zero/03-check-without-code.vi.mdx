@@ -1,0 +1,269 @@
+---
+title: "Kiểm tra kết quả mà không cần đọc code"
+description: "Ba lớp kiểm tra, cách ghi bằng chứng và cách viết báo lỗi để biết kết quả AI làm ra có thật sự đúng."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606078/series/ai-from-zero/cover-check.png"
+track: "shared"
+quiz:
+  - question: "Smoke test 5 phút dùng để làm gì?"
+    options:
+      - text: "Kiểm tra sâu mọi trường hợp biên"
+      - text: "Xác nhận luồng chính còn sống trước khi kiểm tra sâu"
+        correct: true
+      - text: "Chụp ảnh giao diện để báo cáo"
+    explanation: "Smoke test chỉ trả lời câu hỏi thứ chính có chạy không, để bạn biết có nên đi tiếp không."
+  - question: "Bằng chứng nào đủ để nghiệm thu một tiêu chí?"
+    options:
+      - text: "Câu 'em thử rồi, chạy được'"
+      - text: "Ảnh hoặc video kèm bước tái hiện"
+        correct: true
+      - text: "Số lượng test đã viết"
+    explanation: "Bằng chứng phải để người khác xem lại được mà không cần hỏi bạn."
+---
+
+Ở bài trước, bạn thêm màn hình tóm tắt và luồng xác nhận. Mở lên, bấm thử một lần, thấy chạy. Bạn có thể nghĩ: xong rồi.
+
+Nhưng "chạy" và "đúng" là hai chuyện khác nhau.
+
+Một luồng có thể chạy đúng khi bạn đi theo con đường đẹp nhất, và vỡ ngay khi người dùng bấm sai một nút. Một form có thể hiện đủ trường, nhưng thông báo lỗi nằm sai chỗ. Một màn hình tóm tắt có thể đẹp, nhưng hiển thị sai giờ vì múi giờ.
+
+Bài này dạy bạn kiểm tra mà không cần đọc code. Bạn kiểm tra hành vi, không kiểm tra cách viết.
+
+## Kiểm tra hành vi, không kiểm tra code
+
+Bạn không cần biết dữ liệu được lưu ở đâu, hàm nào chạy trước, hay AI dùng thư viện gì.
+
+Bạn chỉ cần trả lời ba câu:
+
+1. Điều gì phải xảy ra?
+2. Điều gì thật sự xảy ra?
+3. Mình có bằng chứng nào?
+
+Ba câu này đủ để kiểm tra gần như mọi thứ người dùng nhìn thấy. Và chúng không yêu cầu bạn đọc một dòng code nào.
+
+## Ba lớp kiểm tra
+
+Mình kiểm tra theo ba lớp, từ ngoài vào trong.
+
+### Lớp 1: Nhìn
+
+Mở trang và nhìn như một người dùng mới.
+
+- Tiêu đề có rõ không?
+- Nút chính có nổi bật hơn các nút khác không?
+- Chữ có bị cắt, tràn hoặc quá nhỏ không?
+- Trên điện thoại, form có bị che không?
+- Khi chưa có dữ liệu, màn hình trông thế nào?
+
+Thử ở ba chiều rộng: khoảng 375px cho điện thoại, 768px cho tablet, 1280px cho desktop. Nếu công cụ của bạn chỉ có một khung xem, kéo nhỏ cửa sổ trình duyệt cũng đủ thấy phần lớn vấn đề.
+
+### Lớp 2: Bấm
+
+Đi qua từng hành động, không chỉ hành động chính.
+
+- Bấm "Đặt lịch" khi đã điền đủ.
+- Bấm "Quay lại" từ màn hình tóm tắt.
+- Bấm "Xác nhận" hai lần liên tiếp.
+- Tải lại trang giữa luồng.
+- Dùng phím Tab để đi qua các trường.
+- Bấm mọi nút có trên màn hình, kể cả nút bạn không nhớ đã thêm.
+
+Mỗi nút phải có một kết quả rõ. Nếu bấm mà không có gì xảy ra, đó đã là một lỗi.
+
+### Lớp 3: Dữ liệu
+
+Đây là lớp người mới hay bỏ qua nhất. Giao diện đẹp lúc mọi thứ đúng chưa nói lên gì.
+
+| Loại dữ liệu | Ví dụ | Điều cần xem |
+| --- | --- | --- |
+| Trống | Bỏ tất cả các trường | Có chặn không, lỗi hiện ở đâu |
+| Sai định dạng | Số điện thoại toàn chữ cái | Có báo lỗi rõ không |
+| Quá dài | Tên dài 200 ký tự | Có tràn layout không |
+| Ký tự đặc biệt | `<>&"` trong ô tên | Có vỡ giao diện không |
+| Trùng | Bấm "Xác nhận" hai lần | Có tạo hai lịch không |
+| Biên | Chọn ngày hôm qua, hoặc 23:59 | Có chặn đúng không |
+
+Bạn không cần thử mọi tổ hợp. Chỉ cần thử mỗi loại một lần. Một lỗi ở lớp này thường nghiêm trọng hơn mười lỗi căn lề.
+
+## Kiểm tra theo tiêu chí, không theo cảm giác
+
+Ở bài trước, bạn đã viết <TermNote id="acceptance-criteria">tiêu chí chấp nhận</TermNote>. Bây giờ dùng chính chúng để kiểm tra.
+
+Với mỗi tiêu chí, ghi ba thứ: cách kiểm tra, bằng chứng, kết quả.
+
+| Tiêu chí | Cách kiểm tra | Bằng chứng | Kết quả |
+| --- | --- | --- | --- |
+| Từ form tới xác nhận phải qua màn hình tóm tắt | Điền form, bấm "Đặt lịch" | Ảnh màn hình tóm tắt | Đạt |
+| "Quay lại" không mất dữ liệu | Điền form, bấm "Đặt lịch", bấm "Quay lại" | Ảnh form còn dữ liệu | Đạt |
+| Bấm "Xác nhận" hai lần chỉ có một lịch | Bấm hai lần liên tiếp | Ảnh và số lịch nhận được | Chưa đạt |
+
+Nhìn bảng này, bạn biết ngay mình đã kiểm tra gì, chưa kiểm tra gì, và có gì để đưa cho người khác xem.
+
+## Bộ kiểm tra 5 phút và 15 phút
+
+Không phải lúc nào cũng có thời gian kiểm tra kỹ. Mình chia thành hai vòng.
+
+### Vòng 5 phút: smoke test
+
+Mục tiêu là biết thứ chính có sống không.
+
+1. Mở trang.
+2. Điền đủ và gửi.
+3. Xem kết quả.
+4. Bấm quay lại.
+5. Thử một trường hợp lỗi.
+
+Nếu một bước trong năm bước này hỏng, dừng lại và sửa trước. Đừng kiểm tra sâu hơn khi cửa chính còn chưa mở được.
+
+### Vòng 15 phút: edge test
+
+Mục tiêu là tìm chỗ vỡ khi người dùng không đi theo con đường đẹp.
+
+- Bỏ trống từng trường một.
+- Nhập sai định dạng.
+- Nhập chuỗi rất dài.
+- Nhập ký tự đặc biệt.
+- Bấm hai lần.
+- Tải lại trang giữa luồng.
+- Thu nhỏ cửa sổ xuống cỡ điện thoại.
+
+Với mỗi lần thử, ghi lại một dòng: đã làm gì, thấy gì, mong đợi gì.
+
+## Ghi bằng chứng
+
+Bằng chứng không phải là câu "em thử rồi, chạy được". Bằng chứng là thứ người khác xem lại được mà không cần hỏi bạn.
+
+Có ba loại đủ dùng:
+
+- Ảnh chụp màn hình.
+- Video quay màn hình 10-20 giây.
+- Các bước tái hiện, viết ngắn và đánh số.
+
+Một báo lỗi tốt trông như thế này:
+
+```text
+Tiêu đề:
+Bấm "Xác nhận" hai lần tạo hai lịch trùng
+
+Môi trường:
+Chrome trên macOS, cửa sổ 1280px
+
+Các bước:
+1. Điền đủ form đặt lịch.
+2. Bấm "Đặt lịch".
+3. Bấm "Xác nhận" hai lần thật nhanh.
+
+Kết quả mong đợi:
+Chỉ có một lịch được tạo.
+
+Kết quả thực tế:
+Hai thông báo thành công và hai lịch xuất hiện.
+
+Bằng chứng:
+Ảnh chụp màn hình sau khi bấm hai lần.
+
+Mức độ:
+Cao, vì tạo dữ liệu trùng.
+```
+
+Bạn không cần viết dài hơn. Nhưng phải có đủ bước, mong đợi, thực tế và bằng chứng.
+
+## Viết báo lỗi mà không cần đọc code
+
+Câu "nút này hỏng" không giúp ai sửa được gì. Người sửa cần biết bạn đã làm gì và bạn thấy gì.
+
+Công thức mình dùng:
+
+```text
+Khi tôi [làm gì], tôi thấy [kết quả thực tế].
+Tôi mong đợi [kết quả đúng].
+```
+
+Ví dụ:
+
+```text
+Khi tôi bỏ trống ô tên và bấm "Đặt lịch", form vẫn gửi và hiện thông báo thành công.
+Tôi mong đợi form chặn gửi và hiện lỗi cạnh ô tên.
+```
+
+Chỉ vậy là đủ để người sửa hiểu và tái hiện.
+
+Hai quy tắc nhỏ:
+
+- **Một báo lỗi cho một vấn đề.** Đừng gộp năm lỗi vào một tin nhắn.
+- **Ghi mức độ.** Cao nếu mất dữ liệu hoặc tạo dữ liệu sai. Trung bình nếu luồng bị kẹt. Thấp nếu chỉ là giao diện.
+
+## Lỗi thường gặp
+
+**Chỉ test happy path.** Điền đủ, bấm đúng, thấy chạy, rồi kết luận. Đây là lỗi phổ biến nhất.
+
+**Chỉ test một kích thước màn hình.** Trang đẹp trên laptop có thể vỡ trên điện thoại.
+
+**Không ghi lại.** Ba hôm sau bạn không nhớ mình đã thử gì, và không biết lỗi cũ có quay lại không.
+
+**Sửa xong không test lại.** Một thay đổi nhỏ có thể làm hỏng thứ vừa chạy đúng.
+
+**Tin lời "đã sửa".** Luôn tự bấm lại. Đây là bài học lặp lại từ bài 1.
+
+**Gộp nhiều lỗi vào một báo cáo.** Người sửa sẽ sửa một nửa, và bạn không biết nửa nào còn.
+
+## Nếu bạn là PM
+
+Buổi nghiệm thu của bạn nên có ba thứ: tiêu chí, bằng chứng, và một người bấm thử.
+
+Quy trình 30 phút:
+
+1. Mở danh sách tiêu chí đã chốt.
+2. Tự bấm từng mục, không nhìn vào lời giải thích của người làm.
+3. Ghi kết quả và bằng chứng vào bảng.
+4. Với mục chưa đạt, viết báo lỗi theo công thức ở trên.
+5. Chỉ sign-off khi mọi tiêu chí bắt buộc đều đạt, hoặc khi các mục còn lại đã được ghi nhận và chấp nhận.
+
+Khi từ chối, đừng nói "chưa ổn". Nói rõ: tiêu chí nào, bước nào, mong đợi gì, thực tế gì. Một lời từ chối mơ hồ sẽ quay lại thành một vòng sửa mơ hồ.
+
+Đầu ra của bạn là acceptance report và danh sách lỗi, không phải code.
+
+<Callout type="warning" title="Đừng kiểm tra bằng cảm giác">
+  "Nhìn cũng được" không phải bằng chứng. Nếu bạn không chỉ ra được bước nào, kết quả nào, thì bạn chưa kiểm tra, bạn chỉ mới xem.
+</Callout>
+
+## Bài tập 45-60 phút
+
+**Bước 1. Mở lại sản phẩm ở bài 2 (5 phút).**
+Mở cuộc trò chuyện hoặc artifact đã có luồng form, tóm tắt, xác nhận.
+
+**Bước 2. Viết lại 5 tiêu chí (5 phút).**
+Lấy từ bài 2. Nếu chưa có, viết năm câu kiểm tra được.
+
+**Bước 3. Chạy smoke test 5 phút (5 phút).**
+Nếu hỏng ở bước nào, sửa trước rồi mới đi tiếp.
+
+**Bước 4. Chạy edge test 15 phút (15 phút).**
+Thử đủ sáu loại dữ liệu ở bảng phía trên. Ghi lại từng lần.
+
+**Bước 5. Điền bảng bằng chứng (10 phút).**
+Mỗi tiêu chí một dòng, kèm ảnh hoặc các bước tái hiện.
+
+**Bước 6. Viết một báo lỗi (10 phút).**
+Chọn lỗi nghiêm trọng nhất. Viết đủ bước, mong đợi, thực tế, bằng chứng.
+
+**Bước 7. Sửa và kiểm tra lại (10 phút).**
+Sửa một lỗi, rồi chạy lại toàn bộ tiêu chí. Đừng chỉ kiểm tra chỗ vừa sửa.
+
+## Cách biết mình đã xong
+
+- Bạn có bảng 5 tiêu chí với bằng chứng cho từng mục.
+- Bạn tìm được ít nhất một vấn đề.
+- Bạn viết được một báo lỗi có bước tái hiện.
+- Bạn đã sửa và kiểm tra lại toàn bộ, không chỉ chỗ vừa sửa.
+- Bạn nói được mình chưa kiểm tra gì.
+
+Điểm cuối cùng quan trọng. Biết mình chưa kiểm tra gì còn hữu ích hơn giả vờ rằng mọi thứ đã được kiểm tra.
+
+## Kết
+
+Bạn vừa học cách kiểm tra mà không cần đọc code: nhìn, bấm, thử dữ liệu, ghi bằng chứng và viết báo lỗi.
+
+Từ đây, khoá rẽ thành hai track. Nếu bạn muốn tự dựng sản phẩm, đi tiếp track Maker. Nếu bạn muốn viết đề bài và nghiệm thu, đi tiếp track PM.
+
+Bài sau sẽ là bài rẽ nhánh. Bạn chọn một lần, nhưng có thể đọc chéo nếu tò mò.

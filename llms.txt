@@ -45,7 +45,7 @@ Rules:
 - `posts/my-post.vi.mdx` → `/blog/my-post/vi`
 - `projects/my-project.mdx` → `/projects/my-project`
 - `series/my-series/_meta.mdx` → `/series/my-series` (series metadata)
-- `series/my-series/01-chapter.mdx` → rendered as chapter on `/series/my-series`
+- `series/my-series/01-chapter.mdx` → `/series/my-series/chapter`
 
 ## Translations
 
@@ -129,6 +129,7 @@ tags: [string]                 # required
 featured: boolean              # optional
 image: url                     # optional, cover image
 status: "active" | "complete" | "paused" | "archived"  # optional
+quiz: [QuizQuestion]           # optional, series check, see Quizzes
 ---
 ```
 
@@ -138,6 +139,8 @@ status: "active" | "complete" | "paused" | "archived"  # optional
 ---
 title: string                  # required, chapter title
 description: string            # optional
+quiz: [QuizQuestion]           # optional, chapter check, see Quizzes
+track: "shared" | "maker" | "pm"  # optional, defaults to shared
 ---
 ```
 
@@ -145,7 +148,28 @@ Chapter rules:
 - Filename must start with a numeric prefix for ordering: `01-`, `02-`, etc.
 - Body headings start at `##` (chapter title is rendered from frontmatter).
 - All custom components (Callout, Image, etc.) are available.
+- Use `track` with `<RolePicker />` in `_meta.mdx` to show a role fork; `shared` chapters stay visible in every track.
 - Each series folder must have exactly one `_meta.mdx`.
+
+### Quizzes
+
+A chapter `quiz` renders at the end of that chapter. A `_meta.mdx` `quiz` renders at the end of the series page. No score, no gate, and a missing `quiz` renders nothing.
+
+```yaml
+quiz:
+  - question: "Which loop does this chapter teach?"
+    options:
+      - text: "Describe, look, fix"
+        correct: true
+      - text: "Read, install, write"
+      - text: "Watch, bookmark, open"
+    explanation: "Optional, plain text."
+```
+
+- At least two options; exactly one has `correct: true`.
+- Use boolean `true`, not `yes` or `on` (YAML reads those as strings).
+- `question`, `text`, and `explanation` are plain text, not markdown.
+- A malformed question is dropped; the rest of the quiz still renders.
 
 ### Series structure example
 
@@ -207,6 +231,12 @@ Resolves a localized contextual note from `glossary/<id>.md`. Each file uses
 <Image src="https://..." alt="..." caption="..." />
 ```
 Click-to-zoom enabled. `alt` is required for accessibility.
+
+### `<RolePicker>`
+```mdx
+<RolePicker />
+```
+A course-level role chooser. It writes `?track=maker` or `?track=pm` to the series URL, and the series page hides chapters from the other branch. Use it in a series `_meta.mdx` below the course structure. It needs chapters with `track: "maker"` or `track: "pm"`; chapters without a track are treated as `shared`.
 
 ### `<Bookmark>`
 ```mdx

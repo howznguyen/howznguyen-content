@@ -1,0 +1,146 @@
+---
+title: "Capstone: đóng gói và bàn giao"
+description: "Bài cuối: chọn artifact theo track, chuẩn bị demo hoặc spec, và tự đánh giá bằng rubric trước khi bàn giao."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792602163/series/ai-from-zero/capstone-package.png"
+track: "shared"
+---
+
+Bạn đã đi qua toàn bộ vòng lặp: dựng một thứ chạy được, nói rõ điều mình muốn, kiểm tra bằng bằng chứng, thêm một tính năng, và giữ prototype không vỡ.
+
+Bài cuối không thêm kiến thức mới. Nó là lúc bạn đóng gói những gì đã có thành một artifact có thể đưa cho người khác xem.
+
+Capstone không phải một tính năng lớn hơn. Nó là một bản bàn giao gọn gàng.
+
+## Hai track, hai bộ artifact
+
+Bạn chọn track nào thì nộp bộ đó. Không cần làm cả hai.
+
+### Maker
+
+- Một prototype chạy được.
+- Một video demo 60-90 giây đi hết luồng chính.
+- Một changelog ngắn.
+- Danh sách 3 giới hạn.
+- Một bước tiếp theo.
+
+### PM
+
+- Một spec một trang.
+- Năm đến bảy tiêu chí chấp nhận.
+- Một risk register ba mục.
+- Một handoff brief một trang.
+- Một acceptance report mẫu.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792602163/series/ai-from-zero/capstone-package.png"
+  alt="Sơ đồ gói bàn giao: Maker nộp prototype, video demo, changelog, giới hạn và bước tiếp; PM nộp spec, tiêu chí, risk, handoff và acceptance report"
+  caption="Cùng một sản phẩm, nhưng mỗi track nộp một bộ artifact khác nhau."
+/>
+
+## Phạm vi capstone
+
+Chọn một trong hai cách:
+
+1. **Dùng sản phẩm đặt lịch đã làm.** Đóng gói nó thành bản demo hoặc bộ tài liệu.
+2. **Đổi sang một sản phẩm nhỏ khác.** Ví dụ trang ghi chú, form đăng ký, hoặc công cụ tính chi phí.
+
+Cách thứ nhất an toàn hơn. Cách thứ hai cho bạn thấy mình đã thật sự học được vòng lặp, hay chỉ học thuộc một ví dụ.
+
+Nếu chọn cách hai, giữ phạm vi nhỏ: một màn hình, một luồng, một kết quả.
+
+## Kế hoạch 5 ngày
+
+**Ngày 1. Chốt phạm vi.**
+Chọn artifact. Viết ra một câu: "Cuối tuần này mình sẽ có [artifact] cho [người dùng]." Đóng băng tính năng. Không thêm gì mới sau bước này.
+
+**Ngày 2. Hoàn thiện.**
+Maker: làm cho luồng chính chạy ổn. PM: viết spec và tiêu chí.
+Chỉ sửa những gì cần cho artifact, không mở rộng.
+
+**Ngày 3. Kiểm tra và ghi bằng chứng.**
+Chạy smoke test, edge test, và regression. Chụp ảnh hoặc quay video. Ghi lại lỗi còn lại.
+
+**Ngày 4. Chuẩn bị trình bày.**
+Maker: quay video 60-90 giây. PM: viết handoff một trang.
+Viết phần tự đánh giá: điều gì hiệu quả, điều gì mất thời gian, nếu làm lại sẽ đổi gì.
+
+**Ngày 5. Trình bày và nhận phản hồi.**
+Trình bày 5 phút hoặc gửi bản viết một trang. Nhận phản hồi từ một người thật, không phải từ chính mình.
+
+## Rubric tự đánh giá
+
+### Maker
+
+- Luồng chính chạy được từ đầu tới cuối.
+- Có bằng chứng cho ít nhất năm tiêu chí.
+- Có ít nhất một lỗi đã sửa và một lỗi còn lại được ghi rõ.
+- Video demo cho thấy luồng thật, không cắt ghép để che lỗi.
+- Giới hạn được nói thẳng, không biện minh.
+
+### PM
+
+- Spec nằm gọn trong một trang.
+- Có mục ngoài phạm vi.
+- Năm đến bảy tiêu chí chấp nhận đều quan sát được.
+- Ba rủi ro có cách giảm cụ thể.
+- Handoff đủ để người khác bắt đầu mà không phải hỏi lại.
+- Acceptance report có bằng chứng cho từng tiêu chí.
+
+Bạn không cần đạt tất cả để "đậu". Bạn cần biết mình đạt cái nào và thiếu cái nào. Capstone là bài tập tự đánh giá, không phải kỳ thi.
+
+## Phần tự đánh giá
+
+Viết ngắn, khoảng 150-250 từ:
+
+```text
+Điều gì hiệu quả nhất?
+Điều gì mất thời gian nhất?
+Chỗ nào mình phải sửa nhiều lần?
+Nếu làm lại, mình sẽ đổi gì?
+Bước tiếp theo là gì?
+```
+
+Phần này quan trọng hơn artifact. Nó cho bạn thấy mình đã học được gì, không chỉ làm được gì.
+
+## Trình bày 5 phút
+
+Nếu có người nghe, dùng cấu trúc này:
+
+1. Vấn đề và người dùng (1 phút).
+2. Bạn đã làm gì (1 phút).
+3. Bằng chứng (1 phút).
+4. Giới hạn và lỗi còn lại (1 phút).
+5. Bước tiếp theo (1 phút).
+
+Đừng dành 5 phút để khoe giao diện. Người nghe cần biết bạn đã quyết định gì và kiểm tra nó ra sao.
+
+## Lỗi thường gặp ở capstone
+
+**Thêm tính năng vào phút cuối.** Bạn sẽ không có thời gian kiểm tra, và demo sẽ mong manh hơn.
+
+**Che giấu giới hạn.** Người xem sẽ phát hiện, và bạn mất phần đáng tin nhất.
+
+**Viết spec mười trang.** Brief dài không phải brief tốt. Một trang là đủ cho phạm vi này.
+
+**Trình bày không có bằng chứng.** Ảnh, video, bước tái hiện. Không có bằng chứng thì chỉ là ý kiến.
+
+**Không tự đánh giá.** Nếu không biết mình yếu chỗ nào, bài học sẽ không theo bạn sang dự án sau.
+
+## Checklist cuối khoá
+
+- Có artifact theo track.
+- Có bằng chứng cho các tiêu chí chính.
+- Có phần tự đánh giá.
+- Có ít nhất một người đã xem hoặc nghe.
+- Có một bước tiếp theo rõ ràng.
+
+Nếu thiếu một mục, bạn vẫn có thể nộp, nhưng hãy ghi rõ mục đó vào phần tự đánh giá.
+
+## Kết
+
+Khoá học kết thúc ở đây, nhưng vòng lặp thì không.
+
+Bạn sẽ gặp lại đúng bốn bước này trong mọi dự án: mô tả, xem, sửa, kiểm tra. Công cụ sẽ đổi. Model sẽ đổi. Nhưng cách bạn giao việc, đòi bằng chứng và giữ phạm vi sẽ vẫn dùng được.
+
+Bước tiếp theo của mình khuyên là: chọn một việc thật đang làm, dùng lại bộ template trong khoá, và chạy một vòng đầy đủ. Đừng học thêm khoá nữa ngay. Làm một việc thật đã.

@@ -1,0 +1,156 @@
+---
+title: "PM: chia task và viết brief"
+description: "Biến một thay đổi nhỏ thành brief, tiêu chí chấp nhận và danh sách task mà người khác làm đúng."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606088/series/ai-from-zero/cover-pm.png"
+track: "pm"
+---
+
+Bạn chọn PM. Bài này dùng đúng thay đổi ở bài 5a: thay ô nhập dịch vụ bằng dropdown ba lựa chọn.
+
+Khác biệt là bạn không tự dựng. Bạn làm cho thay đổi đó rõ đến mức người khác, hoặc một agent, có thể làm đúng mà không phải hỏi lại.
+
+## Brief không phải danh sách mong muốn
+
+Một brief tốt trả lời được bốn câu:
+
+- Vấn đề là gì?
+- Ai gặp vấn đề đó?
+- Thay đổi nào sẽ giải quyết nó?
+- Làm sao biết thay đổi đó đã đúng?
+
+Nếu thiếu câu cuối, bạn chưa có brief. Bạn chỉ có một yêu cầu.
+
+## Một brief một trang
+
+Đây là brief cho thay đổi nhỏ ở bài 5a:
+
+```text
+Vấn đề:
+Người dùng phải gõ tên dịch vụ, dễ sai chính tả và khó thống kê.
+
+Người dùng:
+Khách đặt lịch trên điện thoại.
+
+Luồng hiện tại:
+Form có ô nhập dịch vụ tự do -> màn hình tóm tắt -> xác nhận.
+
+Thay đổi mong muốn:
+- Thay ô nhập dịch vụ bằng dropdown có đúng 3 lựa chọn: cắt tóc, massage, tư vấn.
+- Mặc định chưa chọn gì.
+- Nếu chưa chọn, không cho bấm "Đặt lịch" và hiện lỗi cạnh dropdown.
+- Màn hình tóm tắt hiện đúng dịch vụ đã chọn.
+
+Ngoài phạm vi:
+- Không thêm giá, thời lượng hay lịch làm việc.
+- Không đổi luồng xác nhận.
+- Không thêm đăng nhập hay thanh toán.
+
+Tiêu chí chấp nhận:
+1. Dropdown có đúng 3 lựa chọn.
+2. Mặc định chưa chọn gì.
+3. Bỏ trống thì không gửi được và có lỗi rõ cạnh dropdown.
+4. Chọn dịch vụ nào thì màn hình tóm tắt hiện đúng dịch vụ đó.
+5. Luồng cũ từ form tới xác nhận vẫn chạy.
+
+Rủi ro:
+- Người dùng bỏ qua dropdown vì đã quen gõ tay.
+- Dữ liệu cũ không khớp với 3 lựa chọn mới.
+- Dropdown bị che trên màn hình nhỏ.
+```
+
+Brief này không dài hơn một trang. Đó là chủ ý. Brief dài thường không rõ hơn, chỉ khó đọc hơn.
+
+## Chia thành task
+
+Từ brief, chia thành ba task. Mỗi task phải tạo ra một kết quả nhìn thấy được, không phải một tầng kỹ thuật.
+
+| Task | Mục tiêu | Tiêu chí xong | Phụ thuộc |
+| --- | --- | --- | --- |
+| 1. Dropdown và tóm tắt | Thay ô nhập bằng dropdown, hiện giá trị ở tóm tắt | Có 3 lựa chọn, mặc định trống, tóm tắt đúng | Không |
+| 2. Validation | Chặn gửi khi chưa chọn, hiện lỗi | Bỏ trống thì không gửi được, chọn lại thì lỗi biến mất | Task 1 |
+| 3. Regression và bằng chứng | Kiểm tra luồng cũ và ghi bằng chứng | Cả 5 tiêu chí đạt, có ảnh hoặc video | Task 1, 2 |
+
+Cách chia này có một điểm quan trọng: task 1 đã tạo ra thứ nhìn thấy được. Người làm không phải chờ đến task 3 mới biết mình đang làm gì.
+
+Nếu chia theo tầng kiểu "sửa HTML", "sửa CSS", "sửa JavaScript", mỗi task không tự đứng được. Bạn sẽ khó kiểm tra và khó biết khi nào xong.
+
+## Viết tiêu chí chấp nhận
+
+Tiêu chí phải là câu quan sát được. Đây là năm câu mình dùng:
+
+1. Dropdown có đúng ba lựa chọn: cắt tóc, massage, tư vấn.
+2. Khi mở form, dropdown chưa chọn gì.
+3. Bỏ trống dropdown và bấm "Đặt lịch" thì form không gửi, có lỗi cạnh dropdown.
+4. Chọn "massage" và đi tiếp thì màn hình tóm tắt hiện "massage".
+5. Luồng cũ từ form tới xác nhận vẫn chạy.
+
+Câu "dropdown hoạt động tốt" không phải tiêu chí. Câu "bỏ trống thì không gửi được" là tiêu chí.
+
+## Risk register ngắn
+
+Ba rủi ro là đủ cho một thay đổi nhỏ.
+
+| Rủi ro | Khả năng | Tác động | Cách giảm |
+| --- | --- | --- | --- |
+| Người dùng bỏ qua dropdown | Trung bình | Trung bình | Đặt nhãn rõ, giữ vị trí quen thuộc |
+| Dữ liệu cũ không khớp 3 lựa chọn | Thấp | Cao | Kiểm tra dữ liệu mẫu trước khi triển khai |
+| Dropdown bị che trên mobile | Trung bình | Trung bình | Kiểm tra ở chiều rộng 375px |
+
+Risk register không phải để dọa nhau. Nó để bạn biết chỗ nào cần kiểm tra kỹ hơn.
+
+## Bàn giao
+
+Khi đưa việc cho người làm hoặc agent, đưa đủ năm thứ:
+
+1. Brief một trang.
+2. Ba task với tiêu chí xong.
+3. Năm tiêu chí chấp nhận.
+4. Một ví dụ hoặc ảnh tham khảo.
+5. Yêu cầu bằng chứng khi báo xong.
+
+Thiếu thứ nào, người làm sẽ tự điền. Và khi tự điền, họ sẽ chọn theo cách của họ, không phải cách của bạn.
+
+## Nghiệm thu
+
+Khi nhận kết quả, đừng đọc lời mô tả trước. Mở sản phẩm và bấm thử theo năm tiêu chí.
+
+Với mỗi tiêu chí, ghi:
+
+- Cách kiểm tra.
+- Kết quả thực tế.
+- Bằng chứng.
+- Đạt hay chưa đạt.
+
+Nếu chưa đạt, viết báo lỗi theo mẫu ở bài 3. Đừng nói "chưa ổn". Nói rõ tiêu chí nào, bước nào, mong đợi gì, thực tế gì.
+
+## Lỗi thường gặp
+
+**Brief quá dài.** Dài thường là dấu hiệu bạn chưa chốt phạm vi.
+
+**Tiêu chí mơ hồ.** "Hoạt động tốt" không kiểm tra được. "Bỏ trống thì không gửi được" kiểm tra được.
+
+**Task chồng lên nhau.** Hai người cùng sửa một chỗ, hoặc hai task cùng phụ thuộc một quyết định chưa chốt.
+
+**Không có mục ngoài phạm vi.** Người làm sẽ tự thêm thứ bạn không muốn.
+
+**Không có risk register.** Bạn chỉ phát hiện rủi ro khi nó đã xảy ra.
+
+**Nghiệm thu bằng cảm giác.** Nhìn thấy ổn không có nghĩa là đạt tiêu chí.
+
+## Checklist
+
+- Brief nằm gọn trong một trang.
+- Có ba task, mỗi task có tiêu chí xong.
+- Có năm tiêu chí chấp nhận quan sát được.
+- Có ba rủi ro và cách giảm.
+- Có mục ngoài phạm vi.
+- Bàn giao kèm yêu cầu bằng chứng.
+
+Nếu thiếu một mục, đừng bàn giao vội. Người làm sẽ phải đoán, và bạn sẽ phải sửa nhiều hơn.
+
+## Kết
+
+Bạn vừa biến một thay đổi nhỏ thành brief, task list, tiêu chí và risk register.
+
+Bài sau, mình sẽ nói về lúc kết quả lệch: cách nghiệm thu, cách từ chối cụ thể, và cách quyết định sửa hay chấp nhận.

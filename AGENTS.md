@@ -150,6 +150,7 @@ tags:
 featured: false                  # optional
 image: "https://cdn.example.com/cover.png"  # optional
 status: active                   # active | complete | paused | archived
+quiz: []                         # optional, series-level check, see Quizzes
 ---
 ```
 
@@ -159,6 +160,8 @@ status: active                   # active | complete | paused | archived
 ---
 title: "Chapter Title"
 description: "Brief chapter summary"  # optional
+quiz: []                         # optional, chapter check, see Quizzes
+track: "shared" | "maker" | "pm" # optional, defaults to shared
 ---
 ```
 
@@ -166,8 +169,30 @@ Chapter rules:
 - Filename must start with a numeric prefix for ordering: `01-`, `02-`, etc.
 - Body headings start at `##` (chapter title is rendered from frontmatter, not from body).
 - All custom components (Callout, Image, Video, etc.) are available.
+- Use `track` with `<RolePicker />` in `_meta.mdx` to show a role fork; `shared` chapters stay visible in every track.
 - Each series folder must have exactly one `_meta.mdx`.
 - Folders starting with `_` inside `series/` are ignored.
+
+### Quizzes
+
+Both `_meta.mdx` and a chapter can carry an optional `quiz` list. A chapter quiz renders at the end of that chapter; the `_meta.mdx` quiz renders at the end of the series page. There is no score and no gate, and a missing `quiz` renders nothing.
+
+```yaml
+quiz:
+  - question: "Which loop does this chapter teach?"
+    options:
+      - text: "Describe, look, fix"
+        correct: true
+      - text: "Read, install, write"
+      - text: "Watch, bookmark, open"
+    explanation: "Optional, plain text."
+```
+
+Rules:
+- `options` needs at least two entries. Exactly one option has `correct: true`; leave the field off the others.
+- Use the boolean `true`, not `yes` or `on`. YAML reads those as strings, and the question is dropped.
+- `question`, `text`, and `explanation` are plain text. Markdown is not rendered.
+- A malformed question is dropped and the rest of the quiz still renders. The site logs a warning in development.
 
 ## Available MDX components
 
@@ -188,6 +213,14 @@ Globally available inside any MDX file. **Do not add import statements.**
 ### `<Image>`
 - `src` (required), `alt` (recommended), `caption` (optional)
 - Click-to-zoom enabled automatically
+
+### `<RolePicker>`
+
+```mdx
+<RolePicker />
+```
+
+A course-level role chooser. It writes `?track=maker` or `?track=pm` to the series URL, and the series page hides chapters from the other branch. Use it in a series `_meta.mdx` below the course structure. Chapters without a `track` are treated as `shared`.
 
 ### `<Bookmark>`
 - `url` (required), `title`, `description`, `icon`, `cover`
@@ -273,8 +306,9 @@ Supported: `typescript`, `javascript`, `tsx`, `jsx`, `python`, `go`, `rust`, `ba
 4. Create chapter files with numeric prefix: `01-chapter-slug.mdx`, `02-chapter-slug.mdx`, etc.
 5. Each chapter has minimal frontmatter: `title` (required), `description` (optional).
 6. Chapter body starts at `##` — do not use `#` (the title comes from frontmatter).
-7. All chapters are rendered on a single page at `/series/<slug>`.
-8. Do not commit or push — leave that to the user.
+7. Optionally add `quiz` to `_meta.mdx` for the series check, or to a chapter for that chapter's check. See Quizzes.
+8. Chapters render at `/series/<slug>/<chapter-slug>`; the series page lists them.
+9. Do not commit or push — leave that to the user.
 
 ### Adding a chapter to an existing series
 

@@ -1,0 +1,184 @@
+---
+title: "PM: nghiệm thu và xử lý khi lệch"
+description: "Cách chấm theo tiêu chí, viết từ chối cụ thể và quyết định sửa, chấp nhận có ghi chú hay đổi phạm vi."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606088/series/ai-from-zero/cover-pm.png"
+track: "pm"
+---
+
+Kết quả quay về. Bạn mở lên, bấm thử. Nó gần đúng, nhưng không hoàn toàn đúng.
+
+Đây là lúc công việc PM thật sự bắt đầu.
+
+Không phải lúc viết brief. Không phải lúc chia task. Mà là lúc bạn phải quyết định: chấp nhận, yêu cầu sửa, chấp nhận có điều kiện, hay đổi phạm vi.
+
+## Bốn kết cục, không phải hai
+
+Người mới thường nghĩ nghiệm thu chỉ có hai kết quả: đạt hoặc không đạt. Thực tế có bốn.
+
+| Kết cục | Khi nào dùng | Điều kiện |
+| --- | --- | --- |
+| Chấp nhận | Mọi tiêu chí bắt buộc đều đạt | Có bằng chứng cho từng tiêu chí |
+| Yêu cầu sửa | Một tiêu chí bắt buộc không đạt | Ghi rõ tiêu chí, bước, mong đợi, thực tế |
+| Chấp nhận có ghi chú | Lỗi nhỏ, không ảnh hưởng dữ liệu hay luồng chính | Có open issues và người chịu trách nhiệm |
+| Đổi phạm vi | Kết quả cho thấy một cách làm tốt hơn | Brief và tiêu chí được cập nhật trước |
+
+Kết cục thứ tư là chỗ dễ lạc nhất. Nếu bạn âm thầm chấp nhận một thay đổi ngoài brief, bạn đang đổi phạm vi mà không ai quyết định.
+
+## Chạy nghiệm thu theo tiêu chí
+
+Mở brief ở bài 05-02. Đừng đọc lời giải thích của người làm trước. Mở sản phẩm và bấm thử.
+
+Với mỗi tiêu chí, ghi bốn thứ:
+
+| Tiêu chí | Cách kiểm tra | Bằng chứng | Kết quả |
+| --- | --- | --- | --- |
+| Dropdown có đúng 3 lựa chọn | Mở form, đếm lựa chọn | Ảnh dropdown | Đạt |
+| Mặc định chưa chọn gì | Mở form, xem giá trị ban đầu | Ảnh form | Đạt |
+| Bỏ trống thì không gửi được | Bỏ trống, bấm "Đặt lịch" | Ảnh lỗi | Chưa đạt |
+| Tóm tắt hiện đúng dịch vụ | Chọn "massage", đi tiếp | Ảnh tóm tắt | Đạt |
+| Luồng cũ vẫn chạy | Đi hết một vòng | Video 15 giây | Đạt |
+
+Bảng này là thứ bạn đưa cho người làm, không phải một câu "anh xem lại giúp em".
+
+## Viết từ chối cụ thể
+
+Câu "chưa ổn" không đủ để sửa. Người làm cần biết chỗ nào, khi nào, và đúng ra phải thấy gì.
+
+Dùng mẫu này:
+
+```text
+Tiêu chí chưa đạt:
+Bỏ trống dropdown và bấm "Đặt lịch" thì form vẫn gửi.
+
+Bước tái hiện:
+1. Mở form.
+2. Không chọn dịch vụ.
+3. Bấm "Đặt lịch".
+
+Kết quả mong đợi:
+Form không gửi và hiện lỗi cạnh dropdown.
+
+Kết quả thực tế:
+Form gửi và hiện thông báo đặt lịch thành công.
+
+Bằng chứng:
+Ảnh chụp màn hình sau khi bấm.
+
+Mức độ:
+Cao, vì tạo lịch không có dịch vụ.
+
+Đề xuất:
+Chặn gửi khi dropdown chưa có giá trị.
+```
+
+Một từ chối tốt không làm người làm phải hỏi lại. Nó chỉ vào đúng tiêu chí, đúng bước, đúng khác biệt.
+
+## Ba câu hỏi trước khi quyết định
+
+Trước khi chọn một trong bốn kết cục, hỏi ba câu:
+
+1. **Tiêu chí nào không đạt?** Nếu không chỉ ra được, bạn chưa nghiệm thu.
+2. **Có ảnh hưởng dữ liệu hoặc người dùng thật không?** Mất dữ liệu, tạo dữ liệu sai, hoặc chặn luồng chính là mức cao.
+3. **Sửa mất bao lâu so với chấp nhận có ghi chú?** Nếu sửa 5 phút, sửa. Nếu sửa 2 ngày và lỗi chỉ là căn lề, ghi chú rồi đi tiếp.
+
+Ba câu này giúp bạn tránh cả hai cực: cầu toàn quá mức và dễ dãi quá mức.
+
+## Khi nào chấp nhận có ghi chú
+
+Chấp nhận có ghi chú chỉ hợp lý khi:
+
+- Lỗi không ảnh hưởng dữ liệu.
+- Luồng chính vẫn chạy.
+- Có cách ghi lại và theo dõi.
+- Có người chịu trách nhiệm sửa sau.
+
+Không dùng cách này cho:
+
+- Mất dữ liệu hoặc tạo dữ liệu sai.
+- Sai giá trị hiển thị ở màn hình quan trọng.
+- Luồng chính bị chặn.
+- Vấn đề bảo mật hoặc quyền truy cập.
+
+Nếu rơi vào bốn trường hợp sau, hãy yêu cầu sửa, kể cả khi đang gấp.
+
+## Khi nào đổi phạm vi
+
+Đôi khi kết quả không đúng brief, nhưng lại tốt hơn brief. Ví dụ, người làm thêm một bước xác nhận mà bạn chưa yêu cầu, và bước đó thật sự giúp người dùng.
+
+Đừng âm thầm chấp nhận. Làm ba việc:
+
+1. Ghi rõ thay đổi ngoài brief.
+2. Quyết định có đưa vào phạm vi hay không.
+3. Nếu có, cập nhật brief, tiêu chí và task list.
+
+Nếu không cập nhật, lần sau sẽ có người hỏi vì sao sản phẩm khác brief. Và bạn sẽ không có câu trả lời.
+
+## Ghi lại quyết định
+
+Một acceptance report ngắn là đủ:
+
+```text
+Ngày:
+Người nghiệm thu:
+Phiên bản:
+Tiêu chí đạt:
+Tiêu chí chưa đạt:
+Lỗi còn lại:
+Quyết định: chấp nhận / sửa / chấp nhận có ghi chú / đổi phạm vi
+Bước tiếp theo:
+```
+
+Lưu nó ở cùng chỗ với brief. Ba tháng sau, đây là thứ giúp bạn nhớ vì sao mình đã quyết định như vậy.
+
+## Lỗi thường gặp
+
+**Chấp nhận vì "nhìn cũng được".** Đây không phải nghiệm thu. Đây là xem.
+
+**Từ chối mà không chỉ ra tiêu chí.** Người làm sẽ sửa theo phỏng đoán.
+
+**Di chuyển cột gôn.** Tiêu chí đổi giữa lúc làm khiến không ai biết khi nào xong.
+
+**Chấp nhận lỗi nghiêm trọng vì áp lực thời gian.** Một lỗi dữ liệu hôm nay sẽ thành hai lỗi vào ngày mai.
+
+**Không ghi lại quyết định.** Lần sau bạn sẽ tranh luận lại từ đầu.
+
+**Gộp nhiều lỗi vào một từ chối.** Người làm sửa một nửa và bạn không biết nửa nào còn.
+
+## Bài tập 45-60 phút
+
+**Bước 1. Mở brief (5 phút).**
+Lấy brief và năm tiêu chí ở bài 05-02.
+
+**Bước 2. Mở kết quả (5 phút).**
+Dùng sản phẩm thật, hoặc nhờ AI dựng theo brief.
+
+**Bước 3. Chạy năm tiêu chí (15 phút).**
+Ghi bảng kết quả và bằng chứng.
+
+**Bước 4. Viết acceptance report (10 phút).**
+Điền đủ các mục ở mẫu trên.
+
+**Bước 5. Viết một từ chối (10 phút).**
+Chọn tiêu chí chưa đạt. Viết đủ bước, mong đợi, thực tế, bằng chứng.
+
+**Bước 6. Quyết định (5 phút).**
+Chọn một trong bốn kết cục. Nếu đổi phạm vi, cập nhật brief.
+
+**Bước 7. Ghi lại (5 phút).**
+Lưu report cùng brief để lần sau tra được.
+
+## Checklist
+
+- Có bảng năm tiêu chí với bằng chứng.
+- Có một quyết định rõ ràng.
+- Nếu từ chối, có tiêu chí, bước, mong đợi và thực tế.
+- Nếu chấp nhận có ghi chú, có open issues và người chịu trách nhiệm.
+- Nếu đổi phạm vi, brief đã được cập nhật.
+- Acceptance report được lưu cùng brief.
+
+## Kết
+
+Bạn vừa học cách nghiệm thu và xử lý khi kết quả lệch: chấm theo tiêu chí, từ chối cụ thể, và chọn đúng kết cục.
+
+Bài cuối của track PM là capstone: chuẩn bị một spec một trang, một bộ tiêu chí chấp nhận, và một risk register ngắn để bàn giao.

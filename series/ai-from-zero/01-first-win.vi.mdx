@@ -1,0 +1,238 @@
+---
+title: "Làm một thứ chạy được trong 30 phút"
+description: "Bài đầu tiên của khoá: dựng một trang đặt lịch đơn giản bằng AI, không cần cài gì, để học vòng lặp mô tả - xem - sửa."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606074/series/ai-from-zero/cover-start.png"
+track: "shared"
+quiz:
+  - question: "Vòng lặp học trong bài gồm mấy bước?"
+    options:
+      - text: "Mô tả, xem, sửa"
+        correct: true
+      - text: "Đọc lý thuyết, cài môi trường, viết code"
+      - text: "Xem video, đánh dấu khoá học, mở editor"
+    explanation: "Bài học tập trung vào vòng lặp ngắn: mô tả điều mình muốn, xem kết quả, rồi sửa."
+---
+
+Hồi mới bắt đầu, mình có một thói quen rất khó bỏ: học hết lý thuyết rồi mới làm.
+
+Cài môi trường. Đọc tài liệu. Xem vài video. Đánh dấu ba khoá học. Rồi mở editor lên và ngồi nhìn con trỏ nhấp nháy.
+
+Cách đó đặc biệt tệ khi học với AI. Thứ bạn cần học không phải cú pháp, mà là một vòng lặp: mô tả điều mình muốn, xem kết quả, rồi sửa. Vòng lặp đó chỉ học được bằng cách chạy nó.
+
+Nên bài đầu tiên làm ngược lại. Không cài gì. Không đọc thêm gì. Bạn sẽ tạo một trang đặt lịch đơn giản trong 30-60 phút. Và quan trọng hơn, bạn sẽ thấy mình cần nói gì để AI làm đúng.
+
+## Bài này để làm gì
+
+Sau bài này, bạn có:
+
+- Một trang đặt lịch chạy được trên trình duyệt.
+- Một yêu cầu mẫu đủ rõ để dùng lại cho việc khác.
+- Một checklist để biết kết quả đã ổn chưa.
+- Một lần tự sửa lỗi mà không cần đọc code.
+
+Bạn không cần biết lập trình. Bạn không cần cài terminal. Bạn chỉ cần một trình duyệt và một công cụ AI có thể dựng giao diện ngay trên web.
+
+## Vì sao phải thắng trước khi hiểu
+
+Có một lý do rất thực dụng: não bạn cần thấy kết quả trước khi nó chịu học lý thuyết.
+
+Nếu bài đầu tiên là "context window là gì", bạn sẽ hiểu định nghĩa, ghi nhớ được vài ngày, rồi quên. Nếu bài đầu tiên là "làm cái này chạy đi", bạn sẽ va vào đúng những câu hỏi cần hỏi: mình phải nói gì? nói tới đâu là đủ? kết quả sai thì sửa thế nào?
+
+Ba câu đó mới là kỹ năng thật.
+
+Thắng sớm còn cho bạn một thứ nữa: bạn thấy giới hạn của AI sớm. Nó sẽ quên một chi tiết, tự thêm thứ bạn không yêu cầu, hoặc làm đúng giao diện nhưng sai luồng. Đó không phải lỗi của bạn. Đó là bản chất của công cụ, và biết sớm sẽ giúp bạn bớt kỳ vọng sai.
+
+## Chọn một thứ đủ nhỏ
+
+Ai cũng muốn làm cả sản phẩm ngay. Đừng.
+
+Bài này chỉ cần ba thứ:
+
+- Một màn hình.
+- Một luồng chính.
+- Một kết quả nhìn thấy được.
+
+Cụ thể: một trang đặt lịch hẹn.
+
+Người dùng nhập tên, chọn dịch vụ, chọn ngày giờ, bấm đặt. Trang hiện xác nhận. Hết.
+
+Không đăng nhập. Không thanh toán. Không phân quyền. Không database. Những thứ đó để sau, khi bạn đã quen vòng lặp.
+
+## Vòng lặp ba bước
+
+Mọi việc với AI, từ hôm nay, đi theo ba bước này.
+
+**1. Mô tả.** Nói rõ mục tiêu, người dùng, đầu vào, đầu ra, ràng buộc và một ví dụ.
+
+**2. Xem.** Mở kết quả. Bấm thử. Thử cả dữ liệu xấu.
+
+**3. Sửa.** Mỗi lần chỉ sửa một điểm. Nói rõ cái gì đúng, cái gì sai, và giữ nguyên phần còn lại.
+
+Nghe đơn giản. Nhưng phần lớn lỗi mình thấy đến từ bước 1 quá mơ hồ, hoặc bước 3 sửa quá nhiều thứ cùng lúc.
+
+## Đường đi mặc định
+
+Bài này có hai đường đi. Chọn một, không cần làm cả hai.
+
+### Cách 1: Claude Artifacts, không cần cài gì
+
+Phù hợp nếu bạn muốn thấy kết quả ngay mà không động tới terminal.
+
+1. Mở [claude.ai](https://claude.ai) và đăng nhập.
+2. Tạo một cuộc trò chuyện mới.
+3. Dán yêu cầu ở phần dưới vào ô chat.
+4. Chờ Claude dựng artifact. Mở phần preview để xem kết quả.
+5. Bấm thử như một người dùng thật.
+6. Sửa bằng cách trả lời tiếp trong cùng cuộc trò chuyện.
+7. Lưu link cuộc trò chuyện hoặc ảnh chụp màn hình.
+
+### Cách 2: Claude Code CLI, làm trên máy
+
+Phù hợp nếu bạn đã quen terminal hoặc muốn giữ file trên máy.
+
+1. Tạo một thư mục trống, ví dụ `booking-lab`.
+2. Mở terminal trong thư mục đó và chạy `claude`.
+3. Dán yêu cầu ở phần dưới. Yêu cầu Claude tạo file `index.html`.
+4. Chạy server tĩnh bằng `python3 -m http.server 8000`.
+5. Mở `http://localhost:8000` trong trình duyệt.
+6. Sửa bằng cách trả lời tiếp trong Claude Code.
+7. Lưu file `index.html` hoặc ảnh chụp màn hình.
+
+Nếu bạn dùng Herdr, mở một pane cho Claude Code và một pane cho server. Hai pane chạy song song, không cần chuyển qua lại.
+
+Không cần chụp giao diện terminal. Ảnh trong bài chỉ cần kết quả trong trình duyệt, vì đó là thứ người đọc nào cũng thấy giống nhau.
+
+Nếu bạn dùng công cụ khác, xem phụ lục ở cuối bài. Các bước tương tự, chỉ khác chỗ bấm.
+
+## Một yêu cầu mẫu
+
+Đây là <TermNote id="prompt">prompt</TermNote> bạn có thể dán vào Claude:
+
+```text
+Tạo một trang đặt lịch hẹn đơn giản, chạy được trong trình duyệt.
+
+Bối cảnh:
+- Người dùng là khách của một tiệm nhỏ.
+- Họ muốn đặt lịch mà không cần gọi điện.
+
+Yêu cầu:
+- Có các trường: tên, số điện thoại, dịch vụ (cắt tóc, massage, tư vấn), ngày, giờ.
+- Sau khi bấm "Đặt lịch", hiện thông báo xác nhận ngay trên trang.
+- Nếu thiếu trường bắt buộc, hiện lỗi cạnh trường đó.
+- Không cần backend, không cần đăng nhập. Dữ liệu chỉ cần nhớ trong phiên hiện tại.
+- Giao diện sạch, dễ đọc trên điện thoại.
+
+Ràng buộc:
+- Một file HTML duy nhất, có CSS và JavaScript bên trong.
+- Không dùng thư viện ngoài.
+```
+
+Vì sao yêu cầu này ổn hơn "làm trang đặt lịch giúp tôi":
+
+- Nó nói rõ **ai dùng** và **họ cần gì**.
+- Nó liệt kê **đầu vào** và **đầu ra**.
+- Nó đặt **ràng buộc**, để AI không kéo thêm framework hay database.
+- Nó có **một ví dụ cụ thể**, nên AI không phải tự đoán.
+
+Bạn không cần viết dài như vậy mỗi lần. Nhưng lần đầu, viết rõ sẽ giúp bạn thấy cấu trúc.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792604661/series/ai-from-zero/m1-form.png"
+  alt="Trang đặt lịch với các trường họ tên, số điện thoại, dịch vụ, ngày, giờ và nút Đặt lịch"
+  caption="Kết quả tối thiểu: một form, một nút, một thông báo. Chưa cần đẹp, chỉ cần chạy được."
+/>
+
+## Bài tập 30-60 phút
+
+**Bước 1. Mở công cụ (5 phút).**
+Chọn một trong hai: Claude Artifacts trên [claude.ai](https://claude.ai), hoặc Claude Code CLI trong một thư mục trống.
+
+**Bước 2. Dán yêu cầu (5 phút).**
+Dán nguyên văn yêu cầu trên. Nếu công cụ hỏi thêm, trả lời ngắn, đừng đổi phạm vi.
+
+**Bước 3. Chạy và bấm thử (10 phút).**
+Mở artifact, hoặc mở `http://localhost:8000` nếu dùng CLI. Điền form như một người dùng thật. Xem thông báo xác nhận có hiện không.
+
+**Bước 4. Thử dữ liệu xấu (15 phút).**
+Bỏ trống tên. Nhập số điện thoại chữ cái. Chọn ngày đã qua. Bấm "Đặt lịch" hai lần. Nhập tên rất dài. Xem cái gì vỡ.
+
+**Bước 5. Sửa một lỗi (15 phút).**
+Chọn lỗi khó chịu nhất. Nói rõ: "Khi tôi bỏ trống tên, form vẫn gửi. Hãy chặn và hiện lỗi cạnh ô tên. Giữ nguyên phần còn lại."
+
+**Bước 6. Lưu kết quả (5 phút).**
+Lưu link cuộc trò chuyện, file `index.html`, hoặc ảnh chụp màn hình. Ghi lại một câu: lỗi nào bạn đã sửa, lỗi nào còn.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792604663/series/ai-from-zero/m1-error.png"
+  alt="Form đặt lịch hiển thị lỗi màu đỏ dưới từng trường còn trống"
+  caption="Lỗi nằm cạnh đúng trường, không phải một thông báo chung ở cuối form."
+/>
+
+## Cách biết mình đã xong
+
+Không cần code đẹp. Chỉ cần:
+
+- Trang mở được.
+- Form gửi được.
+- Có xác nhận sau khi gửi.
+- Có ít nhất một thông báo lỗi.
+- Bạn giải thích được luồng chính trong ba câu.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792604664/series/ai-from-zero/m1-success.png"
+  alt="Màn hình xác nhận đặt lịch thành công với tóm tắt họ tên, số điện thoại, dịch vụ, ngày và giờ"
+  caption="Kết quả cuối: xác nhận và tóm tắt đúng thông tin người dùng đã nhập."
+/>
+
+Nếu thiếu một trong năm thứ đó, bạn vẫn đang ở giữa bài. Không sao. Sửa tiếp.
+
+## Lỗi thường gặp
+
+**Yêu cầu quá lớn.** "Làm app đặt lịch có đăng nhập, thanh toán, quản lý lịch" sẽ cho bạn một đống thứ dở dang. Chọn một màn hình trước.
+
+**Không nói rõ đầu ra.** "Làm đẹp hơn" không kiểm tra được. "Dễ đọc trên điện thoại, nút chính to và rõ" kiểm tra được.
+
+**Sửa nhiều thứ cùng lúc.** Bạn sẽ không biết thay đổi nào gây ra kết quả nào. Mỗi lần một điểm.
+
+**Không thử dữ liệu xấu.** Giao diện đẹp lúc mọi thứ đúng chưa nói lên gì. Thử lúc thiếu, lúc sai, lúc bấm hai lần.
+
+**Tin lời "đã xong".** AI rất tự tin. Bạn phải bấm thử. Đây là bài học sẽ quay lại nhiều lần trong khoá.
+
+## Nếu bạn là PM
+
+Bạn làm cùng bài tập, nhưng đổi đầu ra.
+
+Thay vì tự dựng trang, bạn viết brief cho người khác làm, rồi nghiệm thu. Cụ thể:
+
+1. Viết một trang mô tả: ai dùng, họ cần gì, luồng chính, cái gì ngoài phạm vi.
+2. Viết 5 tiêu chí kiểm tra được. Ví dụ: "Bỏ trống tên thì không gửi được và có thông báo lỗi."
+3. Đưa brief cho AI hoặc dev, nhận kết quả.
+4. Tự bấm thử và chấm theo 5 tiêu chí.
+5. Ghi lại một điều bạn sẽ sửa trong brief lần sau.
+
+Đầu ra của bạn là brief và checklist, không phải code. Nhưng bạn vẫn phải tự tay bấm thử. Nghiệm thu bằng cảm giác "nhìn cũng được" là lỗi rất phổ biến.
+
+<Callout type="tip" title="Đừng cố hiểu code vội">
+  Bài này không yêu cầu bạn đọc hiểu code. Nếu muốn, hãy nhờ AI giải thích một đoạn sau khi trang đã chạy. Nhưng đừng để việc hiểu code chặn việc hoàn thành vòng lặp đầu tiên.
+</Callout>
+
+## Kết
+
+Bạn vừa đi hết một vòng: mô tả, xem, sửa.
+
+Vòng lặp này là thứ sẽ lặp lại trong toàn bộ khoá. Những bài sau chỉ làm nó đáng tin hơn: yêu cầu rõ hơn, kiểm tra kỹ hơn, và biết khi nào phải dừng lại.
+
+Bài sau, mình sẽ nói kỹ hơn về cách viết một yêu cầu mà AI không thể hiểu sai theo ý bạn. Nghe thì nhỏ, nhưng đây là kỹ năng tiết kiệm thời gian nhiều nhất.
+
+## Phụ lục: dùng công cụ khác
+
+**v0.** Tạo một project mới, dán yêu cầu, xem preview, rồi sửa bằng chat.
+
+**Lovable.** Tạo project, dán yêu cầu, mở preview, sửa bằng chat. Công cụ này mạnh hơn ở phần dựng nhiều màn hình.
+
+**Bolt.** Tạo project, dán yêu cầu, chạy preview trong trình duyệt.
+
+**AI IDE.** Tạo file `index.html`, dán yêu cầu, lưu, rồi mở file bằng trình duyệt. Cách này gần với công việc thật hơn nhưng cần cài đặt.
+
+Một lưu ý: nếu công cụ tạo ra nhiều file, bạn vẫn dùng được. Chỉ cần tìm file chính và mở nó. Đừng để việc chọn công cụ chặn bạn khỏi bài tập đầu tiên.

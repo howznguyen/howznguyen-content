@@ -1,0 +1,134 @@
+---
+title: "Maker: thêm một tính năng thật"
+description: "Chọn một thay đổi nhỏ, viết yêu cầu, thêm vào prototype và kiểm tra lại toàn bộ luồng."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606085/series/ai-from-zero/cover-maker.png"
+track: "maker"
+---
+
+Bạn chọn Maker. Bài này là lần đầu bạn thêm một tính năng thật vào sản phẩm đang có, thay vì dựng từ đầu.
+
+Mình chọn một thay đổi nhỏ: thay ô nhập dịch vụ tự do bằng dropdown có ba lựa chọn. Nghe thì ít, nhưng nó có đủ mọi thứ của một tính năng thật: dữ liệu, trạng thái, validation, hiển thị và regression.
+
+Regression nghe hơi kỹ thuật, nhưng nghĩa đơn giản là: thứ cũ có còn chạy đúng không. Đây là phần dễ bỏ nhất khi thêm tính năng mới.
+
+## Vì sao chọn thay đổi nhỏ này
+
+Một tính năng tốt để luyện tập cần bốn thứ:
+
+- Có kết quả nhìn thấy được.
+- Có ít nhất một trạng thái lỗi.
+- Có dữ liệu đi từ form sang màn hình khác.
+- Có thể làm hỏng luồng cũ nếu sơ ý.
+
+Dropdown dịch vụ có đủ bốn. Nó nhỏ, nhưng không tầm thường.
+
+## Bước 1: Nhìn lại luồng hiện tại
+
+Trước khi sửa, mở sản phẩm và đi hết một vòng. Ghi lại:
+
+- Ô dịch vụ hiện là gì?
+- Dữ liệu đó đi đâu sau khi bấm "Đặt lịch"?
+- Màn hình tóm tắt đang hiển thị gì?
+- Nếu bỏ trống ô đó thì chuyện gì xảy ra?
+
+Bạn không cần đọc code. Bạn chỉ cần biết luồng đang chạy thế nào, để sau này so sánh.
+
+## Bước 2: Viết yêu cầu
+
+Dùng lại mẫu sáu phần ở bài 2. Đây là một yêu cầu đủ dùng:
+
+```text
+Mục tiêu:
+Cho người dùng chọn dịch vụ từ danh sách thay vì gõ tay.
+
+Người dùng:
+Khách đặt lịch trên điện thoại.
+
+Luồng hiện tại:
+Form có ô nhập dịch vụ tự do -> màn hình tóm tắt -> xác nhận.
+
+Thay đổi mong muốn:
+- Thay ô nhập dịch vụ bằng dropdown có đúng 3 lựa chọn: cắt tóc, massage, tư vấn.
+- Mặc định chưa chọn gì.
+- Nếu chưa chọn, không cho bấm "Đặt lịch" và hiện lỗi cạnh dropdown.
+- Màn hình tóm tắt hiện đúng dịch vụ đã chọn.
+
+Không thay đổi:
+- Không đổi các trường khác.
+- Không đổi luồng tóm tắt và xác nhận.
+- Vẫn là một file HTML duy nhất.
+
+Tiêu chí đúng:
+- Dropdown có đúng 3 lựa chọn.
+- Không chọn thì không gửi được.
+- Chọn dịch vụ nào thì tóm tắt hiện đúng dịch vụ đó.
+- Luồng cũ vẫn chạy.
+```
+
+Điểm quan trọng nhất là dòng "Không thay đổi". Nếu bỏ nó, AI rất dễ tiện tay đổi bố cục hoặc thêm trường mới.
+
+## Bước 3: Thêm vào prototype
+
+Dán yêu cầu vào cuộc trò chuyện đang có sản phẩm. Đừng tạo cuộc trò chuyện mới, vì AI sẽ mất ngữ cảnh của luồng hiện tại.
+
+Sau khi AI làm xong, mở artifact và kiểm tra theo thứ tự:
+
+1. Dropdown có đúng ba lựa chọn không?
+2. Mặc định có trống không?
+3. Bỏ trống rồi bấm "Đặt lịch" thì có bị chặn không?
+4. Chọn "massage" thì màn hình tóm tắt có hiện "massage" không?
+5. Luồng cũ từ form tới xác nhận có còn chạy không?
+
+Nếu một trong năm câu trả lời là không, bạn có một việc để sửa.
+
+## Bước 4: Sửa một điểm mỗi lần
+
+Khi có lỗi, đừng nói "sửa hết giúp tôi". Chọn một điểm và nói rõ:
+
+```text
+Khi tôi bỏ trống dropdown dịch vụ và bấm "Đặt lịch", form vẫn gửi.
+Tôi mong đợi form chặn gửi và hiện lỗi cạnh dropdown.
+Giữ nguyên phần còn lại.
+```
+
+Sau mỗi lần sửa, chạy lại cả năm câu kiểm tra. Đây là cách bạn bắt regression sớm.
+
+## Bước 5: Ghi bằng chứng
+
+Bạn cần ba thứ:
+
+- Ảnh dropdown với ba lựa chọn.
+- Ảnh lỗi khi bỏ trống.
+- Ảnh màn hình tóm tắt hiện đúng dịch vụ đã chọn.
+
+Nếu có thể, quay một video ngắn 15 giây đi hết luồng. Video thường thuyết phục hơn ảnh khi bạn đưa cho người khác xem.
+
+## Lỗi thường gặp
+
+**Thêm quá nhiều thứ trong một lần.** Bạn sẽ không biết thay đổi nào làm hỏng thứ gì.
+
+**Không kiểm tra luồng cũ.** Dropdown chạy, nhưng nút "Quay lại" hoặc màn hình xác nhận bị vỡ.
+
+**Không xử lý trạng thái chưa chọn.** Dropdown mặc định chọn sẵn "cắt tóc", nên người dùng vô tình đặt dịch vụ sai.
+
+**Không kiểm tra dữ liệu hiển thị ở màn hình sau.** Chọn "tư vấn" nhưng tóm tắt vẫn hiện giá trị cũ.
+
+**Sửa xong không chạy lại toàn bộ.** Một thay đổi nhỏ có thể làm hỏng thứ vừa đúng.
+
+## Checklist
+
+- Dropdown có đúng ba lựa chọn.
+- Mặc định chưa chọn gì.
+- Bỏ trống thì không gửi được và có lỗi rõ.
+- Màn hình tóm tắt hiện đúng dịch vụ.
+- Luồng cũ vẫn chạy.
+- Có ảnh hoặc video làm bằng chứng.
+
+Nếu thiếu một mục, bạn chưa xong. Đừng thêm tính năng tiếp theo để che nó.
+
+## Kết
+
+Bạn vừa thêm một tính năng thật và kiểm tra được nó không làm vỡ thứ cũ.
+
+Bài sau, mình sẽ nói về cách giữ prototype không vỡ khi số lượng thay đổi bắt đầu tăng: quay lại phiên bản cũ, ghi changelog, và biết khi nào nên dừng thêm tính năng.

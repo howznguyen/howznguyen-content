@@ -1,0 +1,135 @@
+---
+title: "Maker: giữ prototype không vỡ"
+description: "Cách lưu bản chạy được, ghi changelog, chạy regression và biết khi nào nên dừng thêm tính năng."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792606085/series/ai-from-zero/cover-maker.png"
+track: "maker"
+---
+
+Sau bài trước, bạn đã thêm dropdown dịch vụ và kiểm tra được luồng cũ vẫn chạy. Prototype bắt đầu giống một sản phẩm thật.
+
+Đây cũng là lúc nó dễ vỡ nhất.
+
+Mỗi tính năng mới làm tăng số thứ có thể hỏng. Một thay đổi nhỏ ở form có thể làm sai màn hình tóm tắt. Một lần sửa màu có thể làm mất nút quay lại. Và nếu bạn không có bản chạy được để quay về, bạn sẽ phải sửa trong lúc sản phẩm đang hỏng.
+
+Bài này nói về ba thứ giữ prototype đứng vững: bản chuẩn, changelog và regression.
+
+## Bản chuẩn
+
+Bản chuẩn là phiên bản bạn biết chắc đang chạy đúng. Không phải bản mới nhất. Không phải bản đẹp nhất. Là bản bạn đã kiểm tra và có bằng chứng.
+
+Trước khi thêm bất kỳ thay đổi nào, lưu một bản:
+
+- Nếu công cụ có lịch sử phiên bản, tạo một bản sao hoặc đánh dấu phiên bản hiện tại.
+- Nếu công cụ cho xuất file, tải file HTML về máy.
+- Nếu chỉ có một cuộc trò chuyện, tạo một cuộc trò chuyện mới từ bản đang chạy, hoặc lưu lại toàn bộ nội dung.
+
+Đặt tên dễ hiểu:
+
+```text
+booking-v1-working.html
+booking-v2-dropdown.html
+booking-v3-broken.html
+```
+
+Tên có `working` và `broken` giúp bạn không phải mở từng file để nhớ cái nào là cái nào.
+
+## Changelog
+
+Changelog là danh sách những gì đã thay đổi. Mỗi lần một dòng, không cần dài.
+
+```text
+## v2 - 2026-10-21
+Thay đổi: thêm dropdown dịch vụ.
+Lý do: giảm lỗi gõ tay.
+Kiểm tra: 5/5 tiêu chí đạt.
+Vấn đề còn lại: dropdown hơi thấp trên mobile.
+```
+
+Bốn dòng này đủ để ba hôm sau bạn biết mình đã làm gì và còn gì chưa xong.
+
+Nếu không ghi, bạn sẽ phải đọc lại toàn bộ cuộc trò chuyện để nhớ. Việc đó tốn thời gian hơn nhiều so với viết bốn dòng ngay lúc làm.
+
+## Regression checklist
+
+Regression là kiểm tra lại những thứ cũ sau khi thêm thứ mới. Bạn không cần kiểm tra mọi thứ. Chỉ cần một danh sách ngắn, chạy lại sau mỗi thay đổi.
+
+Với sản phẩm đặt lịch, danh sách của mình là:
+
+```text
+- Trang mở được, không có lỗi trắng.
+- Form gửi được khi điền đủ.
+- Màn hình tóm tắt hiện đúng tên, dịch vụ, ngày, giờ.
+- "Quay lại" giữ nguyên dữ liệu.
+- Bấm "Xác nhận" hai lần không tạo hai lịch.
+- Dropdown có đủ 3 lựa chọn.
+- Ở chiều rộng 375px, form không bị che.
+```
+
+Bảy mục, chạy mất khoảng 5 phút. Nếu một mục hỏng, dừng lại và sửa trước khi thêm thứ mới.
+
+## Khi prototype vỡ
+
+Đừng sửa trong lúc hoảng. Làm theo thứ tự:
+
+1. **Dừng thêm tính năng.** Không thêm gì mới cho tới khi bản hiện tại chạy lại.
+2. **Xác định thứ vừa hỏng.** Ghi rõ: trước đó chạy, bây giờ không chạy, sau thay đổi nào.
+3. **Quay về bản chuẩn.** Mở bản `working` gần nhất.
+4. **Áp lại một thay đổi.** Chỉ một. Kiểm tra. Nếu hỏng, bạn biết thủ phạm.
+5. **Ghi lại.** Thêm một dòng vào changelog: đã hỏng gì, sửa cách nào.
+
+Nếu không có bản chuẩn, hãy yêu cầu AI khôi phục hành vi cũ bằng mô tả cụ thể:
+
+```text
+Sau thay đổi vừa rồi, nút "Quay lại" không còn giữ dữ liệu.
+Trước đó nó giữ dữ liệu.
+Hãy khôi phục hành vi đó, chỉ sửa phần này, giữ nguyên dropdown mới.
+```
+
+Đừng nói "undo hết". Bạn sẽ mất cả những thay đổi đang tốt.
+
+## Khi nào dừng thêm tính năng
+
+Prototype không phải sản phẩm cuối. Nó chỉ cần đủ tốt để demo hoặc để kiểm chứng một ý tưởng.
+
+Mình dùng ba dấu hiệu để dừng:
+
+- **Đủ luồng chính.** Người dùng đi từ đầu tới cuối được.
+- **Đủ bằng chứng.** Bạn có ảnh hoặc video cho từng tiêu chí.
+- **Đủ rõ giới hạn.** Bạn biết và nói được cái gì chưa làm.
+
+Nếu ba thứ này đã có, thêm tính năng chỉ làm demo mong manh hơn. Cảm giác "thêm một cái nữa cho đẹp" là dấu hiệu nên dừng, không phải nên tiếp.
+
+## Bài tập 45-60 phút
+
+**Bước 1. Lưu bản chuẩn (10 phút).**
+Xuất hoặc sao chép phiên bản đang chạy. Đặt tên có `working`.
+
+**Bước 2. Thêm một thay đổi nhỏ (10 phút).**
+Ví dụ: đổi câu thông báo xác nhận, hoặc thêm một trường "ghi chú" không bắt buộc.
+
+**Bước 3. Ghi changelog (5 phút).**
+Bốn dòng: thay đổi, lý do, kiểm tra, vấn đề còn lại.
+
+**Bước 4. Chạy regression (15 phút).**
+Chạy lại bảy mục ở trên. Ghi kết quả.
+
+**Bước 5. Nếu hỏng, quay lại và áp lại (15 phút).**
+Quay về bản `working`, áp lại đúng một thay đổi, kiểm tra lại.
+
+**Bước 6. Lưu bản cuối (5 phút).**
+Đặt tên `booking-v3-stable.html` hoặc tương tự.
+
+## Checklist
+
+- Có một bản `working` trước khi thay đổi.
+- Có changelog cho lần thay đổi này.
+- Có regression checklist và đã chạy lại.
+- Nếu hỏng, đã quay về bản chuẩn thay vì sửa trong lúc hỏng.
+- Biết rõ cái gì chưa làm.
+
+## Kết
+
+Bạn vừa học cách giữ prototype đứng vững: lưu bản chuẩn, ghi changelog, chạy regression và dừng đúng lúc.
+
+Bài cuối của track Maker là capstone: chuẩn bị một bản demo, quay video ngắn, và viết rõ giới hạn của sản phẩm.

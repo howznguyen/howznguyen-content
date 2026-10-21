@@ -1,0 +1,263 @@
+---
+title: "Nói rõ điều mình muốn"
+description: "Vì sao yêu cầu mơ hồ vẫn cho ra kết quả gần đúng, và cách viết một yêu cầu đủ rõ để AI không phải tự đoán."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792602161/series/ai-from-zero/flow-confirmation.png"
+track: "shared"
+quiz:
+  - question: "Phần nào trong yêu cầu giúp AI không tự thêm thứ bạn không muốn?"
+    options:
+      - text: "Mục tiêu"
+      - text: "Người dùng"
+      - text: "Không thay đổi"
+        correct: true
+    explanation: "Mục 'Không thay đổi' đặt ranh giới cho những gì phải giữ nguyên, nên AI ít sửa lan hơn."
+  - question: "Khi kết quả gần đúng nhưng lệch một chi tiết, nên làm gì?"
+    options:
+      - text: "Sửa nhiều thứ cùng lúc cho nhanh"
+      - text: "Chỉ sửa một điểm, nói rõ đúng sai, giữ nguyên phần còn lại"
+        correct: true
+      - text: "Đổi sang model khác"
+    explanation: "Một thay đổi mỗi lần giúp bạn biết thay đổi nào tạo ra kết quả nào."
+---
+
+Ở bài trước, bạn dựng được trang đặt lịch trong khoảng một giờ. Trang chạy. Form gửi được. Có thông báo xác nhận.
+
+Nhưng nếu bạn giống mình, sẽ có một lúc bạn nhìn kết quả và nghĩ: "Gần đúng rồi, nhưng không phải cái mình muốn."
+
+Có thể thông báo xác nhận hiện ra quá nhanh. Có thể AI tự thêm trường "ghi chú" mà bạn không yêu cầu. Có thể nút "Đặt lịch" nằm ở chỗ bạn không muốn.
+
+Lúc đó rất dễ kết luận là công cụ chưa đủ giỏi. Đôi khi đúng. Nhưng phần lớn trường hợp, vấn đề nằm ở yêu cầu: nó đủ để AI làm ra một thứ hợp lý, nhưng không đủ để AI làm ra đúng thứ bạn muốn.
+
+## Kết quả gần đúng là kết quả nguy hiểm nhất
+
+Một kết quả sai hoàn toàn thì dễ phát hiện. Bạn mở lên, thấy trắng trơn, biết ngay là có vấn đề.
+
+Kết quả gần đúng khó hơn. Nó chạy. Nó nhìn ổn. Nó có đủ những thứ bạn nhớ ra khi viết yêu cầu. Chỉ có một chi tiết sai, và chi tiết đó thường chỉ lộ ra khi có người dùng thật.
+
+Ví dụ, bạn nói:
+
+```text
+Thêm bước xác nhận trước khi đặt lịch.
+```
+
+AI có thể hiểu là một thông báo nhỏ hiện lên trong hai giây. Bạn thì muốn một màn hình tóm tắt để người dùng đọc lại thông tin. Cả hai đều là "xác nhận". Chỉ một cái đúng ý bạn.
+
+AI không cố tình làm sai. Nó đang chọn phương án hợp lý nhất trong những gì nó biết. Vấn đề là nó không biết sản phẩm của bạn, người dùng của bạn và điều bạn sẽ kiểm tra.
+
+## AI không đọc được điều bạn chưa nói
+
+Mô hình ngôn ngữ dự đoán bước tiếp theo có khả năng cao nhất. Nó không đọc suy nghĩ của bạn.
+
+Khi bạn nói "thêm bước xác nhận", nó phải tự điền:
+
+- Xác nhận ở đâu?
+- Hiện trong bao lâu?
+- Có cần đọc lại dữ liệu không?
+- Có nút quay lại không?
+- Bấm hai lần thì sao?
+
+Nếu bạn không nói, nó sẽ chọn một phương án. Phương án đó có thể rất hợp lý. Chỉ là không phải của bạn.
+
+Đây là lý do câu "viết prompt dài hơn" không phải lúc nào cũng đúng. Bạn không cần nhiều chữ hơn. Bạn cần đúng loại thông tin hơn.
+
+## Sáu phần của một yêu cầu đủ rõ
+
+Mình dùng một cấu trúc sáu phần cho gần như mọi yêu cầu, từ một nút bấm tới một tính năng nhỏ.
+
+```text
+Mục tiêu:
+Người dùng:
+Luồng hiện tại:
+Thay đổi mong muốn:
+Không thay đổi:
+Tiêu chí đúng:
+```
+
+**Mục tiêu.** Vì sao bạn muốn thay đổi này. Một câu là đủ.
+
+**Người dùng.** Ai sẽ dùng, trong hoàn cảnh nào. Điện thoại hay máy tính, vội hay rảnh, quen hay mới.
+
+**Luồng hiện tại.** Hiện tại người dùng làm gì, theo thứ tự nào. Phần này giúp AI không phải đoán bạn đang đứng ở đâu.
+
+**Thay đổi mong muốn.** Những gì người dùng sẽ thấy hoặc làm được sau khi thay đổi. Viết như mô tả trải nghiệm, không phải mô tả code.
+
+**Không thay đổi.** Những thứ phải giữ nguyên. Đây là phần hay bị bỏ nhất, và cũng là phần cứu bạn khỏi những thay đổi lan rộng.
+
+**Tiêu chí đúng.** Làm sao để biết kết quả đã đúng. Viết thành câu kiểm tra được, không phải cảm nhận.
+
+## Nói kết quả, đừng nói cách làm
+
+Có hai cách mô tả cùng một việc:
+
+```text
+Thêm một modal.
+```
+
+và:
+
+```text
+Khi bấm "Đặt lịch", hiện một màn hình tóm tắt thông tin người dùng vừa nhập, với hai nút "Xác nhận" và "Quay lại".
+```
+
+Câu đầu nói cách làm. Câu sau nói điều người dùng thấy. AI có thể làm đúng cả hai, nhưng câu sau cho bạn thứ để kiểm tra.
+
+Nguyên tắc của mình: **mô tả cái người dùng thấy, không mô tả cái bạn nghĩ AI nên dùng.**
+
+Nếu bạn biết rõ muốn dùng công nghệ gì, cứ nói. Nhưng luôn thêm phần kết quả nhìn thấy được. "Dùng localStorage" không kiểm tra được. "Dữ liệu vẫn còn khi quay lại form" thì kiểm tra được.
+
+## Mỗi lần một thay đổi
+
+Khi kết quả chưa đúng, phản xạ thường là sửa nhiều thứ cùng lúc: đổi màu, thêm nút, sửa luồng, đổi câu chữ.
+
+Làm vậy nhanh hơn một chút, nhưng bạn mất khả năng biết thay đổi nào tạo ra kết quả nào. Lần sau gặp lỗi tương tự, bạn lại phải đoán từ đầu.
+
+Mình dùng một quy tắc đơn giản: **một thay đổi, một lần kiểm tra.**
+
+Nếu buộc phải sửa nhiều thứ, hãy liệt kê chúng thành một danh sách, rồi kiểm tra từng mục. Đừng chỉ nói "sửa hết giúp tôi".
+
+Và câu thần chú quan trọng nhất:
+
+```text
+Giữ nguyên phần còn lại.
+```
+
+Nó không đảm bảo AI không sửa lan, nhưng giảm rất nhiều.
+
+## Ví dụ: thêm bước xác nhận
+
+Giả sử luồng hiện tại là:
+
+```text
+Form -> Thông báo thành công
+```
+
+Bạn muốn:
+
+```text
+Form -> Màn hình tóm tắt -> Xác nhận -> Thông báo thành công
+                          -> Quay lại -> Form
+```
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792602161/series/ai-from-zero/flow-confirmation.png"
+  alt="Sơ đồ luồng đặt lịch: form, màn hình tóm tắt, xác nhận thành công, và đường quay lại giữ dữ liệu"
+  caption="Ba trạng thái của luồng, và đường quay lại khi người dùng đổi ý."
+/>
+
+Yêu cầu tệ:
+
+```text
+Thêm bước xác nhận cho đẹp.
+```
+
+Yêu cầu tốt hơn:
+
+```text
+Mục tiêu:
+Thêm một bước xác nhận trước khi đặt lịch, để người dùng kiểm tra lại thông tin.
+
+Người dùng:
+Khách của tiệm, có thể đang dùng điện thoại.
+
+Luồng hiện tại:
+Điền form -> bấm "Đặt lịch" -> hiện thông báo thành công.
+
+Thay đổi mong muốn:
+- Sau khi bấm "Đặt lịch", hiện một màn hình tóm tắt: tên, số điện thoại, dịch vụ, ngày, giờ.
+- Có hai nút: "Xác nhận" và "Quay lại".
+- "Quay lại" đưa về form, giữ nguyên dữ liệu đã nhập.
+- "Xác nhận" mới hiện thông báo đặt lịch thành công.
+- Bấm "Xác nhận" hai lần không được tạo hai lịch.
+
+Không thay đổi:
+- Không thêm đăng nhập, thanh toán hay backend.
+- Giữ nguyên giao diện và các trường hiện có.
+- Vẫn là một file HTML duy nhất.
+
+Tiêu chí đúng:
+- Từ form tới xác nhận phải qua màn hình tóm tắt.
+- Số điện thoại và dịch vụ hiển thị đúng như đã chọn.
+- "Quay lại" không làm mất dữ liệu.
+- Bấm "Xác nhận" hai lần liên tiếp chỉ có một thông báo thành công.
+```
+
+Đọc lại yêu cầu này, bạn thấy nó không dài hơn nhiều so với một đoạn văn. Nhưng mỗi câu đều có việc để làm.
+
+Phần "Không thay đổi" đặc biệt quan trọng. Không có nó, AI rất dễ "tiện tay" thêm đăng nhập, đổi bố cục hoặc kéo thêm thư viện.
+
+## Bài tập 45-60 phút
+
+**Bước 1. Mở lại bài trước (5 phút).**
+Mở cuộc trò chuyện đã tạo trang đặt lịch ở bài 1. Nếu chưa làm bài 1, làm bài 1 trước.
+
+**Bước 2. Viết yêu cầu ra giấy hoặc ghi chú (10 phút).**
+Đừng viết thẳng vào ô chat. Viết đủ sáu phần trước. Việc này chậm hơn một chút nhưng giúp bạn thấy chỗ nào mình còn mơ hồ.
+
+**Bước 3. Dán yêu cầu vào cuộc trò chuyện (5 phút).**
+Dán nguyên văn. Nếu AI hỏi thêm, trả lời trong phạm vi đã định.
+
+**Bước 4. Kiểm tra luồng (15 phút).**
+Đi hết từ đầu tới cuối. Bấm "Quay lại" xem dữ liệu còn không. Bấm "Xác nhận" hai lần. Thử sửa dữ liệu sau khi quay lại.
+
+**Bước 5. Sửa một điểm lệch (15 phút).**
+Chọn điểm khác xa nhất với tiêu chí. Nói rõ điểm đó, giữ nguyên phần còn lại.
+
+**Bước 6. Lưu lại (5 phút).**
+Lưu yêu cầu và checklist. Đây là tài sản bạn sẽ dùng lại nhiều lần.
+
+## Cách biết mình đã xong
+
+- Luồng có ba trạng thái: form, tóm tắt, thành công.
+- Màn hình tóm tắt hiện đúng dữ liệu đã nhập.
+- "Quay lại" giữ nguyên dữ liệu.
+- Bấm "Xác nhận" hai lần không tạo hai lịch.
+- Bạn giải thích được luồng mới trong bốn câu.
+
+Nếu một tiêu chí không đạt, bạn chưa xong. Đừng thêm tính năng mới để che nó.
+
+## Lỗi thường gặp
+
+**Trộn "cái gì" với "như thế nào".** Bạn muốn một trải nghiệm, nhưng lại viết một giải pháp kỹ thuật. Hãy mô tả điều người dùng thấy, rồi để AI chọn cách làm.
+
+**Không có mục "Không thay đổi".** AI sẽ tự quyết những chỗ bạn không nhắc. Đôi khi đúng, đôi khi không.
+
+**Nhồi nhiều thay đổi.** Bạn không biết cái nào gây ra kết quả nào. Một thay đổi, một lần kiểm tra.
+
+**Tiêu chí không kiểm tra được.** "Nhìn tự nhiên hơn" không phải tiêu chí. "Nút chính nằm trong vùng ngón tay cái trên điện thoại" là tiêu chí.
+
+**Bỏ qua luồng xấu.** Luồng đẹp khi mọi thứ đúng chưa nói lên gì. Thử quay lại, bấm hai lần, nhập thiếu.
+
+## Nếu bạn là PM
+
+Sáu phần trên chính là một brief. Bạn không cần viết khác đi, chỉ cần đổi tên cho phù hợp với đội.
+
+```text
+Vấn đề:
+Người dùng:
+Luồng hiện tại:
+Thay đổi mong muốn:
+Ngoài phạm vi:
+Tiêu chí chấp nhận:
+Rủi ro:
+```
+
+Hai chỗ nên viết kỹ:
+
+**<TermNote id="acceptance-criteria">Tiêu chí chấp nhận</TermNote>** phải là câu quan sát được. "Người dùng thấy màn hình tóm tắt trước khi xác nhận" kiểm tra được. "Luồng mượt" thì không.
+
+**Ngoài phạm vi** phải rõ. Nếu không, đội sẽ tự quyết, và bạn sẽ phát hiện muộn.
+
+Khi nghiệm thu, đừng chấm bằng cảm giác. Mở checklist, bấm thử từng mục, ghi lại kết quả. Nếu một mục không đạt, nói rõ mục nào và bằng chứng nào.
+
+Đầu ra của bạn là brief và checklist, không phải code. Nhưng bạn vẫn phải tự tay bấm thử.
+
+<Callout type="tip" title="Đừng viết dài hơn, hãy viết có cấu trúc hơn">
+  Một yêu cầu 150 chữ có sáu phần thường tốt hơn một đoạn 500 chữ miêu tả lan man. Cấu trúc giúp AI tìm đúng thông tin, và giúp bạn thấy chỗ nào mình chưa nghĩ xong.
+</Callout>
+
+## Kết
+
+Bạn vừa có một mẫu yêu cầu dùng lại được cho hầu hết mọi việc nhỏ.
+
+Bài sau, mình sẽ nói về phần còn lại của vòng lặp: làm sao kiểm tra kết quả mà không cần đọc code. Nghe thì đơn giản, nhưng đây là chỗ phân biệt người dùng AI lâu năm với người mới bắt đầu.

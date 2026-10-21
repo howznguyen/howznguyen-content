@@ -1,0 +1,105 @@
+---
+title: "Làm sản phẩm với AI từ số 0"
+description: "Khoá học cho người chưa biết code và PM: từ một trang chạy được tới prototype và bộ tiêu chí nghiệm thu."
+date: "2026-10-21"
+updatedAt: "2026-10-21"
+tags: ["AI", "Product", "Beginner"]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792599551/series/ai-from-zero/cover.png"
+status: "active"
+quiz:
+  - question: "Series này hướng tới ai?"
+    options:
+      - text: "Người chưa biết code và PM"
+        correct: true
+      - text: "Kỹ sư backend đã có kinh nghiệm"
+      - text: "Người chỉ muốn học CSS"
+    explanation: "Mô tả của series: khoá học cho người chưa biết code và PM."
+  - question: "Sau bài đầu tiên, bạn cần cài gì để bắt đầu?"
+    options:
+      - text: "Không cần cài gì"
+        correct: true
+      - text: "Node.js và Docker"
+      - text: "Một server riêng"
+    explanation: "Bài đầu tiên dựng một trang chạy được trên trình duyệt, không cần cài đặt."
+---
+
+Mở một công cụ AI lên thì khá dễ. Gõ vài câu, nhìn chữ chạy, rồi thấy một trang web hiện ra. Cảm giác đầu tiên thường là: hoá ra làm sản phẩm cũng không khó đến vậy.
+
+Khó hơn là làm cho đúng thứ mình muốn, kiểm tra được nó có đúng không, và biết khi nào nên dừng.
+
+Khoá này dành cho hai nhóm người. Một là người chưa từng viết code nhưng có ý tưởng muốn biến thành sản phẩm. Hai là PM, người phải viết đề bài, theo dõi và nghiệm thu công việc mà không trực tiếp code.
+
+## Hai track, một xương sống
+
+Bốn bài đầu, hai nhóm học chung. Bạn học cách mô tả điều mình muốn, xem kết quả và sửa. Đây là kỹ năng nền, không phụ thuộc vào vai trò.
+
+Từ bài năm, khoá rẽ thành hai track:
+
+- **Maker**: tự dựng prototype, kiểm tra bằng tay, chuẩn bị demo.
+- **PM**: viết brief, đặt tiêu chí chấp nhận, nghiệm thu và xử lý khi kết quả lệch.
+
+Hai track dùng cùng một sản phẩm mẫu. Maker làm ra nó. PM viết đề bài và kiểm tra nó. Cuối khoá, mỗi người có một artifact khác nhau, nhưng cùng đi qua một quy trình.
+
+## Bạn sẽ có gì sau khoá
+
+Maker có:
+
+- Một prototype tương tác chạy trên trình duyệt.
+- Một video demo ngắn.
+- Một danh sách giới hạn và bước tiếp theo.
+
+PM có:
+
+- Một spec một trang.
+- Một bộ tiêu chí chấp nhận kiểm tra được.
+- Một risk register ngắn.
+- Một bản handoff cho dev hoặc agent.
+
+## Cách đọc khoá
+
+Làm bài 1 trước, đừng đọc lướt. Bài 1 cố tình nhỏ để bạn đi hết một vòng mô tả, xem, sửa trong 30-60 phút. Những bài sau chỉ làm vòng đó đáng tin hơn.
+
+Nếu bạn là PM, vẫn nên làm bài 1 bằng tay. Bạn không cần hiểu code, nhưng cần biết cảm giác bấm thử và phát hiện lỗi. Nghiệm thu bằng cảm giác "nhìn cũng được" là lỗi rất phổ biến.
+
+### Hai lộ trình đọc
+
+Bốn bài đầu dùng chung. Từ bài 5, bạn chỉ cần đi một nhánh.
+
+**Nếu chọn Maker:**
+
+1. Làm một thứ chạy được trong 30 phút
+2. Nói rõ điều mình muốn
+3. Kiểm tra kết quả mà không cần đọc code
+4. Chọn track
+5. Maker: thêm một tính năng thật
+6. Maker: giữ prototype không vỡ
+7. Capstone
+
+**Nếu chọn PM:**
+
+1. Làm một thứ chạy được trong 30 phút
+2. Nói rõ điều mình muốn
+3. Kiểm tra kết quả mà không cần đọc code
+4. Chọn track
+5. PM: chia task và viết brief
+6. PM: nghiệm thu và xử lý khi lệch
+7. Capstone
+
+Danh sách chapter trên site xếp theo thứ tự file, nên hai nhánh nằm xen nhau. Cứ đi theo lộ trình của vai mình, bỏ qua bài của nhánh còn lại.
+
+<Callout type="tip" title="Không cần học hết rồi mới làm">
+  Mỗi bài đều có một artifact nhỏ. Cứ làm xong artifact rồi mới sang bài sau. Đọc mà không làm thì tới lúc mở công cụ lên, bạn vẫn sẽ ngồi nhìn ô chat và không biết bắt đầu từ đâu.
+</Callout>
+
+## Cấu trúc khoá
+
+1. **Làm một thứ chạy được trong 30 phút.** Bài mở đầu, dựng trang đặt lịch bằng Claude Artifacts.
+2. **Nói rõ điều mình muốn.** Sáu phần của một yêu cầu đủ rõ, và cách thêm một bước xác nhận vào luồng đặt lịch.
+3. **Kiểm tra kết quả mà không cần đọc code.** Nhìn gì, bấm gì, thử dữ liệu xấu ra sao.
+4. **Chọn track.** Maker đi tiếp phần dựng prototype. PM đi tiếp phần viết spec.
+5. **Maker: thêm một tính năng thật. PM: chia task và viết brief.**
+6. **Maker: giữ prototype không vỡ. PM: nghiệm thu và xử lý lệch.**
+7. **Capstone.** Maker nộp prototype và video demo. PM nộp spec và checklist. Bài cuối cũng có phần bước tiếp: làm việc với dev hoặc agent, handoff, và khi nào cần người thật.
+
+<RolePicker />
