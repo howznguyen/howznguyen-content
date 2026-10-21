@@ -192,6 +192,8 @@ Không cái nào trong số này hỏng vì AI. Chúng hỏng vì **giả địn
 
 Anthropic cũng không đóng cửa lại. Họ đề xuất khá cụ thể: **git server không nhất thiết phải hoạt động giống git client**. Hoàn toàn có thể có những kiến trúc server mới scale tốt hơn, các forge cung cấp RPC phía server phong phú theo chuẩn chung mà git client học được, giao thức negotiation thay đổi, và các tính năng sparse/shallow compose với nhau tốt hơn. Họ nói muốn hợp tác với GitHub, GitLab và cộng đồng OSS.
 
+Và đúng một tuần trước bài này, GitHub đã công bố hướng đi của chính họ: không bỏ Git, mà viết lại toàn bộ hạ tầng bên dưới nó. Mình viết kỹ hơn ở bài [GitHub: hạ tầng Git cho thời đại agent viết code](/blog/github-git-agent-scale/vi).
+
 Mình thấy đó là phần insight giá trị nhất: họ bỏ Git, nhưng không tuyên chiến với Git. Họ chỉ ra rằng Git có thể giữ nguyên giao diện và vẫn được xây lại ở phía dưới.
 
 ## Mình rút ra mấy điều

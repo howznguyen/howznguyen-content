@@ -1,0 +1,179 @@
+---
+title: "GitHub: Git infrastructure for the age of coding agents"
+description: "Anthropic dropped Git. GitHub didn't - they rebuilt everything underneath it while the platform kept running. The bottleneck was somewhere nobody expected."
+date: 2026-10-21
+tags:
+  - AI
+  - Agent
+  - Engineering
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792566682/posts/github-git-agent-scale/cover.png"
+---
+
+On October 6, 2026, GitHub published an engineering post with a fairly dry title: "Building Git infrastructure for agent-scale development."
+
+A week later, [Anthropic published a post about how they had abandoned Git](/blog/anthropic-scion-thay-git/en).
+
+Two posts, two opposite conclusions, one shared pressure. Anthropic concluded Git no longer fit and built a new version control system. GitHub concluded Git is fine - the thing that needs rewriting is the entire infrastructure underneath it.
+
+I read GitHub's post after writing about Scion, and I think these two belong side by side. Not to pick a winner, but because together they show that the same problem can have two correct answers.
+
+## What happened
+
+The numbers are here:
+
+<Callout type="note" title="GitHub's scale, August-September 2026">
+  Total Git activity on GitHub went from **218.2 billion events per month** (September 2025) to **473.3 billion per month** (August 2026), more than double in a year. September 2026 alone saw **7.38 billion commits**, more than five times as many as a year earlier. The busiest repository took roughly **1 billion requests** in August.
+</Callout>
+
+A few other figures are worth noting because they point at specific pain:
+
+- **Pushes grew 4.9x** year over year, from 0.69 billion to 3.35 billion per month
+- **Pull request merges grew to nearly 4x** their volume a year ago
+- **GitHub Actions ran 3.26 billion times** in September, more than 4x as many as a year earlier
+- Each push fans out into **thousands of reads**: CI and code scanning clone or fetch the same branch tip thousands of times per minute
+
+This post differs from the Scion one in an important way. Anthropic wrote about a finished system with measured results. GitHub wrote about a system **still being built**, while the old one keeps serving. That makes it harder engineering, even if it's a less dramatic story.
+
+## Why the old architecture became the bottleneck
+
+This is the best part of the post, and the part I had to read twice.
+
+GitHub's current architecture stores every <TermNote id="repository">repository</TermNote> through a system called Spokes: each repo is kept as **a complete copy** on the local disks of several fileservers, five by default. Local disks are fast, so Git operations read native repository data at low latency, and the extra copies provide both redundancy and read spreading.
+
+When a push updates a reference, a three-phase commit protocol with a quorum ensures CI, the web UI, and API clients all see a consistent state. That design serves **a billion repositories** today.
+
+Then comes the key line:
+
+> However, the mechanism we use for durability is the same one we use for scale. The copies on disk are the source of truth, so adding read capacity means adding another durable replica.
+
+In other words: **the mechanism that keeps data from being lost is the same one that scales the system.** The on-disk copy is both the source of truth and the thing that answers requests.
+
+The consequences are unpleasant. Because every replica participates in every write, a push is only as fast as the slowest replica in its set. Which means:
+
+**Adding replicas to absorb read load makes writes slower.**
+
+For almost every repository on earth, that tradeoff is fine. At the highest activity levels it becomes a hard ceiling, and GitHub describes that ceiling in three short clauses:
+
+<Quote color="blue">
+  Adding read replicas adds overhead to writes. Losing a replica reduces read capacity. Losing quorum stops writes entirely.
+</Quote>
+
+There is no exit in any of the three directions. That is the signature of an assumption that has expired, not a parameter that needs tuning.
+
+## Five new pressures
+
+GitHub lays these out plainly, and I think they complement the Scion post well, because they break "AI writes code faster" down into concrete mechanisms.
+
+**One, commit turnaround becomes a per-agent bottleneck.** An agent in a tight loop commits or checkpoints after nearly every action. Its speed is bounded by how fast a single push completes. Latency a human would never notice becomes the limiting factor.
+
+**Two, write throughput demand increases by orders of magnitude.** Thousands of agents working on their own branches in one repository produce a sustained write rate, and all of it converges on a single point in the architecture.
+
+**Three, merges contend on one reference.** Trunk-based development, release trains, and merge queues all funnel work onto a single ref that has to absorb every merge.
+
+**Four, each push multiplies into thousands of reads.** CI and code scanning read the same branch tip continuously, and that fan-out has to be cheap.
+
+**Five, maintenance runs on the same hosts that serve traffic.** Compaction and object cleanup are among the heaviest work a repository does, and they currently run on the same machines answering Git requests. Every new write adds to that pile.
+
+What I like about this list: it never says "AI broke the system." It names **exactly which mechanisms are under strain**, and each one is a separate, testable assumption.
+
+## How GitHub is fixing it
+
+The post is explicit that this is the first in a series, so this section describes design principles rather than a finished architecture. There are three pillars.
+
+**Minimize coordination.** The tightest principle in the whole post:
+
+> The part of a push that truly needs agreement is the reference update itself.
+
+The only part that genuinely needs agreement is the reference update. Storing objects, validating object connectivity, and secret scanning are far more work, but most of it can happen in parallel with other writes. Shrink a push's critical path down to the step that needs agreement.
+
+**Move maintenance off the serving path.** Compaction and garbage collection move to separate workers running directly against durable storage. A busy repository can be optimized continuously in the background without slowing pushes and fetches.
+
+**Decouple storage from compute.** This is the biggest change. The authoritative copy of a repository lives in Azure Blob Storage. Read capacity comes from lightweight workers that only cache data to serve requests. The result:
+
+| Aspect | Old architecture (Spokes) | New architecture |
+| --- | --- | --- |
+| Source of truth | Full copy on local disks of several fileservers | One copy in durable storage |
+| Scaling reads | Add another durable replica | Add a lightweight cache worker |
+| Every write | Every replica participates, waiting on quorum | Only the ref update needs agreement |
+| Maintenance | Runs on hosts serving live requests | Separate workers, in the background |
+| Losing a node | Reduces both capacity and durability | Closer to a cache miss |
+| Capacity | Provisioned for peak in advance | Scales with actual traffic |
+
+The "losing a node" row is my favorite. Once storage and compute are separate, losing a worker stops being a durability event - it's just a cache miss. A replacement starts serving immediately and fills its cache from durable storage as traffic arrives.
+
+This is the kind of change you can't see from outside, but it completely changes how the system fails.
+
+## Results
+
+Per the post:
+
+- In internal benchmarks, the new architecture delivers **up to 35 times higher write throughput**
+- Reads scale independently, no longer adding work to every push
+- Failure recovery is much faster, since there's no full repository copy to rebuild
+
+I'm deliberately leaving the words "internal benchmarks" in that sentence, because that's the entire confidence level behind the 35x figure. The post gives no production numbers, and can't yet - the system is still being built.
+
+## The core difference from Anthropic
+
+Put the two posts side by side and the difference isn't technical. It's about **constraints**.
+
+Anthropic could change the protocol. They own both client and server, their Git users are almost entirely agents and CI jobs, and they accepted a system with no offline support.
+
+GitHub can't change anything. They serve a billion repositories, and every workflow running on them has to keep working: branching, review, merge, history, branch protection, audit logs, required reviews. The post says so directly:
+
+> We're rebuilding the infrastructure while GitHub keeps running. There's no maintenance window where the world's code stops moving, and no version of this work where we ask people to change how they build software while we do it.
+
+That's a far stronger constraint than "make it as fast as possible." It eliminates the easiest option outright: telling everyone to change how they work.
+
+So the two opposite conclusions don't actually contradict each other. Anthropic optimized for one monorepo with an internal user base. GitHub optimized for a public platform that isn't allowed to make anyone change anything. Same pressure, different constraints, different answers.
+
+## What's still unfinished
+
+GitHub's post is honest about being incomplete, and a few things are worth flagging:
+
+- This is the **first post in a series**; the future architecture comes later. This one mostly frames the problem.
+- The 35x figure is an **internal benchmark**, not production.
+- The authoritative copy moves into **Azure Blob Storage**, meaning deeper dependence on one <TermNote id="cloud">cloud</TermNote> provider. The post doesn't discuss that tradeoff.
+- There are no numbers on **latency of the new path**. For agents in tight loops, that's precisely the metric that matters most.
+
+Compared to the Scion post, this one is less "done." But I think that makes it more useful to learn from: it shows a large team thinking **before** they know they're right.
+
+## What about the rest of us?
+
+The Scion post left one question: which assumptions were written when the user was a human, and are now being used by an agent?
+
+GitHub's post leaves a narrower but sharper one:
+
+<Callout type="tip" title="The question worth taking home">
+  In your system, **which mechanism is doing two jobs at once**? And what happens if you separate them?
+</Callout>
+
+For GitHub, it was "the on-disk copy is both the source of truth and the thing that serves requests." For you it might be something else:
+
+- A database that is both the source of truth and its own read replica
+- A queue that both guarantees ordering and absorbs load
+- A job that both computes and cleans up
+- A cache that both speeds things up and holds state
+
+What these configurations share is that they make perfect sense at small scale and become hard ceilings at large scale - with no warning sign along the way.
+
+And of course, don't read this and go split storage from compute for your eight-person team's system. What's worth taking is the way of asking the question, not the architecture.
+
+## A few things I took away
+
+**One, a mechanism that's correct at small scale can be wrong at large scale.** Not because it broke, but because it's being asked a different question. GitHub didn't fix Spokes - they recognized Spokes was answering the wrong question.
+
+**Two, "don't change anything for users" is a stronger design constraint than "be as fast as possible."** It eliminates the easiest option and forces you to solve the real problem. A lot of good architecture decisions start from a constraint like this.
+
+**Three, read the label on the number.** 35x is an internal benchmark. Anthropic's 12x is production. They aren't the same kind of figure, and the post that labels its numbers clearly is the one worth trusting.
+
+**Four, the same pressure can produce two opposite answers and both can be right.** Anthropic dropped Git; GitHub rebuilt Git. The question isn't who's correct, it's where their constraints differ. That's probably the thing I'll remember most from reading these two back to back.
+
+And what's genuinely impressive about GitHub's post is that they chose to do something hard in public: rebuild their own foundation **while the building is still occupied**. There's no maintenance window for that.
+
+---
+
+Source: [Building Git infrastructure for agent-scale development](https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/) - Brian Celenza, GitHub Engineering, October 6, 2026. Read alongside: [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) - Anthropic Engineering, October 13, 2026.

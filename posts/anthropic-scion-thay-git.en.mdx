@@ -1,0 +1,213 @@
+---
+title: "Scion: when Anthropic had to replace Git because AI writes code faster than the infrastructure"
+description: "Git isn't broken, its users changed. Anthropic replaced Git with Scion after merges grew 12x in four months."
+date: 2026-10-14
+tags:
+  - AI
+  - Agent
+  - Engineering
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972722/posts/anthropic-scion-thay-git/cover.jpg"
+---
+
+On October 13, 2026, Anthropic published an engineering post with a very calm title: "Redesigning source control at Anthropic." The contents were not calm at all - they had dropped Git for their main monorepo, replaced it with a homegrown version control system called **Scion**, and finished the migration in five months.
+
+Reading it, a few layers stood out.
+
+The obvious layer is "Anthropic is genuinely good at this." The second is "AI writes code fast enough to break infrastructure." But the layer I think is most worth taking home is this: **Git isn't bad. It's just serving a different kind of user than the one it was designed for.**
+
+## What happened
+
+The numbers are here:
+
+<Callout type="note" title="Merge rate at Anthropic">
+  May 2026: around **2,500 changes merged per day**. September 2026: **over 30,000 per day**. The peak recorded was **30,401** on September 9.
+</Callout>
+
+More than 12x in four months. And by Anthropic's own account, most of that increase came from agents, not from hiring more people.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972724/posts/anthropic-scion-thay-git/merges-per-day.png"
+  alt="Bar chart comparing changes merged per day: around 2,500 in May 2026 and over 30,000 in September 2026"
+  caption="Changes merged per day into Anthropic's monorepo. Peak of 30,401 on September 9. Source: Anthropic Engineering."
+/>
+
+What I like about the post is that they don't dodge admitting the cause:
+
+> Claude's ability to write code was both what put us in this situation in the first place _and_ how we were able to quickly build a high-quality, scalable system to deal with it.
+
+Meaning: the tool caused the problem, and the tool solved the problem. It's neither "AI can do everything" nor "AI only causes trouble."
+
+## Why Git became the bottleneck
+
+This section is where the sheer scale of the problem lands.
+
+Anthropic's main monorepo has a **main branch history of almost 100 GB**, and a compressed working copy is **still over 25 GB**. For CI alone they perform **on the order of 25 million code checkouts per day** - before counting developer environments, agent <TermNote id="sandbox">sandboxes</TermNote>, and research jobs. Fetching the usual way, the Git traffic would **exceed 600 PB per day**.
+
+Before giving up, they tried every patch:
+
+- Shallow clone, sparse checkout, promisor remote
+- Internal Git mirrors - at the peak, **several hundred mirrors** running in parallel
+- Repository snapshots (seeds) stored in blob storage
+
+These bought time, but at some point they started contradicting each other: a rising merge rate pushed seeds further and further from the tip of main, and history-dependent operations like <TermNote id="diff">diff</TermNote> or blame became harder and harder to keep correct on partial clones.
+
+Then they noticed the crux.
+
+<Quote color="blue">
+  Taking a step back, we noticed that, like most companies, we were using git as a centralized system with one authoritative copy, but nearly all of our clients were agents and jobs that are online by definition. The properties that make git excellent for distributed, offline work were actively undermining our ability to scale as the repo grew.
+</Quote>
+
+That is the most important sentence in the whole post, in my reading.
+
+Git was born to solve a very specific problem: every machine keeps a complete <TermNote id="repository">repository</TermNote>, computes its own diffs, reads its own history, runs its own blame, and **can do all of it with no network**. For almost every repository in the world, that is the right design - and it's why Git won.
+
+But Git pays for that ability with an assumption: **a client can be a server**. Every clone is complete. Every operation is computable locally. That price is only reasonable when the client genuinely needs to work offline.
+
+At Anthropic, Git's "users" are almost entirely agents, CI jobs, and sandboxes - processes for which being offline is unthinkable. They were paying for an ability nobody used.
+
+A Scion engineer, Nick G., answered on Hacker News about Scion not supporting offline, with a line so plain it's almost funny:
+
+> Since Claude is by far the heaviest user of Scion and is necessarily online, this just wasn't important to do.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972726/posts/anthropic-scion-thay-git/git-vs-scion.jpg"
+  alt="Comparing two models: on the Git side a robot hauls an enormous archive, on the Scion side a robot carries only a small bag and asks the server"
+  caption="The same agent, two models. Git forces the client to hold a complete copy; Scion lets the client ask the server when it needs something."
+/>
+
+## Where Scion differs from Git
+
+Anthropic is not the first team to do this. They say plainly that they learned from Google's **Piper** and Meta's **Sapling**. But their statement of the principles is tight and worth reading slowly:
+
+| Principle | Git | Scion |
+| --- | --- | --- |
+| Client | Can be offline, holds a complete copy | Always online, fetches on demand |
+| Role | Any client can act as a server | Asymmetric: the server computes, clients only cache and display files |
+| Queries | Client must have a local repo, or depend on a vendor's private API | Every query a client makes is exposed as an API |
+| Scaling | A mirror is a full copy, hits disk and RAM ceilings | No complete copy exists anywhere, each component scales independently |
+| Commit | Commit locally, then push | Commit, rebase, and merge all happen on the server, there is nothing to push |
+| Working copy | Required by default | Optional, sparse, and can be virtualized |
+
+A few details I found interesting:
+
+**The unit of work is called a "changeset"**, and it lives in a write-ahead log. A Git commit points at a tree; a Scion changeset stores **the list of files changed relative to the first parent**, plus a content-addressed pointer to the compressed file contents in blob storage. The consequences: **no packfiles, no locks, no cross-server coordination, no moving refs**. Refs still exist, but moving a ref is just a compare-and-swap on a Spanner row, fully decoupled from creating a changeset.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972728/posts/anthropic-scion-thay-git/changeset.jpg"
+  alt="Comparing a Git commit with a Scion changeset: a commit is one large tied bundle next to a whole directory tree, a changeset is a few loose sheets with small jars"
+  caption="A Git commit points at a tree and travels with a packfile. A Scion changeset only records which files changed, plus pointers to compressed blobs."
+/>
+
+**Derived data.** A changeset only records what changed, so on its own it can't quickly answer "who last touched this line." Scion builds additional structures like blame, path history, and a skip list for the commit graph - and defines them **recursively**: a changeset's value is computed from its parents' values. That buys three things: new kinds of derived data are easy to add, you can choose eager or lazy per kind, and clients never see the internals, so internal optimization can't break them.
+
+**A three-tier cache architecture:**
+
+- `scion-server` - the source API, reading from Spanner or cloud storage
+- `scion-cache` - a per-region cache that streams objects straight from memory, in exactly the format the daemon will use, so no time is spent on delta compression
+- `scion-daemon` - runs on each node, holds objects for the whole machine, starting from a periodic snapshot refresh
+
+All three tiers answer **the same set of RPCs**, so clients don't need to know the topology. But they still enforce tiering strictly to isolate failure domains - so a dead cache region can't take down the source server.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1791972731/posts/anthropic-scion-thay-git/architecture.jpg"
+  alt="Diagram of Scion's three tiers: client, scion-daemon, scion-cache, scion-server stacked with arrows pointing upward"
+  caption="Scion's three tiers: a daemon on each node, a per-region cache, and the source server. All three answer the same set of RPCs."
+/>
+
+## Results
+
+Per the numbers Anthropic published:
+
+- Scion's infrastructure has a **CPU and memory footprint 200x smaller** than the previous Git mirroring infrastructure
+- CI and research jobs check out code **two orders of magnitude faster** - from minutes down to seconds
+- CI alone realized a **25% CPU capacity win**
+- Every cache tier reaches a **cache hit rate above 99%**, with no long-lived state
+- No repository maintenance - no more `git gc`, packfiles, or repacking
+
+And the notable part: **seven people** built Scion, Antique (their code review tool), code search, the source control IAM system, plus half a dozen related systems - and migrated in five months, while the volume of code merged per day grew 10x.
+
+## AI is both the pressure and the builder
+
+The section I found most interesting is how Claude took part in building the very system that replaced its own bottleneck.
+
+The ingestion pipeline from Git to Scion was originally hand-written. The team thought it was fine. Then they got an internal snapshot of Claude Mythos Preview, handed it over, and asked for a full rewrite. **With no further instructions**, it returned a version using **20x less memory, running 4x faster**, and still preserving the implicit invariants around ingestion order and data structure.
+
+On the operations side, they used Claude Tag to create Slack agents called **"superfans"**: each one obsesses over exactly one component - a `scion-daemon` superfan, a `scion-cache` superfan, an Antique merge queue superfan. They have read access to telemetry and logs, and behave like a seasoned engineer with nothing else to do but refresh charts and sniff out anomalies.
+
+Anthropic says it plainly: traditional alerting still exists, but the superfans catch subtle, novel problems that make alerts look "one-dimensional" by comparison.
+
+But the most honest part of the post is this - they also say clearly that AI is **not** perfect:
+
+<Callout type="warning" title="Adversarial review can also be narrow">
+  Anthropic makes extensive use of adversarial review, and it works. But it can also be myopic: they had to keep steering Claude away from **over-engineering**. In one case, a review was overly suspicious of trusting another internal service, which led Claude to add validation and unnecessary complexity.
+</Callout>
+
+## The engineer's role doesn't shrink, it changes shape
+
+The line I think will get quoted most:
+
+> All of the engineers who worked on this system would now rate Claude as better at writing code than them. But our engineers still supplied the invaluable understanding of the high-level inter-system components and the design-level tradeoffs.
+
+More concretely, they describe the new job with a rather odd verb: **saying "no."**
+
+Agents tend to satisfy a pattern at any cost, even when doing so violates a core constraint of the system. During the migration, several systems tried to brute-force looking up when a change merged to main by **linearly reading the commit log**, instead of asking the code review tool. That kind of mistake isn't a syntax error, and it isn't a bug. It's wrong at the architecture level - and only someone who understands the system can catch it.
+
+Review changed shape too: the team still reviews **every** change request, but they read **the intent of the change** rather than every line of code.
+
+Thinking it through, this is a reasonable shift. When the cost of writing code approaches zero, what becomes scarce isn't code - it's **judgment about what should and shouldn't be written.**
+
+## Anthropic is also dropping a few other assumptions
+
+The end of the original post has a few passages I found more valuable than the architecture section.
+
+**Traditional merge queues stop meaning much at agent scale.** The question they ask is a good one: what does CI even mean when hundreds or thousands of changes can merge while tests are running? They haven't replicated a global repository lock on the merge queue, so instead they invested in **post-merge and pre-deploy automated testing**. That means accepting that concurrent changes can conflict - but by their account, Claude usually fixes conflicts faster than a human notices there is one.
+
+**Monorepo security changes approach too.** Scion supports access control at the repository level, and **per-directory permissions** to protect sensitive code without losing the benefits of a monorepo. Their code review tool can also express complex semantic constraints for approval - distinguishing a change that only edits comments from one that touches sensitive logic, so reviewers focus where it matters.
+
+## What about the rest of us?
+
+Anthropic is very clear here, and I think it deserves emphasis to avoid any misunderstanding:
+
+<Callout type="error" title="Don't go write your own VCS">
+  **Scion is not a general-purpose Git replacement.** It isn't open source. Anthropic says these ideas only make sense for a genuinely enormous monorepo, with tens of thousands of engineers or a swarm of agents writing code continuously. They even concede that their internal token burn goes far beyond what other companies would realistically want to spend.
+</Callout>
+
+So if you finished reading and are about to open a PR to rewrite the VCS for your eight-person team: don't.
+
+What's worth taking home is a question, not an architecture:
+
+> In my pipeline, which assumptions were written when the user was a human, and are now being used by an agent?
+
+For Anthropic, that assumption was "the client can be offline and needs a complete copy." For you it might be something else entirely:
+
+- Code review assumes a human reads a PR over a few dozen minutes
+- CI assumes every commit is a notable event
+- Merge queues assume throughput below test speed
+- Alerting assumes the on-call human starts the investigation
+
+None of these broke because of AI. They broke because **the assumption went stale and nobody noticed.**
+
+Anthropic doesn't close the door either. They make a fairly concrete proposal: **a Git server doesn't have to behave like a Git client.** There's room for new server architectures that scale better, forges offering rich server-side RPCs on a common standard that Git clients can learn, changed negotiation protocols, and sparse/shallow features that compose better. They say they want to work with GitHub, GitLab, and the open source community.
+
+And exactly one week before this post, GitHub published their own direction: not dropping Git, but rebuilding the entire infrastructure underneath it. I wrote about that in [GitHub: Git infrastructure for the age of coding agents](/blog/github-git-agent-scale/en).
+
+I think that's the most valuable insight here: they dropped Git without declaring war on Git. They just point out that Git can keep its interface and still be rebuilt underneath.
+
+## A few things I took away
+
+**One, the best infrastructure for one assumption can be the worst infrastructure for another.** Git isn't wrong. It's right to the point of becoming the default. Then the default got used somewhere it was never designed for.
+
+**Two, "AI writes code" is old news.** The new news is what happens **after** code is written: source control, build, CI, review, deploy. That's where the flow jams up, and it's also where the most worthwhile work remains over the next 6-12 months.
+
+**Three, writing code faster doesn't automatically mean shipping faster.** Anthropic increased merge speed 12x and immediately hit a ceiling. Removing that ceiling, they say plainly, will lead to producing even more code. The loop has no natural stopping point.
+
+**Four, the engineer's value is shifting from "writing" to "choosing."** Choosing what should exist, what should be rejected, what is over-engineering answering an imagined worry. Among those seven people, the hardest part was almost certainly not the code.
+
+And perhaps the most admirable thing about the original post is that it isn't marketing. It tells the unfinished parts too: the merge queue hasn't been replicated, conflicts still happen, adversarial review still needs a human to pull it back. A good engineering post should look like that.
+
+---
+
+Source: [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) - Anthropic Engineering, October 13, 2026. Further discussion on [Hacker News](https://news.ycombinator.com/item?id=50073633) and in [Simon Willison's notes](https://simonwillison.net/2026/Oct/13/redesigning-source-control-at-anthropic/).

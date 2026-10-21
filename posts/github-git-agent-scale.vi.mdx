@@ -1,0 +1,179 @@
+---
+title: "GitHub: hạ tầng Git cho thời đại agent viết code"
+description: "Anthropic bỏ Git. GitHub thì không: họ viết lại toàn bộ hạ tầng bên dưới Git trong lúc hệ thống vẫn chạy. Nút thắt nằm ở chỗ ít ai ngờ."
+date: 2026-10-21
+tags:
+  - AI
+  - Agent
+  - Engineering
+  - Programming
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792566682/posts/github-git-agent-scale/cover.png"
+---
+
+Ngày 6/10/2026, GitHub đăng một bài engineering với tiêu đề khá kỹ thuật: "Building Git infrastructure for agent-scale development".
+
+Một tuần sau, [Anthropic đăng bài về việc họ đã bỏ Git](/blog/anthropic-scion-thay-git/vi).
+
+Hai bài, hai kết luận ngược nhau, cùng một áp lực. Anthropic kết luận Git không còn phù hợp và viết một hệ thống quản lý phiên bản mới. GitHub kết luận Git vẫn ổn - thứ cần viết lại là toàn bộ hạ tầng bên dưới nó.
+
+Mình đọc bài của GitHub sau khi đã viết bài về Scion, và thấy hai bài này đáng được đọc cạnh nhau. Không phải để chọn phe, mà vì chúng cho thấy cùng một bài toán có thể có hai lời giải đúng.
+
+## Chuyện gì đã xảy ra
+
+Con số nằm ở đây:
+
+<Callout type="note" title="Quy mô GitHub, tháng 8-9/2026">
+  Tổng hoạt động Git trên GitHub: từ **218,2 tỉ event/tháng** (9/2025) lên **473,3 tỉ event/tháng** (8/2026), hơn gấp đôi trong một năm. Riêng tháng 9/2026 có **7,38 tỉ commit**, gấp hơn 5 lần cùng kỳ năm trước. Repo bận nhất nhận khoảng **1 tỉ request** trong tháng 8.
+</Callout>
+
+Vài con số khác trong bài đáng để ý vì chúng chỉ ra chỗ đau cụ thể:
+
+- **Push tăng 4,9 lần** trong một năm, từ 0,69 tỉ lên 3,35 tỉ mỗi tháng
+- **Merge pull request tăng gần 4 lần** so với một năm trước
+- **GitHub Actions chạy 3,26 tỉ lần** trong tháng 9, gấp hơn 4 lần cùng kỳ
+- Mỗi push nở thành **hàng nghìn lượt đọc**: CI và code scanning clone hoặc fetch đúng một branch tip hàng nghìn lần mỗi phút
+
+Bài này khác bài Scion ở một điểm quan trọng: Anthropic viết về một hệ thống đã chạy xong, có kết quả đo được. GitHub viết về một hệ thống **đang được xây**, trong lúc hệ thống cũ vẫn phục vụ. Đó là lý do mình thấy nó khó hơn về mặt kỹ thuật, dù ít hào nhoáng hơn về mặt câu chuyện.
+
+## Vì sao hạ tầng cũ thành nút thắt
+
+Đây là phần hay nhất của bài, và cũng là phần mình phải đọc lại hai lần.
+
+Kiến trúc hiện tại của GitHub lưu mỗi <TermNote id="repository">repository</TermNote> bằng một hệ thống tên là Spokes: mỗi repo được giữ **nguyên một bản đầy đủ** trên đĩa local của vài fileserver, mặc định là năm. Đĩa local nhanh nên thao tác Git đọc dữ liệu native với độ trễ thấp, và các bản dư thừa vừa để chịu lỗi vừa để chia tải đọc.
+
+Khi một push cập nhật ref, hệ thống dùng giao thức commit ba pha với quorum để đảm bảo CI, web UI và API client thấy cùng một trạng thái. Cách này phục vụ **một tỉ repository** cho tới nay.
+
+Rồi tới câu mấu chốt:
+
+> However, the mechanism we use for durability is the same one we use for scale. The copies on disk are the source of truth, so adding read capacity means adding another durable replica.
+
+Tức là: **cơ chế dùng để đảm bảo dữ liệu không mất cũng chính là cơ chế dùng để mở rộng**. Bản trên đĩa vừa là nguồn sự thật, vừa là thứ trả lời request.
+
+Hệ quả kéo theo rất khó chịu. Vì mọi replica đều tham gia mọi write, một push chỉ nhanh bằng replica chậm nhất trong nhóm. Nghĩa là:
+
+**Thêm replica để chịu tải đọc sẽ làm write chậm đi.**
+
+Với gần như mọi repo trên đời, đánh đổi này không thành vấn đề. Ở mức hoạt động cao nhất, nó thành trần cứng, và GitHub mô tả cái trần đó bằng ba vế rất gọn:
+
+<Quote color="blue">
+  Thêm replica đọc thì thêm overhead cho write. Mất một replica thì giảm capacity đọc. Mất quorum thì write dừng hẳn.
+</Quote>
+
+Không có lối ra nào trong cả ba hướng. Đó là dấu hiệu của một giả định đã hết hạn, chứ không phải một tham số cần tinh chỉnh.
+
+## Năm áp lực mới
+
+Phần này GitHub liệt kê khá thẳng, và mình thấy nó bổ sung rất tốt cho bài Scion vì nó chia nhỏ "AI viết code nhanh hơn" thành các cơ chế cụ thể.
+
+**Một, commit turnaround thành nút thắt cho từng agent.** Một agent chạy trong vòng lặp chặt sẽ commit hoặc checkpoint gần như sau mỗi hành động. Tốc độ của nó bị chặn bởi tốc độ một push hoàn tất. Độ trễ mà con người không bao giờ nhận ra trở thành giới hạn cứng.
+
+**Hai, write throughput tăng theo bậc độ lớn.** Hàng nghìn agent làm việc trên nhánh riêng trong cùng một repo tạo ra tốc độ ghi liên tục, và tất cả hội tụ về một điểm trong kiến trúc.
+
+**Ba, merge tranh nhau trên một ref.** Trunk-based development, release train và merge queue đều dồn công việc về một ref duy nhất phải hấp thụ mọi merge.
+
+**Bốn, mỗi push nở thành hàng nghìn read.** CI và code scanning đọc cùng một branch tip liên tục, và fan-out đó phải rẻ.
+
+**Năm, maintenance phải chạy trên chính máy đang phục vụ.** Compaction và dọn object là việc nặng nhất của một repo, và nó đang chạy trên cùng host trả lời request Git. Mỗi write mới lại cộng thêm vào khối việc đó.
+
+Điểm mình thích ở cách liệt kê này: nó không nói "AI làm hệ thống sập". Nó chỉ ra **chính xác cơ chế nào bị ép**, và mỗi cơ chế là một giả định riêng có thể kiểm tra được.
+
+## Cách GitHub giải
+
+Bài viết nói rõ đây mới là bài đầu của một series, nên phần này mô tả nguyên tắc thiết kế chứ chưa phải kiến trúc hoàn chỉnh. Có ba trụ.
+
+**Giảm coordination.** Nguyên tắc gọn nhất của cả bài:
+
+> The part of a push that truly needs agreement is the reference update itself.
+
+Phần thật sự cần mọi người đồng ý chỉ là cập nhật ref. Lưu object, kiểm tra tính liên tục của object, quét secret - đều là việc nặng hơn nhiều, nhưng phần lớn có thể chạy song song với các write khác. Rút ngắn critical path của một push xuống đúng bước cần đồng thuận.
+
+**Đưa maintenance ra khỏi serving path.** Compaction và garbage collection chuyển sang worker riêng, chạy trực tiếp trên durable storage. Repo bận có thể được tối ưu liên tục ở nền mà không làm chậm push và fetch.
+
+**Tách storage khỏi compute.** Đây là thay đổi lớn nhất. Bản quyền lực của repo nằm trong Azure Blob Storage. Capacity đọc đến từ các worker nhẹ chỉ cache dữ liệu để trả request. Kết quả:
+
+| Khía cạnh | Kiến trúc cũ (Spokes) | Kiến trúc mới |
+| --- | --- | --- |
+| Nguồn sự thật | Bản đầy đủ trên đĩa local của vài fileserver | Một bản trong durable storage |
+| Mở rộng read | Thêm replica bền vững | Thêm worker cache nhẹ |
+| Mỗi write | Mọi replica tham gia, chờ quorum | Chỉ ref update cần đồng thuận |
+| Maintenance | Chạy trên host đang phục vụ request | Worker riêng, chạy nền |
+| Mất một node | Giảm cả capacity lẫn durability | Gần giống một cache miss |
+| Cấp phát | Provision trước cho đỉnh | Co giãn theo traffic thật |
+
+Dòng "mất một node" là dòng mình thấy hay nhất. Khi storage và compute tách rời, mất một worker không còn là sự kiện về durability nữa - nó chỉ là một cache miss. Worker thay thế bắt đầu phục vụ ngay và tự làm đầy cache từ durable storage khi traffic tới.
+
+Đây là kiểu thay đổi mà bạn không thấy được từ bên ngoài, nhưng nó đổi hẳn cách hệ thống hỏng.
+
+## Kết quả
+
+Theo bài viết:
+
+- Trong benchmark nội bộ, kiến trúc mới đạt **write throughput cao hơn tới 35 lần**
+- Read scale độc lập, không còn cộng thêm việc cho mỗi push
+- Hồi phục sau lỗi nhanh hơn nhiều vì không phải dựng lại bản repo đầy đủ
+
+Mình cố tình để chữ "benchmark nội bộ" ở lại trong câu, vì đó là toàn bộ độ tin cậy của con số 35 lần. Bài không đưa số production, và cũng chưa thể đưa - hệ thống đang được xây.
+
+## Khác biệt cốt lõi với Anthropic
+
+Đặt hai bài cạnh nhau thì khác biệt không nằm ở kỹ thuật, mà ở **ràng buộc**.
+
+Anthropic có thể đổi giao thức. Họ sở hữu cả client lẫn server, người dùng Git của họ gần như toàn là agent và CI job, và họ chấp nhận một hệ thống không hỗ trợ offline.
+
+GitHub thì không được đổi gì cả. Họ phục vụ một tỉ repo, và mọi workflow đang chạy trên đó phải giữ nguyên: branching, review, merge, history, branch protection, audit log, required review. Bài viết nói thẳng điều đó:
+
+> We're rebuilding the infrastructure while GitHub keeps running. There's no maintenance window where the world's code stops moving, and no version of this work where we ask people to change how they build software while we do it.
+
+Đây là ràng buộc mạnh hơn "làm cho nhanh nhất có thể" rất nhiều. Nó loại bỏ luôn phương án dễ nhất, là bảo mọi người đổi cách làm việc.
+
+Nên hai kết luận ngược nhau thật ra không mâu thuẫn. Anthropic tối ưu cho một monorepo với một nhóm người dùng nội bộ. GitHub tối ưu cho một nền tảng công cộng không được phép làm ai phải đổi gì. Cùng áp lực, khác ràng buộc, khác lời giải.
+
+## Phần còn dang dở
+
+Bài GitHub trung thực ở chỗ nó tự nhận mình chưa xong, và có mấy điểm đáng ghi lại:
+
+- Đây là **bài đầu của một series**, kiến trúc tương lai sẽ nói ở bài sau. Bài này chủ yếu đặt vấn đề.
+- Con số 35 lần là **benchmark nội bộ**, chưa phải production.
+- Bản quyền lực của repo chuyển vào **Azure Blob Storage**, tức là phụ thuộc sâu hơn vào một nhà cung cấp <TermNote id="cloud">cloud</TermNote>. Bài không bàn tới đánh đổi này.
+- Không có số về **độ trễ của đường đi mới**. Với agent chạy vòng lặp chặt, đây lại đúng là chỉ số quan trọng nhất.
+
+So với bài Scion, bài này ít "đã xong" hơn. Nhưng mình nghĩ chính vì vậy nó hữu ích hơn để học: nó cho thấy một đội lớn đang nghĩ gì **trước khi** biết mình đúng.
+
+## Còn với phần còn lại của chúng ta?
+
+Bài Scion để lại một câu hỏi: giả định nào được viết ra khi người dùng là con người, mà giờ người dùng đã là agent?
+
+Bài GitHub để lại một câu hỏi hẹp hơn nhưng sắc hơn:
+
+<Callout type="tip" title="Câu hỏi đáng mang về">
+  Trong hệ thống của bạn, **cơ chế nào đang làm hai việc cùng lúc**? Và nếu tách chúng ra thì sao?
+</Callout>
+
+Với GitHub, đó là "bản trên đĩa vừa là nguồn sự thật vừa là thứ trả request". Với bạn nó có thể là chuyện khác:
+
+- Một database vừa là nguồn sự thật vừa là read replica
+- Một queue vừa đảm bảo thứ tự vừa chịu tải
+- Một job vừa tính toán vừa dọn dẹp
+- Một cache vừa tăng tốc vừa là nơi lưu state
+
+Điểm chung của những cấu hình này là chúng rất hợp lý ở quy mô nhỏ, và trở thành trần cứng ở quy mô lớn - mà không có tín hiệu nào báo trước.
+
+Và tất nhiên, đừng đọc bài này rồi đi tách storage khỏi compute cho hệ thống của team tám người. Cái đáng lấy là cách đặt câu hỏi, không phải kiến trúc.
+
+## Mình rút ra mấy điều
+
+**Một, cơ chế đúng ở quy mô nhỏ có thể là cơ chế sai ở quy mô lớn.** Không phải vì nó hỏng, mà vì nó bị hỏi một câu hỏi khác. GitHub không sửa Spokes - họ nhận ra Spokes đang trả lời sai câu hỏi.
+
+**Hai, "không đổi gì cho người dùng" là một ràng buộc thiết kế mạnh hơn "nhanh nhất có thể".** Nó loại bỏ phương án dễ nhất và buộc phải giải bài toán thật. Rất nhiều quyết định kiến trúc tốt bắt đầu từ một ràng buộc kiểu này.
+
+**Ba, đọc số phải đọc cả nhãn.** 35 lần là benchmark nội bộ. 12 lần của Anthropic là số production. Hai con số không cùng loại, và bài nào nói rõ nhãn thì đáng tin hơn.
+
+**Bốn, cùng một áp lực có thể có hai lời giải ngược nhau và cả hai đều đúng.** Anthropic bỏ Git, GitHub viết lại Git. Câu hỏi không phải "ai đúng", mà là "ràng buộc của họ khác nhau ở đâu". Đây có lẽ là điều mình thấy đáng nhớ nhất khi đọc hai bài này liền nhau.
+
+Và điều đáng nể ở bài GitHub là họ chọn công khai một việc khó: viết lại nền móng của mình **trong lúc tòa nhà vẫn có người ở**. Không có cửa sổ bảo trì nào cho việc đó.
+
+---
+
+Nguồn: [Building Git infrastructure for agent-scale development](https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/) - Brian Celenza, GitHub Engineering, 6/10/2026. Đọc kèm: [Redesigning source control at Anthropic](https://www.anthropic.com/engineering/redesigning-source-control) - Anthropic Engineering, 13/10/2026.
