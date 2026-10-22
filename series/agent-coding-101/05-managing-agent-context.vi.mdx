@@ -3,6 +3,21 @@ title: "Giữ context cho coding agent qua nhiều session"
 description: "Cách nhận ra agent đang mất context, viết bản bàn giao gọn và chuyển session mà không phải kể lại mọi thứ từ đầu."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784089131/c9707fd7-35c7-4228-a683-d184f195524f.png"
+quiz:
+  - question: "Dấu hiệu nào cho thấy agent đã mất context?"
+    options:
+      - text: "Agent trả lời chậm hơn"
+      - text: "Agent hỏi lại điều đã nói hoặc dùng lại giả định cũ"
+        correct: true
+      - text: "Agent chạy test thất bại"
+    explanation: "Mất context thường lộ ra qua việc hỏi lại, quên giới hạn hoặc âm thầm dùng giả định cũ."
+  - question: "Bản bàn giao tốt nên có gì?"
+    options:
+      - text: "Toàn bộ nội dung cuộc trò chuyện"
+      - text: "Mục tiêu, trạng thái, quyết định, file, kiểm tra và bước tiếp"
+        correct: true
+      - text: "Chỉ danh sách file đã sửa"
+    explanation: "Bàn giao là bản tóm tắt có cấu trúc, không phải bản chép lại cuộc trò chuyện."
 ---
 
 Ở bài trước, mình đã đi từ một feature còn mơ hồ tới spec và các task nhỏ có thể kiểm tra riêng.

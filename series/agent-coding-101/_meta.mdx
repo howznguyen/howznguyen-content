@@ -1,13 +1,28 @@
 ---
 title: "Agent Coding 101"
-description: "Series cho người mới dùng AI để code, từ mấy thuật ngữ dễ gây ngợp tới cách giao việc và kiểm tra agent ngoài đời thật."
+description: "Khoá học cho dev đã biết code nhưng chưa quen giao việc cho coding agent: từ prompt, spec, context tới review, guardrail và một capstone có rubric."
 date: "2026-05-19"
-updatedAt: "2026-07-16"
+updatedAt: "2026-10-22"
 tags: ["AI", "Agent", "Programming"]
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1779202507/agent_coding_101_sofzpc.png"
 featured: true
 status: "complete"
 author: howznguyen
+quiz:
+  - question: "Mục tiêu chính của Agent Coding 101 là gì?"
+    options:
+      - text: "Dùng model mạnh nhất có thể"
+      - text: "Kiểm soát và kiểm tra agent, không phải viết nhiều code hơn"
+        correct: true
+      - text: "Học cú pháp của mọi ngôn ngữ"
+    explanation: "Khoá học tập trung vào cách giao việc, kiểm tra và giữ quyền quyết định."
+  - question: "Capstone yêu cầu bạn nộp gì?"
+    options:
+      - text: "Một feature nhỏ đi từ ý tưởng tới pull request, kèm bằng chứng"
+        correct: true
+      - text: "Một refactor lớn không cần test"
+      - text: "Mười feature cùng lúc"
+    explanation: "Capstone là một lát cắt nhỏ, có bằng chứng và có thể review."
 ---
 
 Mở một coding agent lên thì khá dễ. Giao cho nó một câu ngắn, nhìn mấy dòng chữ chạy ào ào rồi thấy code xuất hiện cũng vui mắt lắm.
@@ -43,3 +58,32 @@ Mỗi bài tập trung vào một vấn đề và có thể đọc riêng. Nếu
   giúp mình hiểu, nhưng vài lần giao việc sai mới cho biết quy tắc nào thật sự
   đáng giữ. Hơi đau một chút, nhưng nhớ lâu.
 </Callout>
+
+## Trước khi bắt đầu
+
+Bạn cần:
+
+- Một repo thật, có test hoặc ít nhất một cách chạy thử.
+- Một coding agent: Claude Code, Codex, Cursor hoặc Copilot.
+- Quyền tạo branch và mở pull request.
+- Khoảng 3-5 giờ mỗi tuần.
+
+Không cần một repo lớn. Một repo nhỏ có vài module, một lệnh test và một tính năng đang dở là đủ.
+
+## Khoá học có gì
+
+Mỗi bài có một vòng lặp nhỏ: đọc, thử trên repo, ghi lại kết quả. Cuối khoá, bạn nộp một capstone gồm:
+
+- Task brief và tiêu chí chấp nhận.
+- Spec và task list.
+- Một pull request nhỏ.
+- Gói bằng chứng.
+- Self-review và retro.
+
+Bài 10 là ví dụ có người dẫn. Bài 11 là đề bài capstone và rubric để bạn tự làm, tự chấm.
+
+## Cách khoá này được chấm
+
+Không có điểm số tự động. Bạn tự chấm theo rubric ở bài 11. Nếu học theo nhóm, đổi bài cho nhau review bằng cùng rubric đó.
+
+Tiêu chí chính: phạm vi, cách chia task, bằng chứng, review và chất lượng pull request.

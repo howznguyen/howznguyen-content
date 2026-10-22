@@ -1,0 +1,216 @@
+---
+title: "Capstone: đề bài và rubric"
+description: "Bài tập cuối khoá: đưa một feature nhỏ từ ý tưởng tới pull request, kèm bằng chứng và tự chấm theo rubric."
+author: howznguyen
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784099817/yg6e6xcl1tb0boyjystv.webp"
+quiz:
+  - question: "Capstone dừng ở đâu?"
+    options:
+      - text: "Merge vào main"
+      - text: "Một pull request chưa merge"
+        correct: true
+      - text: "Deploy lên production"
+    explanation: "Capstone tạo ra một gói thay đổi để review, không phải để tự merge."
+  - question: "Nếu Phạm vi hoặc Bằng chứng đang ở mức 'Chưa đạt', nên làm gì?"
+    options:
+      - text: "Nộp luôn"
+      - text: "Sửa trước khi nộp"
+        correct: true
+      - text: "Bỏ qua vì các mục khác đạt"
+    explanation: "Phạm vi và bằng chứng là hai mục không nên nộp khi còn ở mức Chưa đạt."
+---
+
+Bài 10 là một vòng làm việc mẫu. Mình đi trước, bạn xem cách mình chọn lát cắt, viết tài liệu, giao agent, kiểm tra và chuẩn bị <TermNote id="pull-request">pull request</TermNote>.
+
+Bài này là lượt của bạn.
+
+Không có đáp án mẫu. Chỉ có một đề bài, một bộ ràng buộc và một rubric để bạn tự chấm. Mục tiêu không phải làm thật nhiều, mà là làm một việc đủ nhỏ và làm cho tới.
+
+## Bài này khác bài 10 thế nào
+
+Bài 10 là ví dụ có người dẫn. Bạn đọc và thấy cách một feature đi từ yêu cầu mơ hồ tới PR.
+
+Bài 11 là bài tập. Bạn chọn feature của mình, tự viết tài liệu, tự giao agent, tự kiểm tra và tự đánh giá.
+
+Không có kiến thức mới. Mọi thứ đã nằm trong các bài trước:
+
+- Bài 3: sổ tay project và quy ước.
+- Bài 4: spec, lát cắt dọc và task nhỏ.
+- Bài 5: context và bản bàn giao.
+- Bài 6: khi nào cần thêm agent.
+- Bài 7: review và bằng chứng.
+- Bài 8: xử lý khi agent bị kẹt.
+- Bài 9: hàng rào và quyền.
+
+Capstone là lúc ghép chúng lại.
+
+## Đề bài
+
+Chọn **một feature nhỏ trong một repo thật** của bạn. Đưa nó từ ý tưởng tới một pull request có thể review.
+
+Không cần feature lớn. Cần một lát cắt trọn vẹn: người dùng làm được một việc, có dữ liệu đi qua, có ít nhất một trạng thái lỗi, và có cách kiểm tra.
+
+Ví dụ đủ tốt:
+
+- Thêm một trường vào form và hiển thị đúng ở màn hình xác nhận.
+- Thêm bộ lọc cho một danh sách, có trạng thái rỗng.
+- Sửa một bug nhỏ và thêm regression test.
+- Thêm một endpoint nhỏ, có validation và test.
+
+Ví dụ quá lớn:
+
+- Làm lại trang thanh toán.
+- Đổi toàn bộ thư viện UI.
+- Thêm hệ thống phân quyền nhiều tầng.
+- Refactor ba module cùng lúc.
+
+Nếu feature của bạn cần hơn một tuần, cắt nhỏ hơn. Nếu không cắt được, chọn feature khác.
+
+## Ràng buộc
+
+Các ràng buộc này không phải để làm khó. Chúng tạo ra một gói thay đổi mà người khác có thể review trong một lần ngồi.
+
+- Một feature, không kèm refactor ngoài phạm vi.
+- Khoảng 5-8 file thay đổi, dưới 300 dòng nếu có thể.
+- Không nâng dependency, không đổi format toàn repo, không xoá code không liên quan.
+- Có test cho hành vi mới hoặc test tái hiện bug.
+- Không có secret, token hay dữ liệu production trong <TermNote id="diff">diff</TermNote>.
+- Làm trên branch riêng. Không push thẳng lên `main`. Không merge.
+- PR để mở, kèm bằng chứng và câu hỏi mở nếu có.
+
+<Callout type="warning" title="Đừng merge chính mình">
+  Capstone dừng ở pull request. Bạn có thể tự review, nhưng đừng merge. Mục tiêu là tạo ra một gói thay đổi để người khác đọc và quyết định, không phải chứng minh bạn merge được.
+</Callout>
+
+## Bạn nộp gì
+
+Sáu món. Không cần dài, nhưng phải đủ để người khác hiểu và kiểm tra.
+
+| # | Artifact | Nội dung tối thiểu |
+| --- | --- | --- |
+| 1 | Task brief | Vấn đề, người dùng, trong phạm vi, ngoài phạm vi, tiêu chí chấp nhận |
+| 2 | Spec và task list | Lát cắt dọc, thứ tự, phụ thuộc, tiêu chí xong của từng task |
+| 3 | PR description | Vì sao, thay đổi gì, cách kiểm tra, rủi ro, cách rollback |
+| 4 | Evidence package | Test, log, ảnh hoặc video, câu lệnh đã chạy |
+| 5 | Self-review | Đã kiểm tra gì, còn gì chưa kiểm tra, quyết định nào cần giải thích |
+| 6 | Retro | Điều gì hiệu quả, điều gì mất thời gian, lần sau đổi gì |
+
+Task brief và spec có thể nằm trong cùng một file. PR description và self-review có thể nằm trong PR. Đừng tạo sáu file nếu ba file đủ.
+
+Tiêu chí chấp nhận phải là câu kiểm tra được. "Luồng mượt" không kiểm tra được. "Bỏ trống email thì không gửi được và có lỗi cạnh ô email" kiểm tra được.
+
+## Kế hoạch 5 ngày
+
+**Ngày 1. Chọn và chốt phạm vi.**
+Chọn feature, viết task brief, liệt kê rõ cái gì ngoài phạm vi. Đóng băng phạm vi. Không thêm gì mới sau bước này.
+
+**Ngày 2. Viết spec và chia task.**
+Chia thành lát cắt dọc. Mỗi task có tiêu chí xong. Viết bản giao việc cho agent hoặc cho chính bạn.
+
+**Ngày 3. Làm theo từng lát cắt.**
+Giao một task mỗi lần. Cho agent đọc code trước khi sửa. Kiểm tra sau mỗi lát cắt. Nếu agent kẹt, dừng và chẩn đoán thay vì thêm retry.
+
+**Ngày 4. Kiểm tra và gom bằng chứng.**
+Chạy smoke test, edge test và regression. Chụp ảnh hoặc quay video. Ghi lại lỗi còn lại.
+
+**Ngày 5. Đóng gói và tự chấm.**
+Viết PR description, self-review và retro. Chấm theo rubric. Nếu có mục "Chưa đạt" ở Phạm vi hoặc Bằng chứng, sửa trước khi nộp.
+
+## Rubric
+
+Chấm mỗi tiêu chí theo ba mức. Không cần đạt "Tốt" ở mọi mục. Nhưng không nên nộp nếu Phạm vi hoặc Bằng chứng đang ở "Chưa đạt".
+
+| Tiêu chí | Chưa đạt | Đạt | Tốt |
+| --- | --- | --- | --- |
+| Phạm vi | Feature lan rộng, nhiều thay đổi ngoài lề | Một lát cắt nhỏ, có mục ngoài phạm vi | Lát cắt rõ, mỗi thay đổi đều cần cho feature |
+| Chia task | Task theo tầng, phụ thuộc mơ hồ | Task nhỏ, có thứ tự và tiêu chí xong | Task là lát cắt dọc, kiểm tra được từng phần |
+| Bằng chứng | Chỉ có lời agent báo xong | Có test, log hoặc ảnh cho tiêu chí chính | Bằng chứng đủ để người khác tái hiện, gồm cả case xấu |
+| Review | Không review hoặc chỉ đọc tóm tắt | Review diff và checklist | Review từ rộng tới hẹp, ghi rõ quyết định và rủi ro |
+| PR | Diff lớn, mô tả mơ hồ | PR nhỏ, mô tả rõ, test pass | PR dễ review, có rủi ro, rollback và câu hỏi mở |
+
+Cách tự chấm:
+
+1. Đọc từng tiêu chí.
+2. Chọn mức thật lòng, không chọn mức mình muốn.
+3. Ghi một bằng chứng cho mức đã chọn.
+4. Nếu không có bằng chứng, hạ xuống "Chưa đạt".
+
+## Mẫu nộp bài
+
+```text
+# Capstone: <tên feature>
+
+## 1. Task brief
+- Vấn đề:
+- Người dùng:
+- Trong phạm vi:
+- Ngoài phạm vi:
+- Tiêu chí chấp nhận:
+  1.
+  2.
+  3.
+
+## 2. Spec và task
+- Lát cắt:
+- Task 1:
+  - Mục tiêu:
+  - Tiêu chí xong:
+  - Phụ thuộc:
+- Task 2:
+  - Mục tiêu:
+  - Tiêu chí xong:
+  - Phụ thuộc:
+
+## 3. PR
+- Link:
+- Vì sao:
+- Thay đổi chính:
+- Cách kiểm tra:
+- Rủi ro:
+- Rollback:
+
+## 4. Bằng chứng
+- Test:
+- Log:
+- Ảnh hoặc video:
+- Câu lệnh đã chạy:
+
+## 5. Tự review
+- Đã kiểm tra:
+- Chưa kiểm tra:
+- Quyết định cần giải thích:
+
+## 6. Retro
+- Hiệu quả:
+- Mất thời gian:
+- Lần sau đổi gì:
+```
+
+## Checklist trước khi nộp
+
+- Chỉ có một feature, không có thay đổi ngoài phạm vi.
+- Tiêu chí chấp nhận kiểm tra được.
+- Task là lát cắt dọc, không phải chia theo tầng.
+- Test pass, có bằng chứng cho tiêu chí chính.
+- Đã thử ít nhất một trường hợp xấu.
+- PR description có rủi ro và rollback.
+- Không có secret trong diff.
+- Có self-review và retro.
+- PR chưa merge.
+
+Nếu thiếu một mục, ghi rõ vào self-review. Đừng giả vờ đã làm.
+
+## Khi nào chưa nên nộp
+
+- Diff quá lớn hoặc có nhiều thay đổi không liên quan.
+- Không có test hoặc bằng chứng.
+- Không giải thích được vì sao chọn cách làm.
+- Có secret trong log hoặc commit.
+- PR đã merge hoặc push thẳng lên `main`.
+- Bạn không biết mình chưa kiểm tra gì.
+
+## Kết
+
+Bạn không cần một capstone hoàn hảo. Bạn cần một gói thay đổi mà người khác có thể review, và một lý do rõ ràng cho từng quyết định.
+
+Nếu làm xong, bạn đã đi hết một vòng thật: từ một feature nhỏ tới một pull request có bằng chứng. Đó cũng là vòng lặp bạn sẽ dùng lại trong mọi dự án sau.

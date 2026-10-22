@@ -3,6 +3,21 @@ title: "Khi coding agent nói 'done', kiểm tra thế nào?"
 description: "Cách review diff, đối chiếu tiêu chí hoàn thành và đòi đủ bằng chứng trước khi commit hoặc merge."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784095307/g6jv81wun5zlmig1yqow.webp"
+quiz:
+  - question: "Khi agent báo 'done', điều đó có nghĩa gì?"
+    options:
+      - text: "Task đã chắc chắn đúng"
+      - text: "Đó chỉ là lời báo của người viết code, chưa phải bằng chứng"
+        correct: true
+      - text: "Test đã pass trên mọi môi trường"
+    explanation: "Done là lời báo. Bạn vẫn phải kiểm tra trạng thái cuối và bằng chứng."
+  - question: "Bằng chứng nào đủ để merge?"
+    options:
+      - text: "Lời tóm tắt của agent"
+      - text: "Test xanh trên một branch riêng"
+      - text: "Kiểm tra trên trạng thái đã ghép, kèm diff, test và log phù hợp tiêu chí"
+        correct: true
+    explanation: "Bằng chứng phải được lấy trên trạng thái cuối và đủ để người khác tái hiện."
 ---
 
 Ở cuối bài trước, mình nói rằng lần kiểm tra cuối phải chạy trên trạng thái đã ghép, không phải trên từng branch hoặc bản tóm tắt riêng lẻ.

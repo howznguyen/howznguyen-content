@@ -3,6 +3,21 @@ title: "Viết sổ tay dự án cho coding agent"
 description: "Cách viết AGENTS.md hoặc CLAUDE.md vừa đủ để agent hiểu repo, giữ đúng quy ước và không bắt mình kể lại từ đầu."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784030814/6b38ddac-d41e-4a8e-aebe-f967cfdd0b06.png"
+quiz:
+  - question: "Một rule tốt trong AGENTS.md nên thế nào?"
+    options:
+      - text: "Càng dài càng tốt"
+      - text: "Cụ thể và kiểm tra được"
+        correct: true
+      - text: "Chỉ là lời khuyên chung"
+    explanation: "Rule tốt nói rõ hành vi và cách kiểm tra, để agent làm đúng và bạn phát hiện được khi sai."
+  - question: "Khi nào nên thêm một rule mới?"
+    options:
+      - text: "Trước khi bắt đầu, để phòng mọi thứ"
+      - text: "Sau một lỗi thật, khi rule giúp tránh lặp lại"
+        correct: true
+      - text: "Mỗi khi agent hỏi lại"
+    explanation: "Viết từ lỗi thật giúp rule ngắn, cụ thể và có lý do tồn tại."
 ---
 
 Ở bài trước, mình đã nói về cách giao một task nhỏ cho coding agent: nói rõ việc cần làm, cho đủ context, đặt giới hạn, rồi review diff.

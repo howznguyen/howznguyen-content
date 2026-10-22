@@ -3,6 +3,21 @@ title: "Đặt hàng rào cho coding agent: cho quyền tới đâu là vừa?"
 description: "Cách giới hạn quyền, dữ liệu và tác động ra bên ngoài để agent làm nhanh mà mình vẫn còn đường lui."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784098573/nqjgdsz4abc798gr0mwt.webp"
+quiz:
+  - question: "Guardrail tốt nên là gì?"
+    options:
+      - text: "Một câu nhắc trong prompt"
+      - text: "Một luật chặn thật ở tầng quyền hoặc công cụ"
+        correct: true
+      - text: "Tắt test để agent chạy nhanh"
+    explanation: "Lời dặn chỉ là ý định. Guardrail thật nằm ở quyền, công cụ và điểm xin phép."
+  - question: "Trước một tác động khó quay đầu, nên làm gì?"
+    options:
+      - text: "Để agent tự quyết"
+      - text: "Đặt điểm xin phép hoặc xem trước"
+        correct: true
+      - text: "Chạy luôn rồi tính sau"
+    explanation: "Điểm xin phép trước chỗ khó quay đầu giữ cho bạn còn đường lui."
 ---
 
 Ở bài trước, mình nói về cách dừng một coding agent đang đi vòng rồi chuyển sang chẩn đoán.

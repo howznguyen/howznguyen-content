@@ -3,6 +3,21 @@ title: "Khi coding agent bị kẹt hoặc đi sai hướng"
 description: "Cách dừng một vòng sửa mãi không xong, dựng giả thuyết có căn cứ rồi quyết định tiếp tục, bàn giao hay hỏi con người."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784097436/tqpq1icrlhjuiqvprldx.webp"
+quiz:
+  - question: '"Bị kẹt" nghĩa là gì trong bài này?'
+    options:
+      - text: "Agent không trả lời nữa"
+      - text: "Mỗi vòng sửa không tạo ra bằng chứng mới"
+        correct: true
+      - text: "Test đang đỏ"
+    explanation: "Bị kẹt là khi công việc đứng yên dù agent vẫn trả lời và sửa code."
+  - question: "Trước khi sửa code khi agent bị kẹt, nên làm gì?"
+    options:
+      - text: "Thêm retry"
+      - text: "Đổi sang model khác"
+      - text: "Đóng băng trạng thái và phân loại vấn đề"
+        correct: true
+    explanation: "Đóng băng trạng thái và phân loại đúng chỗ sai giúp chọn phép thử tiếp theo có căn cứ."
 ---
 
 Ở bài trước, mình đã chốt trạng thái, review diff và chạy các bước kiểm tra trước khi tin lời agent báo `done`.

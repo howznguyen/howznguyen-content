@@ -3,6 +3,21 @@ title: "Buổi đầu tiên với coding agent"
 description: "Mở Claude Code, Cursor hay Copilot lên thì nên giao việc thế nào để agent hiểu đúng, làm đúng, và không đi quá xa?"
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1780543732/02-first-agent-session-cover_as3a8w.png"
+quiz:
+  - question: "Trước khi yêu cầu agent sửa code, nên làm gì?"
+    options:
+      - text: "Bắt đầu sửa ngay để tiết kiệm thời gian"
+      - text: "Cho agent đọc code và hiểu context trước"
+        correct: true
+      - text: "Tắt test để agent chạy nhanh hơn"
+    explanation: "Đọc trước giúp agent không phải đoán cấu trúc và quy ước của project."
+  - question: "Vì sao không nên giao một feature quá lớn ngay từ đầu?"
+    options:
+      - text: "Vì agent sẽ chạy chậm hơn"
+      - text: "Vì agent phải tự đoán quá nhiều thứ"
+        correct: true
+      - text: "Vì agent không biết dùng Git"
+    explanation: "Feature càng lớn, số chỗ agent phải tự điền càng nhiều, và diff càng khó review."
 ---
 
 Ở bài trước mình nói về mấy thuật ngữ cơ bản: <TermNote id="llm">LLM</TermNote>, <TermNote id="agent">Agent</TermNote>, <TermNote id="prompt">Prompt</TermNote>, <TermNote id="token">Token</TermNote>, <TermNote id="context-window">Context Window</TermNote>, <TermNote id="memory">Memory</TermNote>.

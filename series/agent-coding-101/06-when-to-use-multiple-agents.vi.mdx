@@ -3,6 +3,21 @@ title: "Khi nào nên dùng nhiều coding agent?"
 description: "Cách chia việc cho agent phụ, session song song và worktree mà không biến thời gian tiết kiệm thành một buổi dọn conflict."
 author: howznguyen
 image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1784092439/tksbw8i2wcrdr4vmf2n2.webp"
+quiz:
+  - question: "Khi nào nên dùng nhiều agent?"
+    options:
+      - text: "Khi muốn mọi việc nhanh hơn"
+      - text: "Khi task tách độc lập và phần việc thuộc về ai đã rõ"
+        correct: true
+      - text: "Khi có nhiều model khác nhau"
+    explanation: "Nhiều agent chỉ có lợi khi phần việc tách độc lập và có người chịu trách nhiệm gom kết quả."
+  - question: "Kiểm tra cuối nên chạy ở đâu?"
+    options:
+      - text: "Trên từng branch riêng"
+      - text: "Trên bản tóm tắt của từng agent"
+      - text: "Trên trạng thái đã ghép"
+        correct: true
+    explanation: "Lần kiểm tra cuối phải chạy trên trạng thái đã ghép, vì đó là thứ thật sự được merge."
 ---
 
 Ở cuối bài trước, mình nói rằng một bản bàn giao tốt giúp agent mới tiếp tục task mà không cần đọc lại toàn bộ đoạn chat.
