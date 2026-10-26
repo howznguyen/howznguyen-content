@@ -225,6 +225,11 @@ A course-level role chooser. It writes `?track=maker` or `?track=pm` to the seri
 ### `<Bookmark>`
 - `url` (required), `title`, `description`, `icon`, `cover`
 
+### `<XPost>`
+- `value` (required): an X status URL or the bare numeric id. `url` and `id` are aliases.
+- Renders the post with `react-tweet`. In post and series bodies it loads per visitor; Journey entries embed through the `x:` frontmatter field instead and are read at build time.
+- Example: `<XPost value="https://x.com/user/status/1234567890123456789" />`
+
 ### `<Video>`
 - `src` (required). YouTube URLs auto-detected.
 

@@ -244,6 +244,15 @@ A course-level role chooser. It writes `?track=maker` or `?track=pm` to the seri
 ```
 Props: `url` (required), `title`, `description`, `icon`, `cover`.
 
+### `<XPost>`
+```mdx
+<XPost value="https://x.com/user/status/1234567890123456789" />
+```
+Embeds an X post with `react-tweet`. `value` takes a status URL or a bare
+numeric id; `url` and `id` are aliases. Post and series bodies load the embed
+per visitor, while Journey entries use the `x:` frontmatter field and are read
+at build time.
+
 ### `<Video>`
 ```mdx
 <Video src="https://www.youtube.com/watch?v=ID" />

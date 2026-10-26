@@ -183,6 +183,7 @@ See [`posts/_demo.mdx`](posts/_demo.mdx) for a live example of every component. 
 - `<Callout type="info|warning|error|success|note|tip" title="...">` - highlighted box
 - `<Image src="..." alt="..." caption="..." />` - image with caption + zoom
 - `<Bookmark url="..." title="..." description="..." />` - link preview card
+- `<XPost value="https://x.com/user/status/..." />` - embedded X post
 - `<Video src="..." />` - YouTube URL auto-detected
 - `<TodoList>` + `<Todo checked>` - checklist
 - `<Quote color="blue|red|green|...">` - styled blockquote
