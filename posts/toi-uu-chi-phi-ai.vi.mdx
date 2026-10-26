@@ -49,15 +49,17 @@ Ranh giới giữa hai loại là <TermNote id="spec">spec</TermNote>. Nếu spe
 Sau cú khóa, mình chia stack theo việc:
 
 - **Plan và spec:** Antigravity Pro với Gemini 4 Argon. Argon là model Gemini duy nhất mình thấy đủ chắc tay cho task khó.
-- **Implementation:** OpenCode Go với DeepSeek V4.1 Flash. Gói Go $10/tháng, hạn mức V4.1 Flash đủ cho phần lớn task code.
+- **Implementation:** vẫn là Claude Code, nhưng trỏ sang DeepSeek V4.1 Flash qua OpenCode Go. Gói Go $10/tháng, hạn mức V4.1 Flash đủ cho phần lớn task code.
 - **Việc nhỏ:** mấy model Gemini rẻ hơn, hoặc V4.1 Flash cho task đã rõ.
+
+Harness vẫn là Claude Code. Mình chỉ đổi model đứng sau nó. Cái gì ngon thì giữ, phần đắt thì thay.
 
 Quota của Argon cũng khá chát, nhưng có còn hơn không. Mình để nó cho những task thật sự cần, còn lại đẩy sang V4.1 Flash.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792999074/posts/toi-uu-chi-phi-ai/stack-deepseek-flash.png"
   alt="Claude Code chạy với DeepSeek V4.1 Flash, hiển thị session và weekly usage trong terminal"
-  caption="Claude Code v2.1.310 chạy với DeepSeek V4.1 Flash, usage hiện ngay trong terminal. Ảnh: howznguyen."
+  caption="Claude Code v2.1.310 chạy với DeepSeek V4.1 Flash qua OpenCode Go, usage hiện ngay trong terminal. Ảnh: howznguyen."
 />
 
 Không mua thêm gói mới. Tổng chi phí vẫn thấp hơn nhiều so với Claude Max.
@@ -76,7 +78,7 @@ Có ba thứ đó, đổi model chỉ là đổi công cụ. Không có, đổi 
 
 ## Kết quả
 
-Chi phí giảm. Thay vì hơn $200/tháng cho Claude Max, mình trả $10 cho OpenCode Go, cộng gói mình đã có sẵn. Tốc độ ship chậm hơn một chút, vì mình dành thời gian viết spec trước. Nhưng chất lượng tốt hơn: ít code thừa, ít sửa lại, và mình hiểu rõ mình đang trả tiền cho cái gì.
+Chi phí giảm. Thay vì hơn $200/tháng cho Claude Max, mình trả $10 cho OpenCode Go để lấy DeepSeek V4.1 Flash, còn harness vẫn là Claude Code, cộng gói mình đã có sẵn. Tốc độ ship chậm hơn một chút, vì mình dành thời gian viết spec trước. Nhưng chất lượng tốt hơn: ít code thừa, ít sửa lại, và mình hiểu rõ mình đang trả tiền cho cái gì.
 
 <Image
   src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1793002409/posts/toi-uu-chi-phi-ai/opencode-go-pricing-cropped.png"
