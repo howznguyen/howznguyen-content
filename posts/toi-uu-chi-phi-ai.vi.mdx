@@ -1,0 +1,113 @@
+---
+title: "Tối ưu chi phí AI: trả ít hơn bằng cách nghĩ nhiều hơn"
+description: "Claude Max $200 chỉ là cái cớ. Bài học thật là cách chia việc, viết spec, và chọn model theo chi phí."
+date: 2026-10-26
+tags:
+  - AI
+  - Cost
+  - Workflow
+  - Reflection
+authors: [howznguyen]
+featured: false
+image: "https://res.cloudinary.com/dkxhoyenc/image/upload/v1792999074/posts/toi-uu-chi-phi-ai/stack-deepseek-flash.png"
+---
+
+Dù Hehehihi (Gemini) rất ngu, nhưng mình vẫn đang dùng nó để viết spec cho chính mình.
+
+Nghe như một câu đùa. Nhưng nó là kết quả của vài tuần mình mất quyền truy cập Claude Max, và phải học lại cách tiêu tiền cho AI.
+
+## Nguyên nhân
+
+14:50 ngày 7/10, Claude Startups chúc mừng Knowns Lab được nhận vào chương trình. 15:05, bốn email tạm ngưng tài khoản Max. Lý do duy nhất: "high signal volume". Mình đã gửi kháng nghị. Đến giờ mình vẫn chỉ có dòng đó.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792999242/posts/toi-uu-chi-phi-ai/claude-max-suspension-emails.jpg"
+  alt="Chuỗi email 14:50 nhận vào Claude Startups, 14:58 offer Teams được duyệt, 15:05 bốn email tạm ngưng tài khoản"
+  caption="14:50 nhận vào Startup Program, 14:58 offer Teams được duyệt, 15:05 bốn email tạm ngưng tài khoản. Ảnh: howznguyen."
+/>
+
+Mình kể chuyện này không phải để kể về Anthropic. Mình kể vì nó là cái cớ để nhìn lại một câu hỏi lớn hơn: mình đang tiêu bao nhiêu cho AI, và tiêu vào đâu?
+
+## Chỗ tốn tiền nhất không phải model
+
+Trước đó mình trả hơn $200/tháng sau thuế. Mình trả để không phải nghĩ: không chọn model, không ước lượng <TermNote id="token">token</TermNote>, không cân nhắc task nào đáng dùng Opus. Cứ có việc là mở Claude Code, chọn Opus, làm.
+
+Cái tiện đó là lý do mình mua gói. Nó cũng là lý do mình ngừng tối ưu. Khi mọi task đều đi qua model đắt nhất, mình không còn biết task nào thật sự cần model đắt. Chi phí tăng, nhưng chất lượng không tăng tương ứng, vì phần lớn task không cần Opus.
+
+## Tối ưu chi phí là chia việc, không phải mua model rẻ
+
+Câu hỏi không phải "model nào rẻ nhất", mà là "task này cần gì".
+
+- Task mơ hồ, nhiều ràng buộc, cần giữ context lớn: dành thời gian viết đề bài, dùng model mạnh để plan.
+- Task đã rõ, có acceptance criteria, có file cụ thể: đẩy cho model rẻ.
+- Task lặp lại, đọc file, sửa lỗi nhỏ: model rẻ nhất là đủ.
+
+Ranh giới giữa hai loại là <TermNote id="spec">spec</TermNote>. Nếu spec đủ rõ, model rẻ làm được. Nếu spec mơ hồ, model rẻ sẽ đoán sai, và mình trả tiền hai lần: một lần cho nó, một lần để sửa.
+
+## Hehehihi rất ngu, nhưng vẫn có chỗ dùng
+
+Sau cú khóa, mình chia stack theo việc:
+
+- **Plan và spec:** Antigravity Pro với Gemini 4 Argon. Argon là model Gemini duy nhất mình thấy đủ chắc tay cho task khó.
+- **Implementation:** OpenCode Go với DeepSeek V4.1 Flash. Gói Go $10/tháng, hạn mức V4.1 Flash đủ cho phần lớn task code.
+- **Việc nhỏ:** mấy model Gemini rẻ hơn, hoặc V4.1 Flash cho task đã rõ.
+
+Quota của Argon cũng khá chát, nhưng có còn hơn không. Mình để nó cho những task thật sự cần, còn lại đẩy sang V4.1 Flash.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1792999074/posts/toi-uu-chi-phi-ai/stack-deepseek-flash.png"
+  alt="Claude Code chạy với DeepSeek V4.1 Flash, hiển thị session và weekly usage trong terminal"
+  caption="Claude Code v2.1.310 chạy với DeepSeek V4.1 Flash, usage hiện ngay trong terminal. Ảnh: howznguyen."
+/>
+
+Không mua thêm gói mới. Tổng chi phí vẫn thấp hơn nhiều so với Claude Max.
+
+Nghe mâu thuẫn với câu mở bài. Nếu Hehehihi ngu, sao lại dùng nó viết spec? Vì viết spec không phải task mở. Mình đã biết mình muốn gì; việc của nó là hỏi lại, sắp xếp, và viết thành cấu trúc. Nó tệ ở chỗ tự quyết định thay mình, nhưng ổn ở chỗ làm sạch một quyết định mình đã có. Model là người chép, không phải người quyết.
+
+## Giữ gì ở ngoài
+
+Để đổi model mà không mất workflow, có ba thứ mình giữ ngoài nhà cung cấp:
+
+- **Spec và quyết định:** nằm trong repo, không nằm trong chat history.
+- **<TermNote id="memory">Memory</TermNote>:** task, doc, decision nằm ở file mình đọc được.
+- **Harness:** không phụ thuộc một CLI duy nhất.
+
+Có ba thứ đó, đổi model chỉ là đổi công cụ. Không có, đổi model là làm lại từ đầu.
+
+## Kết quả
+
+Chi phí giảm. Thay vì hơn $200/tháng cho Claude Max, mình trả $10 cho OpenCode Go, cộng gói mình đã có sẵn. Tốc độ ship chậm hơn một chút, vì mình dành thời gian viết spec trước. Nhưng chất lượng tốt hơn: ít code thừa, ít sửa lại, và mình hiểu rõ mình đang trả tiền cho cái gì.
+
+<Image
+  src="https://res.cloudinary.com/dkxhoyenc/image/upload/v1793002409/posts/toi-uu-chi-phi-ai/opencode-go-pricing-cropped.png"
+  alt="Bảng giá OpenCode Go 10 đô một tháng và hạn mức cho Gemini 4 Argon, DeepSeek V4.1 Flash"
+  caption="Go $10/tháng, hạn mức DeepSeek V4.1 Flash cho phần implementation. Ảnh: opencode.ai."
+/>
+
+Mình không nói mình đã tối ưu hoàn hảo. Nhưng sau vài tuần, mình làm việc này khá tốt: chi phí giảm, chất lượng giữ được, và mình biết rõ task nào đáng dùng model đắt.
+
+Cái mình không mua thêm là gói mới. Mình chỉ đổi cách chia việc.
+
+## Mình rút ra mấy điều
+
+**Một, gói all-you-can-eat không làm mình giỏi hơn.** Nó chỉ làm mình ngừng chọn. Khi ngừng chọn, mình ngừng tối ưu.
+
+**Hai, tối ưu chi phí là tối ưu đề bài.** Model rẻ chỉ rẻ khi spec đủ rõ. Spec mơ hồ thì model rẻ thành model đắt, vì phải làm lại.
+
+**Ba, dùng thứ mình có sẵn trước khi mua thêm.** Câu hỏi không phải "mua gói nào", mà là "việc này cần model nào".
+
+## Kết
+
+Claude Max chỉ là cái cớ. Cái mình thật sự mất không phải $200, mà là thói quen để một gói subscription quyết định thay mình nên dùng gì.
+
+Từ giờ, mình muốn là người chọn model, không phải người trả tiền để khỏi phải chọn.
+
+Bài đăng gốc:
+
+<XPost value="https://x.com/howznguyen/status/2107748605113016715" />
+
+---
+
+Nguồn: [Bài đăng trên X ngày 7/10/2026](https://x.com/howznguyen/status/2107748605113016715), [Claude Plans & Pricing](https://claude.com/pricing).
+
+Bài viết bắt đầu từ một cuộc thảo luận trong nhóm [Agentic Coding Việt Nam](https://www.facebook.com/groups/agentic.coding.vietnam), sau bài "Thử thách cai nghiện AI: Từ $200/tháng quay về $20/tháng" của Lê Phương Tây.
