@@ -1,0 +1,53 @@
+---
+title: "Knowns UI"
+description: "The UI kit for AI products: React components and blocks for every screen an AI product needs, installed as source with the shadcn CLI."
+date: 2026-11-07
+tags:
+  - AI
+  - React
+  - shadcn
+  - Tailwind CSS
+  - Design Systems
+type: product
+status: active
+featured: true
+icon: "https://ui.knowns.dev/favicon.svg"
+image: "https://ui.knowns.dev/og/home"
+demo: "https://ui.knowns.dev"
+authors:
+  - howznguyen
+---
+
+**Knowns UI is the UI kit for AI products.**
+
+Every screen an AI product needs, as React components and blocks: live agent views and chat, app screens, marketing sections, backgrounds and text effects. Each piece installs with the shadcn CLI and lands in your repo as source you own and can change.
+
+## Why I built it
+
+Building agent tools, I kept redrawing the same screens: a graph of what the agents are doing, a tool call that needs approval, a context window filling up, a fleet of runs with spend and status. General UI kits stop at buttons and dialogs, and AI-specific kits stop at the chat box.
+
+Knowns UI covers the whole product: the agent views in the middle, the app shell around them, and the landing page that sells it.
+
+## What is in it
+
+- **Components:** actions, forms, overlays, navigation, data display, feedback, effects and text animation.
+- **Blocks:** agent graphs, lanes and traces; review and approval flows; fleets, boards and evals; chat with sources; app shells, settings and auth; marketing sections; illustrations and backgrounds.
+- **Templates:** whole pages assembled from the blocks, starting with the agent ops dashboard and the chat app.
+
+Most of it is Free. Pro adds the heavier agent views, the richer layouts and the SDK adapters.
+
+## How it works
+
+1. Add the registry to `components.json`.
+2. Install any item with the shadcn CLI.
+3. The source lands in your project, styled with Tailwind v4 and theme tokens.
+
+Pro items install from a licensed registry with your key. An MCP server lets coding agents search the docs and install components for you.
+
+```bash
+npx shadcn@latest add https://ui.knowns.dev/r/button.json
+```
+
+## Built with agents
+
+Knowns UI was built by a small team of coding agents coordinated through [Knowns](/projects/knowns-sh): tasks, review checklists and decisions kept in one place, every screen checked against a written quality bar before it shipped.
