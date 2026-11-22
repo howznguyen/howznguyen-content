@@ -1,5 +1,5 @@
 ---
-title: "PhoneDesk"
+title: "Nookdeck"
 description: "Turn an old phone or tablet into a Stream Deck-style control panel and dashboard for your Mac or Windows PC, with no app on the phone and no cloud."
 date: 2026-11-22
 tags:
@@ -12,23 +12,23 @@ tags:
 type: open-source
 status: active
 featured: false
-icon: "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/brand/phonedesk-mark.svg"
-image: "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-hero.png"
+icon: "https://nookdeck.app/favicon.svg"
+image: "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-hero.png"
 images:
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-hero.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-claude.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-ai.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-keys.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/promo-home.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/manage-screen-size.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/manage-theme.png"
-  - "https://raw.githubusercontent.com/howznguyen/phonedesk/main/docs/images/manage-tile.png"
-github: "https://github.com/howznguyen/phonedesk"
-demo: "https://github.com/howznguyen/phonedesk/releases/latest"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-hero.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-claude.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-ai.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-keys.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/promo-home.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/manage-screen-size.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/manage-theme.png"
+  - "https://raw.githubusercontent.com/howznguyen/nookdeck/main/docs/images/manage-tile.png"
+github: "https://github.com/howznguyen/nookdeck"
+demo: "https://nookdeck.app"
 author: howznguyen
 ---
 
-**PhoneDesk turns an old phone or tablet into a control panel for your computer.** It is a small agent that runs on your Mac or Windows PC and serves a touch overlay to any browser on the same Wi-Fi. There is nothing to install on the phone, and no account or cloud service.
+**Nookdeck turns an old phone or tablet into a control panel for your computer.** Nookdeck was previously called PhoneDesk. It is a small agent that runs on your Mac or Windows PC and serves a touch overlay to any browser on the same Wi-Fi. There is nothing to install on the phone, and no account or cloud service.
 
 The project is early (0.x). macOS is the main target and Windows 10/11 is experimental. Builds are not signed with an Apple Developer ID or a Windows certificate, and the installers handle that.
 
@@ -55,21 +55,21 @@ A screen size picker above the preview lets you see the deck at iPhone 5s/SE, iP
 You need a Mac (macOS 13 or later) or a Windows 10/11 PC, and a phone or tablet on the same Wi-Fi. On a Mac, run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/howznguyen/phonedesk/main/setup.sh | bash
+curl -fsSL https://nookdeck.app/scripts/install | bash
 ```
 
 On Windows, run this in PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/howznguyen/phonedesk/main/setup.ps1 | iex
+irm https://nookdeck.app/scripts/install.ps1 | iex
 ```
 
-The installer prints a QR code, a phone address and a 6-digit PIN. Scan the code with the phone's camera, or type the address and PIN, then add the page to the home screen for a full-screen panel. PhoneDesk starts by itself each time you sign in.
+The installer prints a QR code, a phone address and a 6-digit PIN. Scan the code with the phone's camera, or type the address and PIN, then add the page to the home screen for a full-screen panel. Nookdeck starts by itself each time you sign in.
 
 ## Local only
 
-Everything runs on your own computer and your own network. The management page is only reachable from the computer itself, and a phone has to be paired with a PIN. AI quotas are read-only: PhoneDesk reads the sign-in Claude Code already stored without refreshing it, Codex's local session files and Antigravity's local server. The repository documents every outbound connection in its privacy notes.
+Everything runs on your own computer and your own network. The management page is only reachable from the computer itself, and a phone has to be paired with a PIN. AI quotas are read-only: Nookdeck reads the sign-in Claude Code already stored without refreshing it, Codex's local session files and Antigravity's local server. The repository documents every outbound connection in its privacy notes.
 
 ## Open source
 
-PhoneDesk is released under the MIT License. Read the code, report issues or contribute on [GitHub](https://github.com/howznguyen/phonedesk).
+Nookdeck is released under the MIT License. Read the code, report issues or contribute on [GitHub](https://github.com/howznguyen/nookdeck).
